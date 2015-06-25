@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (C) 2015 Andriy Druk
+  ~
+  ~ Licensed under the Apache License, Version 2.0 (the "License");
+  ~ you may not use this file except in compliance with the License.
+  ~ You may obtain a copy of the License at
+  ~
+  ~      http://www.apache.org/licenses/LICENSE-2.0
+  ~
+  ~ Unless required by applicable law or agreed to in writing, software
+  ~ distributed under the License is distributed on an "AS IS" BASIS,
+  ~ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  v See the License for the specific language governing permissions and
+  ~ limitations under the License.
+-->
+<resources>
+
+    <string name="app_name">Bonjour Browser</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_bonjour_browser">Bonjour Browser</string>
+
+    <string name="title_section1">TCP</string>
+    <string name="title_section2">UDP</string>
+    <string name="title_section3">Section 3</string>
+    <string name="title_activity_bonjour_domain">BonjourDomainActivity</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="title_activity_bonjour_service">BonjourServiceActivity</string>
+    <string name="no_txt_records">No TXT records</string>
+
+    <string name="copy_toast_message">%1$s was copied to your clipboard</string>
+    <string name="not_resolved_yet">Not resolved yet</string>
+    <string name="service_was_resolved">Service info was resolved</string>
+    <string name="domain">"Domain: %1$s"</string>
+    <string name="reg_type">"RegType: %1$s"</string>
+    <string name="last_update">"Last update: %1$s"</string>
+
+</resources>
