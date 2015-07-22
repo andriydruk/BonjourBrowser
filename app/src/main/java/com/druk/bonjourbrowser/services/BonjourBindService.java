@@ -19,7 +19,6 @@ import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.util.ArrayMap;
 import android.text.TextUtils;
@@ -39,6 +38,7 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -58,8 +58,7 @@ public class BonjourBindService extends Service implements BrowseListener {
     private final IBinder mBinder = new LocalBinder();
     private final TreeMap<String, BonjourService> mServices = new TreeMap<>();
     private final Map<String, DNSSDService> mBrowsers = new ArrayMap<>();
-    private final Map<String, Set<OnBrowserListener>> mListeners = new ArrayMap<>();
-    private final Handler mHandler = new Handler();
+    private final Map<String, Set<Subscriber<? super Collection<BonjourService>>>> mListeners = new ArrayMap<>();
     private DNSSDService mDomainBrowser;
 
     public static String createKey(String domain, String regType){
@@ -104,31 +103,27 @@ public class BonjourBindService extends Service implements BrowseListener {
         for (DNSSDService service : mBrowsers.values()){
             service.stop();
         }
-        for (String key : mServices.keySet()){
-            BonjourService b = mServices.get(key);
-        }
         mServices.clear();
         mBrowsers.clear();
         mListeners.clear();
     }
 
-    public void addListener(String domain, String regType, OnBrowserListener listener){
-        String key = createKey(domain, regType);
-        Set<OnBrowserListener> onBrowserListeners = mListeners.get(regType);
-        if (onBrowserListeners == null){
-            onBrowserListeners = new HashSet<>();
-            mListeners.put(key, onBrowserListeners);
-        }
-        onBrowserListeners.add(listener);
-        synchronized (mBinder) {
-            listener.changed(key, new ArrayList<>(mServices.subMap(key, key + Character.MAX_VALUE).values()));
-        }
-    }
-
-    public boolean removeListener(String domain, String regType, OnBrowserListener listener) {
-        String key = createKey(domain, regType);
-        Set<OnBrowserListener> onBrowserListeners = mListeners.get(key);
-        return onBrowserListeners != null && onBrowserListeners.remove(listener);
+    public Observable<Collection<BonjourService>> listenChanges(final String domain, final String regType){
+        return Observable.create(new Observable.OnSubscribe<Collection<BonjourService>>() {
+            @Override
+            public void call(Subscriber<? super Collection<BonjourService>> subscriber) {
+                String key = createKey(domain, regType);
+                Set<Subscriber<? super Collection<BonjourService>>> onBrowserListeners = mListeners.get(regType);
+                if (onBrowserListeners == null){
+                    onBrowserListeners = new HashSet<>();
+                    mListeners.put(key, onBrowserListeners);
+                }
+                onBrowserListeners.add(subscriber);
+                synchronized (mBinder) {
+                    subscriber.onNext(new ArrayList<>(mServices.subMap(key, key + Character.MAX_VALUE).values()));
+                }
+            }
+        });
     }
 
     public Observable<BonjourService> resolve(final String key){
@@ -201,19 +196,22 @@ public class BonjourBindService extends Service implements BrowseListener {
     }
 
     private void notifyListeners(final String key){
-        mHandler.post(new Runnable() {
-            @Override
-            public void run() {
-                Set<OnBrowserListener> onBrowserListeners = mListeners.get(key);
-                if (onBrowserListeners != null) {
-                    for (OnBrowserListener listener : onBrowserListeners) {
-                        synchronized (mBinder) {
-                            listener.changed(key, new ArrayList<>(mServices.subMap(key, key + Character.MAX_VALUE).values()));
-                        }
-                    }
+        Collection<BonjourService> services;
+        synchronized (mBinder) {
+            services = new ArrayList<>(mServices.subMap(key, key + Character.MAX_VALUE).values());
+        }
+        if (mListeners.containsKey(key)) {
+            Iterator<Subscriber<? super Collection<BonjourService>>> iterator = mListeners.get(key).iterator();
+            while (iterator.hasNext()){
+                Subscriber<? super Collection<BonjourService>> subscriber = iterator.next();
+                if (subscriber.isUnsubscribed()){
+                    iterator.remove();
+                }
+                else{
+                    subscriber.onNext(services);
                 }
             }
-        });
+        }
     }
 
     @Override
@@ -309,10 +307,6 @@ public class BonjourBindService extends Service implements BrowseListener {
 
     public BonjourService getServiceForKey(String key){
         return mServices.get(key);
-    }
-
-    public interface OnBrowserListener{
-        void changed(String domain, Collection<BonjourService> services);
     }
 
     /**

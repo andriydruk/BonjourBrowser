@@ -25,8 +25,11 @@ import com.druk.bonjourbrowser.entity.BonjourService;
 import com.druk.bonjourbrowser.ui.RegTypeActivity;
 import com.druk.bonjourbrowser.ui.adapter.ServiceAdapter;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+
+import rx.functions.Func1;
 
 public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 
@@ -60,12 +63,19 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     }
 
     @Override
-    protected void filter(Collection<BonjourService> services) {
-        Iterator<BonjourService> i = services.iterator();
-        while (i.hasNext()) {
-            if (!i.next().dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) {
-                i.remove();
+    protected Func1<? super Collection<BonjourService>, Collection<BonjourService>> getMapFunc() {
+        return new Func1<Collection<BonjourService>, Collection<BonjourService>>() {
+            @Override
+            public Collection<BonjourService> call(Collection<BonjourService> bonjourServices) {
+                ArrayList<BonjourService> result = new ArrayList<>(bonjourServices);
+                Iterator<BonjourService> i = result.iterator();
+                while (i.hasNext()) {
+                    if (!i.next().dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) {
+                        i.remove();
+                    }
+                }
+                return result;
             }
-        }
+        };
     }
 }

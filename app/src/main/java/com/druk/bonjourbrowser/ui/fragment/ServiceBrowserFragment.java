@@ -37,12 +37,17 @@ import com.druk.bonjourbrowser.ui.adapter.ServiceAdapter;
 
 import java.util.Collection;
 
-public class ServiceBrowserFragment extends Fragment implements BonjourBindService.OnBrowserListener {
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+import rx.functions.Func1;
+
+public class ServiceBrowserFragment extends Fragment {
 
     private static final String KEY_REG_TYPE = "reg_type";
     private static final String KEY_DOMAIN = "domain";
 
-    protected BonjourBindService mService;
+    protected Subscription mSubscription;
     protected ServiceAdapter mAdapter;
     protected String mReqType;
     protected String mDomain;
@@ -51,8 +56,16 @@ public class ServiceBrowserFragment extends Fragment implements BonjourBindServi
 
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
-            mService = ((BonjourBindService.LocalBinder) service).getService();
-            mService.addListener(mDomain, mReqType, ServiceBrowserFragment.this);
+            mSubscription = ((BonjourBindService.LocalBinder) service).getService().listenChanges(mDomain, mReqType)
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .map(getMapFunc())
+                    .subscribe(new Action1<Collection<BonjourService>>() {
+                        @Override
+                        public void call(Collection<BonjourService> bonjourServices) {
+                            mAdapter.swap(bonjourServices);
+                            mAdapter.notifyDataSetChanged();
+                        }
+                    });
         }
 
         @Override
@@ -114,21 +127,18 @@ public class ServiceBrowserFragment extends Fragment implements BonjourBindServi
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mService != null) {
-            mService.removeListener(mDomain, mReqType, this);
-            mService = null;
+        if (mSubscription != null){
+            mSubscription.unsubscribe();
         }
         getActivity().unbindService(mServiceConnection);
     }
 
-    @Override
-    public void changed(String domain, Collection<BonjourService> services) {
-        filter(services);
-        mAdapter.swap(services);
-        mAdapter.notifyDataSetChanged();
-    }
-
-    protected void filter(Collection<BonjourService> services){
-        //empty filter
+    protected Func1<? super Collection<BonjourService>, Collection<BonjourService>> getMapFunc() {
+        return new Func1<Collection<BonjourService>, Collection<BonjourService>>() {
+            @Override
+            public Collection<BonjourService> call(Collection<BonjourService> bonjourServices) {
+                return bonjourServices;
+            }
+        };
     }
 }
