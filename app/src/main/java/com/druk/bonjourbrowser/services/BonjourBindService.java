@@ -21,7 +21,6 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
-import android.support.annotation.Nullable;
 import android.support.v4.util.ArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
@@ -43,6 +42,9 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+
+import rx.Observable;
+import rx.Subscriber;
 
 import static com.druk.bonjourbrowser.Config.EMPTY_DOMAIN;
 import static com.druk.bonjourbrowser.Config.TCP_REG_TYPE_SUFFIX;
@@ -129,67 +131,73 @@ public class BonjourBindService extends Service implements BrowseListener {
         return onBrowserListeners != null && onBrowserListeners.remove(listener);
     }
 
-    public void resolve(final String key, @Nullable final OnResolveListener listener){
-        BonjourService bs = mServices.get(key);
-        try {
-            DNSSD.resolve(bs.flags, bs.ifIndex, bs.serviceName, bs.regType, bs.domain, new ResolveListener() {
-                @Override
-                public void serviceResolved(DNSSDService resolver, int flags, int ifIndex, String fullName, String hostName, int port, TXTRecord txtRecord) {
-                    final BonjourService bs = mServices.get(key);
-                    if (bs != null) {
-                        bs.fullServiceName = fullName;
-                        bs.port = port;
-                        bs.hostname = hostName;
-                        bs.dnsRecords.clear();
-                        bs.dnsRecords.put(BonjourService.DNS_RECORD_KEY_ADDRESS, "0.0.0.0:" + bs.port);
-                        bs.dnsRecords.putAll(parseTXTRecords(txtRecord));
-                        bs.timestamp = System.currentTimeMillis();
-                        try {
-                            // Start a record query to obtain IP address from hostname
-                            DNSSD.queryRecord(0, ifIndex, hostName, 1 /* ns_t_a */, 1 /* ns_c_in */,
-                                    new QueryListener() {
-                                        @Override
-                                        public void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata, int ttl) {
-                                            try {
-                                                InetAddress address = InetAddress.getByAddress(rdata);
-                                                bs.dnsRecords.put(BonjourService.DNS_RECORD_KEY_ADDRESS, address.getHostAddress() + ":" + bs.port);
-                                                if (listener != null)
-                                                    listener.onResolved(bs);
-                                                notifyListeners(createKey(bs.domain, bs.regType));
-                                            }
-                                            catch ( Exception e) {
-                                                if (listener != null)
-                                                    listener.onResolved(bs);
-                                            }
-                                            finally {
-                                                query.stop();
-                                            }
-                                        }
+    public Observable<BonjourService> resolve(final String key){
+        return Observable.create(new Observable.OnSubscribe<BonjourService>() {
+            @Override
+            public void call(final Subscriber<? super BonjourService> subscriber) {
+                BonjourService bs = mServices.get(key);
+                try {
+                    DNSSD.resolve(bs.flags, bs.ifIndex, bs.serviceName, bs.regType, bs.domain, new ResolveListener() {
+                        @Override
+                        public void serviceResolved(DNSSDService resolver, int flags, int ifIndex, String fullName, String hostName, int port, TXTRecord txtRecord) {
+                            final BonjourService bs = mServices.get(key);
+                            if (bs != null) {
+                                bs.fullServiceName = fullName;
+                                bs.port = port;
+                                bs.hostname = hostName;
+                                bs.dnsRecords.clear();
+                                bs.dnsRecords.put(BonjourService.DNS_RECORD_KEY_ADDRESS, "0.0.0.0:" + bs.port);
+                                bs.dnsRecords.putAll(parseTXTRecords(txtRecord));
+                                bs.timestamp = System.currentTimeMillis();
+                                try {
+                                    // Start a record query to obtain IP address from hostname
+                                    DNSSD.queryRecord(0, ifIndex, hostName, 1 /* ns_t_a */, 1 /* ns_c_in */,
+                                            new QueryListener() {
+                                                @Override
+                                                public void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata, int ttl) {
+                                                    try {
+                                                        InetAddress address = InetAddress.getByAddress(rdata);
+                                                        bs.dnsRecords.put(BonjourService.DNS_RECORD_KEY_ADDRESS, address.getHostAddress() + ":" + bs.port);
+                                                        subscriber.onNext(bs);
+                                                        subscriber.onCompleted();
+                                                        notifyListeners(createKey(bs.domain, bs.regType));
+                                                    }
+                                                    catch (Exception e) {
+                                                        subscriber.onNext(bs);
+                                                        subscriber.onError(e);
+                                                    }
+                                                    finally {
+                                                        query.stop();
+                                                    }
+                                                }
 
-                                        @Override
-                                        public void operationFailed(DNSSDService service, int errorCode) {
-                                            if (listener != null)
-                                                listener.onResolved(bs);
-                                        }
-                                    });
+                                                @Override
+                                                public void operationFailed(DNSSDService service, int errorCode) {
+                                                    subscriber.onNext(bs);
+                                                    subscriber.onError(new RuntimeException("DNSSD queryRecord error: " + errorCode));
+                                                }
+                                            });
+                                }
+                                catch ( Exception e) {
+                                    subscriber.onNext(bs);
+                                    subscriber.onError(e);
+                                }
+                            }
+                            resolver.stop();
                         }
-                        catch ( Exception e) {
-                            if (listener != null)
-                                listener.onResolved(bs);
+
+                        @Override
+                        public void operationFailed(DNSSDService service, int errorCode){
+                            subscriber.onError(new RuntimeException("DNSSD resolve error: " + errorCode));
                         }
-                    }
-                    resolver.stop();
+                    });
+                } catch (DNSSDException e) {
+                    Log.e(TAG, e.getMessage() + " for " + bs.regType + " " + bs.serviceName + " " + bs.domain);
+                    e.printStackTrace();
+                    subscriber.onError(e);
                 }
-
-                @Override
-                public void operationFailed(DNSSDService service, int errorCode) {
-
-                }
-            });
-        } catch (DNSSDException e) {
-            Log.e(TAG, e.getMessage() + " for " + bs.regType + " " + bs.serviceName + " " + bs.domain);
-            e.printStackTrace();
-        }
+            }
+        });
     }
 
     private void notifyListeners(final String key){
@@ -259,7 +267,7 @@ public class BonjourBindService extends Service implements BrowseListener {
         }
         if (mDomainBrowser != browser) {
             notifyListeners(createKey(domain, regType));
-            resolve(createKey(domain, regType, serviceName), null);
+            resolve(createKey(domain, regType, serviceName)).subscribe();
         }
     }
 
@@ -275,7 +283,7 @@ public class BonjourBindService extends Service implements BrowseListener {
                 Log.e(TAG, "Incorrect req type: " + regType);
             }
             else {
-                //if it's serviceBrowser increase count of services for specific reqType
+                //it's serviceBrowser, decrease count of services for specific reqType
                 String serviceRegType = regTypeParts[0];
                 String protocolSuffix = regTypeParts[1];
                 String key = createKey(EMPTY_DOMAIN, protocolSuffix + "." + domain, serviceRegType);
@@ -305,10 +313,6 @@ public class BonjourBindService extends Service implements BrowseListener {
 
     public interface OnBrowserListener{
         void changed(String domain, Collection<BonjourService> services);
-    }
-
-    public interface OnResolveListener{
-        void onResolved(BonjourService service);
     }
 
     /**

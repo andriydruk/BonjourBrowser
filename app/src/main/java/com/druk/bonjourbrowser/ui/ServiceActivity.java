@@ -27,7 +27,6 @@ import android.support.v4.util.ArrayMap;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -43,6 +42,10 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+
 public class ServiceActivity extends AppCompatActivity implements OnClickListener{
 
     private static final String KEY = "key";
@@ -56,8 +59,8 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
     private TxtRecordsAdapter mAdapter;
 
     private String key;
-    private Resolver resolver;
     private BonjourBindService mService;
+    private Subscription mResolveSubscription;
 
     private ServiceConnection mServiceConnection = new ServiceConnection(){
 
@@ -111,15 +114,15 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
     @Override
     protected void onResume() {
         super.onResume();
-        resolver = new Resolver();
-        resolver.setWeakReference(this);
         bindService(new Intent(this, BonjourBindService.class), mServiceConnection, Context.BIND_AUTO_CREATE);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        resolver.setWeakReference(null);
+        if (mResolveSubscription != null) {
+            mResolveSubscription.unsubscribe();
+        }
         unbindService(mServiceConnection);
         mService = null;
     }
@@ -139,35 +142,13 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
 
     @Override
     public void onClick(View v) {
-        mService.resolve(key, resolver);
-    }
-
-    private static class Resolver implements BonjourBindService.OnResolveListener{
-        private final static String TAG = "Resolver";
-        private ServiceActivity activity;
-
-        private void setWeakReference(ServiceActivity activity){
-            this.activity = activity;
-        }
-
-        @Override
-        public void onResolved(final BonjourService service) {
-            if (activity != null) {
-                activity.runOnUiThread(new Runnable() {
+        mResolveSubscription = mService.resolve(key)
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Action1<BonjourService>() {
                     @Override
-                    public void run() {
-                        if (activity != null){
-                            activity.updateUI(service, true);
-                        }
-                        else {
-                            Log.w(TAG, "Activity reference is empty in main thread");
-                        }
+                    public void call(BonjourService bonjourService) {
+                        updateUI(bonjourService, false);
                     }
                 });
-            }
-            else{
-                Log.w(TAG, "Activity reference is empty in DN-SSD thread");
-            }
-        }
     }
 }
