@@ -104,17 +104,15 @@ public class ServiceBrowserFragment extends Fragment {
     }
 
     protected void startDiscovery(){
-        final List<BonjourService> bonjourServices = new ArrayList<>();
         mSubscription = RxDNSSD.queryRecords(RxDNSSD.resolve(RxDNSSD.browse(mReqType, mDomain)))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
                     if (!bonjourService.isDeleted) {
-                        bonjourServices.add(bonjourService);
+                        mAdapter.add(bonjourService);
                     }
                     else{
-                        bonjourServices.remove(bonjourService);
+                        mAdapter.remove(bonjourService);
                     }
-                    mAdapter.swap(bonjourServices);
                     mAdapter.notifyDataSetChanged();
                 });
     }

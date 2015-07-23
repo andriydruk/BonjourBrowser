@@ -13,8 +13,13 @@ import com.apple.dnssd.QueryListener;
 import com.apple.dnssd.ResolveListener;
 import com.apple.dnssd.TXTRecord;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.util.Map;
+import java.util.TreeMap;
 
 import rx.Observable;
 import rx.Subscriber;
@@ -25,9 +30,44 @@ import rx.Subscriber;
 public class RxDNSSD {
 
     private static final String TAG = "RxDNSSD";
+    private static final TreeMap<String, String> SERVICE_NAMES_TREE = new TreeMap<>();
 
     public static void init(Context ctx){
         ctx.getSystemService(Context.NSD_SERVICE);
+
+        try {
+            InputStream is = ctx.getAssets().open("service-names-port-numbers.csv");
+            try {
+
+                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] rowData = line.split(",");
+                    if (rowData.length < 4 || TextUtils.isEmpty(rowData[0]) || TextUtils.isEmpty(rowData[2]) || TextUtils.isEmpty(rowData[3])){
+                        continue;
+                    }
+                    SERVICE_NAMES_TREE.put("_" + rowData[0] + "._" + rowData[2] + ".", rowData[3]);
+                    // do something with "data" and "value"
+                }
+            }
+            catch (IOException ex) {
+                // handle exception
+            }
+            finally {
+                try {
+                    is.close();
+                }
+                catch (IOException e) {
+                    // handle exception
+                }
+
+//                for (String key : SERVICE_NAMES_TREE.keySet()){
+//                    Log.d("TREE", key + " = " + SERVICE_NAMES_TREE.get(key));
+//                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     public static Observable<BonjourService> resolve(final Observable<BonjourService> observable){
@@ -42,7 +82,6 @@ public class RxDNSSD {
                         DNSSD.resolve(bs.flags, bs.ifIndex, bs.serviceName, bs.regType, bs.domain, new ResolveListener() {
                             @Override
                             public void serviceResolved(DNSSDService resolver, int flags, int ifIndex, String fullName, String hostName, int port, TXTRecord txtRecord) {
-                                bs.fullServiceName = fullName;
                                 bs.port = port;
                                 bs.hostname = hostName;
                                 bs.dnsRecords.clear();
@@ -144,6 +183,10 @@ public class RxDNSSD {
                 service[0] = null;
             }
         });
+    }
+
+    public static String getRegTypeDescription(String regType){
+        return SERVICE_NAMES_TREE.get(regType);
     }
 
     private static Map<String, String> parseTXTRecords(TXTRecord record){

@@ -28,6 +28,8 @@ import com.druk.bonjourbrowser.dnssd.BonjourService;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 
 public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> {
 
@@ -56,17 +58,20 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
         return services.get(position);
     }
 
-    public void swap(Collection<BonjourService> domains){
-        this.services.clear();
-        this.services.addAll(domains);
-    }
-
     public void clear(){
         this.services.clear();
     }
 
     public void add(BonjourService service){
+        this.services.remove(service);
         this.services.add(service);
+        Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
+    }
+
+    public void remove(BonjourService bonjourService) {
+        if (this.services.remove(bonjourService)) {
+            Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
+        }
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{

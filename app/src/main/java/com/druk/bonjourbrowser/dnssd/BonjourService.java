@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 public class BonjourService implements Parcelable {
 
     public static final String DNS_RECORD_KEY_SERVICE_COUNT = "dns_record_key_service_count";
-    public static final String DNS_RECORD_KEY_ADDRESS = "dns_record_key_address";
+    public static final String DNS_RECORD_KEY_ADDRESS = "IP address";
     private static final String REG_TYPE_SEPARATOR = Pattern.quote(".");
 
     public final int flags;
@@ -34,8 +34,6 @@ public class BonjourService implements Parcelable {
     public final String domain;
     public Map<String, String> dnsRecords = new ArrayMap<>();
     public int ifIndex;
-    //TODO: change to RegType description
-    public String fullServiceName;
     public String hostname;
     public int port;
 
@@ -58,24 +56,15 @@ public class BonjourService implements Parcelable {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-
-        BonjourService service = (BonjourService) o;
-
-        if (flags != service.flags) return false;
-        if (ifIndex != service.ifIndex) return false;
-        if (!serviceName.equals(service.serviceName)) return false;
-        if (!regType.equals(service.regType)) return false;
-        return domain.equals(service.domain);
-
+        BonjourService that = (BonjourService) o;
+        return serviceName.equals(that.serviceName) && regType.equals(that.regType) && domain.equals(that.domain);
     }
 
     @Override
     public int hashCode() {
-        int result = flags;
-        result = 31 * result + serviceName.hashCode();
+        int result = serviceName.hashCode();
         result = 31 * result + regType.hashCode();
         result = 31 * result + domain.hashCode();
-        result = 31 * result + ifIndex;
         return result;
     }
 
@@ -92,7 +81,6 @@ public class BonjourService implements Parcelable {
         dest.writeString(this.domain);
         writeMap(dest, this.dnsRecords);
         dest.writeInt(this.ifIndex);
-        dest.writeString(this.fullServiceName);
         dest.writeString(this.hostname);
         dest.writeInt(this.port);
         dest.writeLong(this.timestamp);
@@ -105,7 +93,6 @@ public class BonjourService implements Parcelable {
         this.domain = in.readString();
         this.dnsRecords = readMap(in);
         this.ifIndex = in.readInt();
-        this.fullServiceName = in.readString();
         this.hostname = in.readString();
         this.port = in.readInt();
         this.timestamp = in.readLong();

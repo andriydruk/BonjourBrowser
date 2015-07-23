@@ -122,7 +122,7 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
                     if (bonjourService.isDeleted){
                         return;
                     }
-                    updateUI(bonjourService, false);
+                    updateUI(bonjourService, true);
                 });
     }
 }

@@ -29,7 +29,9 @@ import android.widget.TextView;
 
 import com.druk.bonjourbrowser.R;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.TreeMap;
 
 public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.ViewHolder> {
 
@@ -79,7 +81,7 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
 
     public void swap(Map<String, String> records){
         this.mRecords.clear();
-        this.mRecords.putAll(records);
+        this.mRecords.putAll(new TreeMap<>(records));
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{

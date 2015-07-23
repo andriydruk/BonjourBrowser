@@ -16,11 +16,6 @@
 package com.druk.bonjourbrowser.ui;
 
 import android.os.Bundle;
-import android.support.design.widget.TabLayout;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentPagerAdapter;
-import android.support.v4.view.ViewPager;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -29,9 +24,6 @@ import android.view.MenuItem;
 import com.druk.bonjourbrowser.Config;
 import com.druk.bonjourbrowser.R;
 import com.druk.bonjourbrowser.ui.fragment.RegTypeBrowserFragment;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity{
 
@@ -43,11 +35,10 @@ public class MainActivity extends AppCompatActivity{
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        ViewPager viewPager = (ViewPager) findViewById(R.id.viewpager);
-        setupViewPager(viewPager);
-
-        TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
-        tabLayout.setupWithViewPager(viewPager);
+        if (savedInstanceState == null) {
+            getSupportFragmentManager().beginTransaction().
+                    replace(R.id.fragment_container, RegTypeBrowserFragment.newInstance(Config.TCP_REG_TYPE_SUFFIX)).commit();
+        }
     }
 
     @Override
@@ -69,41 +60,5 @@ public class MainActivity extends AppCompatActivity{
         }
 
         return super.onOptionsItemSelected(item);
-    }
-
-    private void setupViewPager(ViewPager viewPager) {
-        Adapter adapter = new Adapter(getSupportFragmentManager());
-        adapter.addFragment(RegTypeBrowserFragment.newInstance(Config.TCP_REG_TYPE_SUFFIX), "TCP");
-        adapter.addFragment(RegTypeBrowserFragment.newInstance(Config.UDP_REG_TYPE_SUFFIX), "UDP");
-        viewPager.setAdapter(adapter);
-    }
-
-    static class Adapter extends FragmentPagerAdapter {
-        private final List<Fragment> mFragments = new ArrayList<>();
-        private final List<String> mFragmentTitles = new ArrayList<>();
-
-        public Adapter(FragmentManager fm) {
-            super(fm);
-        }
-
-        public void addFragment(Fragment fragment, String title) {
-            mFragments.add(fragment);
-            mFragmentTitles.add(title);
-        }
-
-        @Override
-        public Fragment getItem(int position) {
-            return mFragments.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mFragments.size();
-        }
-
-        @Override
-        public CharSequence getPageTitle(int position) {
-            return mFragmentTitles.get(position);
-        }
     }
 }

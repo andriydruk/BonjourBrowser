@@ -22,6 +22,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
 import com.druk.bonjourbrowser.R;
+import com.druk.bonjourbrowser.dnssd.RxDNSSD;
 import com.druk.bonjourbrowser.ui.fragment.ServiceBrowserFragment;
 
 public class RegTypeActivity extends AppCompatActivity {
@@ -46,9 +47,17 @@ public class RegTypeActivity extends AppCompatActivity {
         if (getIntent() != null && getIntent().hasExtra(KEY_DOMAIN) && getIntent().hasExtra(KEY_REG_TYPE)){
             String regType = getIntent().getStringExtra(KEY_REG_TYPE);
             String domain = getIntent().getStringExtra(KEY_DOMAIN);
-            setTitle(regType);
-            getSupportFragmentManager().beginTransaction().
-                    replace(R.id.content, ServiceBrowserFragment.newInstance(domain, regType)).commit();
+            String description = RxDNSSD.getRegTypeDescription(regType);
+            if (description != null){
+                setTitle(description);
+            }
+            else {
+                setTitle(regType);
+            }
+            if (savedInstanceState == null) {
+                getSupportFragmentManager().beginTransaction().
+                        replace(R.id.content, ServiceBrowserFragment.newInstance(domain, regType)).commit();
+            }
         }
     }
 }
