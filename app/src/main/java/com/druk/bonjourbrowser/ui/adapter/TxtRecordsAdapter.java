@@ -54,16 +54,13 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
     public void onBindViewHolder(ViewHolder holder, final int position) {
         holder.key.setText(getKey(position));
         holder.value.setText(getValue(position));
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Context context = v.getContext();
-                ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-                ClipData clip = ClipData.newPlainText(getKey(position), getValue(position));
-                clipboard.setPrimaryClip(clip);
+        holder.itemView.setOnClickListener(v -> {
+            Context context = v.getContext();
+            ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+            ClipData clip = ClipData.newPlainText(getKey(position), getValue(position));
+            clipboard.setPrimaryClip(clip);
 
-                Snackbar.make(v, context.getResources().getString(R.string.copy_toast_message, getKey(position)), Snackbar.LENGTH_LONG).show();
-            }
+            Snackbar.make(v, context.getResources().getString(R.string.copy_toast_message, getKey(position)), Snackbar.LENGTH_LONG).show();
         });
     }
 

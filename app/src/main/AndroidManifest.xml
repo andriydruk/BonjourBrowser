@@ -26,8 +26,6 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <service android:name=".services.BonjourBindService" />
-
         <activity
             android:name=".ui.RegTypeActivity"
             android:label="@string/title_activity_bonjour_domain" >

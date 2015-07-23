@@ -18,20 +18,28 @@ package com.druk.bonjourbrowser.ui.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.view.View;
 
 import com.druk.bonjourbrowser.Config;
-import com.druk.bonjourbrowser.entity.BonjourService;
+import com.druk.bonjourbrowser.dnssd.BonjourService;
+import com.druk.bonjourbrowser.dnssd.RxDNSSD;
 import com.druk.bonjourbrowser.ui.RegTypeActivity;
 import com.druk.bonjourbrowser.ui.adapter.ServiceAdapter;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
+import java.util.HashMap;
 
-import rx.functions.Func1;
+import rx.Observable;
+import rx.Subscription;
+import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
+
+import static com.druk.bonjourbrowser.Config.EMPTY_DOMAIN;
+import static com.druk.bonjourbrowser.Config.TCP_REG_TYPE_SUFFIX;
+import static com.druk.bonjourbrowser.Config.UDP_REG_TYPE_SUFFIX;
 
 public class RegTypeBrowserFragment extends ServiceBrowserFragment {
+
+    private final HashMap<String, Subscription> mBrowsers = new HashMap<>();
+    private final HashMap<String, BonjourService> mServices = new HashMap<>();
 
     public static Fragment newInstance(String regType){
         return fillArguments(new RegTypeBrowserFragment(), Config.EMPTY_DOMAIN, regType);
@@ -48,34 +56,79 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
                 viewHolder.domain.setText(service.serviceName);
                 viewHolder.serviceCount.setText(service.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT) + " services");
 
-                viewHolder.itemView.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Context context = v.getContext();
-                        String[] regTypeParts = service.getRegTypeParts();
-                        String reqType = service.serviceName + "." +  regTypeParts[0] + ".";
-                        String domain = regTypeParts[1] + ".";
-                        RegTypeActivity.startActivity(context, reqType, domain);
-                    }
+                viewHolder.itemView.setOnClickListener(v -> {
+                    Context context = v.getContext();
+                    String[] regTypeParts = service.getRegTypeParts();
+                    String reqType = service.serviceName + "." +  regTypeParts[0] + ".";
+                    String domain = regTypeParts[1] + ".";
+                    RegTypeActivity.startActivity(context, reqType, domain);
                 });
             }
         };
     }
 
     @Override
-    protected Func1<? super Collection<BonjourService>, Collection<BonjourService>> getMapFunc() {
-        return new Func1<Collection<BonjourService>, Collection<BonjourService>>() {
-            @Override
-            public Collection<BonjourService> call(Collection<BonjourService> bonjourServices) {
-                ArrayList<BonjourService> result = new ArrayList<>(bonjourServices);
-                Iterator<BonjourService> i = result.iterator();
-                while (i.hasNext()) {
-                    if (!i.next().dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) {
-                        i.remove();
-                    }
-                }
-                return result;
+    protected void startSearch() {
+        mSubscription = RxDNSSD.browse(Config.SERVICES_DOMAIN, "")
+                .subscribe(reqTypeAction);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mServices.clear();
+        for (Subscription subscription : mBrowsers.values()){
+            subscription.unsubscribe();
+        }
+        mBrowsers.clear();
+    }
+
+    private final Action1<BonjourService> reqTypeAction = service -> {
+        String[] regTypeParts = service.getRegTypeParts();
+        if (regTypeParts.length != 2) {
+            //Log.e(TAG, "Incorrect reg type: " + regType);
+            return;
+        }
+        String protocolSuffix = regTypeParts[0];
+        String serviceDomain = regTypeParts[1];
+        if (TCP_REG_TYPE_SUFFIX.equals(protocolSuffix) || UDP_REG_TYPE_SUFFIX.equals(protocolSuffix)) {
+            String key = service.serviceName + "." + protocolSuffix;
+            if (!mBrowsers.containsKey(key)) {
+                mBrowsers.put(key, RxDNSSD.browse(key, serviceDomain)
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(RegTypeBrowserFragment.this.servicesAction));
             }
-        };
+            mServices.put(createKey(service.domain, service.regType, service.serviceName), service);
+        } else {
+            //Log.e(TAG, "Unknown protocol suffix: " + protocolSuffix);
+        }
+    };
+
+    private final Action1<BonjourService> servicesAction = service -> {
+        String[] regTypeParts = service.getRegTypeParts();
+        if (regTypeParts.length != 2) {
+            //Log.e(TAG, "Incorrect reg type: " + regType);
+            return;
+        }
+        String serviceRegType = regTypeParts[0];
+        String protocolSuffix = regTypeParts[1];
+        String key1 = createKey(EMPTY_DOMAIN, protocolSuffix + "." + service.domain, serviceRegType);
+        BonjourService domainService = mServices.get(key1);
+        if (domainService != null) {
+            Integer serviceCount = (domainService.dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) ?
+                    Integer.parseInt(domainService.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) + 1 : 1;
+            domainService.dnsRecords.put(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT, serviceCount.toString());
+
+            mAdapter.clear();
+            Observable.from(mServices.values())
+                    .filter(bonjourService -> bonjourService.dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT))
+                    .subscribe(mAdapter::add, throwable -> {/* empty */}, mAdapter::notifyDataSetChanged);
+        } else {
+            //Log.w(TAG, "Service from unknown service type " + key);
+        }
+    };
+
+    public static String createKey(String domain, String regType, String serviceName){
+        return domain + regType + serviceName;
     }
 }

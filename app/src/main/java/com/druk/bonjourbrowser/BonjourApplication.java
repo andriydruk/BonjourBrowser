@@ -18,6 +18,8 @@ package com.druk.bonjourbrowser;
 import android.app.Application;
 import android.os.StrictMode;
 
+import com.druk.bonjourbrowser.dnssd.RxDNSSD;
+
 public class BonjourApplication extends Application {
 
     @Override
@@ -40,6 +42,8 @@ public class BonjourApplication extends Application {
                     .penaltyDeath()
                     .build());
         }
+
+        RxDNSSD.init(this);
     }
 
 }

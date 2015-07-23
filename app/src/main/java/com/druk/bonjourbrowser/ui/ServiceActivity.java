@@ -15,12 +15,9 @@
  */
 package com.druk.bonjourbrowser.ui;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.ServiceConnection;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.util.ArrayMap;
@@ -32,8 +29,8 @@ import android.view.View.OnClickListener;
 import android.widget.TextView;
 
 import com.druk.bonjourbrowser.R;
-import com.druk.bonjourbrowser.entity.BonjourService;
-import com.druk.bonjourbrowser.services.BonjourBindService;
+import com.druk.bonjourbrowser.dnssd.RxDNSSD;
+import com.druk.bonjourbrowser.dnssd.BonjourService;
 import com.druk.bonjourbrowser.ui.adapter.TxtRecordsAdapter;
 
 import java.text.SimpleDateFormat;
@@ -42,13 +39,13 @@ import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
+import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 public class ServiceActivity extends AppCompatActivity implements OnClickListener{
 
-    private static final String KEY = "key";
+    private static final String SERVICE = "mService";
     private static final String TIME_FORMAT = "HH:mm:ss";
 
     private TextView serviceName;
@@ -58,26 +55,12 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
 
     private TxtRecordsAdapter mAdapter;
 
-    private String key;
-    private BonjourBindService mService;
+    private BonjourService mService;
     private Subscription mResolveSubscription;
 
-    private ServiceConnection mServiceConnection = new ServiceConnection(){
-
-        @Override
-        public void onServiceConnected(ComponentName name, IBinder service) {
-            mService = (((BonjourBindService.LocalBinder) service).getService());
-            updateUI(mService.getServiceForKey(key), false);
-        }
-
-        @Override
-        public void onServiceDisconnected(ComponentName name) {
-        }
-    };
-
-    public static void startActivity(Context context, String key){
+    public static void startActivity(Context context, BonjourService service){
         context.startActivity(new Intent(context, ServiceActivity.class).
-                putExtra(ServiceActivity.KEY, key));
+                putExtra(ServiceActivity.SERVICE, service));
     }
 
     private static String getTime(long timestamp){
@@ -94,11 +77,8 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_service);
-
-        key = getIntent().getStringExtra(KEY);
-
-        mAdapter = new TxtRecordsAdapter(this, new ArrayMap<String, String>());
-
+        mService = getIntent().getParcelableExtra(SERVICE);
+        mAdapter = new TxtRecordsAdapter(this, new ArrayMap<>());
         serviceName = (TextView) findViewById(R.id.service_name);
         domain = (TextView) findViewById(R.id.domain);
         regType = (TextView) findViewById(R.id.reg_type);
@@ -109,12 +89,8 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(this);
-    }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        bindService(new Intent(this, BonjourBindService.class), mServiceConnection, Context.BIND_AUTO_CREATE);
+        updateUI(mService, false);
     }
 
     @Override
@@ -123,8 +99,6 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
         if (mResolveSubscription != null) {
             mResolveSubscription.unsubscribe();
         }
-        unbindService(mServiceConnection);
-        mService = null;
     }
 
     private void updateUI(BonjourService service, boolean withSnakeBar){
@@ -142,13 +116,10 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
 
     @Override
     public void onClick(View v) {
-        mResolveSubscription = mService.resolve(key)
+        mResolveSubscription = RxDNSSD.queryRecords(RxDNSSD.resolve(Observable.just(mService)))
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<BonjourService>() {
-                    @Override
-                    public void call(BonjourService bonjourService) {
-                        updateUI(bonjourService, false);
-                    }
+                .subscribe(bonjourService -> {
+                    updateUI(bonjourService, false);
                 });
     }
 }

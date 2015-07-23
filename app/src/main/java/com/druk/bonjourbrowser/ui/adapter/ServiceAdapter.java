@@ -24,7 +24,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.druk.bonjourbrowser.R;
-import com.druk.bonjourbrowser.entity.BonjourService;
+import com.druk.bonjourbrowser.dnssd.BonjourService;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -59,6 +59,14 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
     public void swap(Collection<BonjourService> domains){
         this.services.clear();
         this.services.addAll(domains);
+    }
+
+    public void clear(){
+        this.services.clear();
+    }
+
+    public void add(BonjourService service){
+        this.services.add(service);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder{
