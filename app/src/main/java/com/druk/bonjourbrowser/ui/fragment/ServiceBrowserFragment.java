@@ -79,11 +79,31 @@ public class ServiceBrowserFragment extends Fragment {
                 viewHolder.itemView.setOnClickListener(v -> ServiceActivity.startActivity(v.getContext(), service));
             }
         };
-
-        startSearch();
     }
 
-    protected void startSearch(){
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        RecyclerView recyclerView = (RecyclerView) inflater.inflate(
+                R.layout.fragment_service_browser, container, false);
+        recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));
+        recyclerView.setAdapter(mAdapter);
+        return recyclerView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        startDiscovery();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        stopDiscovery();
+    }
+
+    protected void startDiscovery(){
         final List<BonjourService> bonjourServices = new ArrayList<>();
         mSubscription = RxDNSSD.queryRecords(RxDNSSD.resolve(RxDNSSD.browse(mReqType, mDomain)))
                 .observeOn(AndroidSchedulers.mainThread())
@@ -99,19 +119,7 @@ public class ServiceBrowserFragment extends Fragment {
                 });
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        RecyclerView recyclerView = (RecyclerView) inflater.inflate(
-                R.layout.fragment_service_browser, container, false);
-        recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));
-        recyclerView.setAdapter(mAdapter);
-        return recyclerView;
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
+    protected void stopDiscovery(){
         if (mSubscription != null){
             mSubscription.unsubscribe();
         }

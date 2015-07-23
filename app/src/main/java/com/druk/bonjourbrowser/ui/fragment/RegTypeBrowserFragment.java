@@ -68,14 +68,14 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     }
 
     @Override
-    protected void startSearch() {
+    protected void startDiscovery() {
         mSubscription = RxDNSSD.browse(Config.SERVICES_DOMAIN, "")
                 .subscribe(reqTypeAction);
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    protected void stopDiscovery() {
+        super.stopDiscovery();
         mServices.clear();
         for (Subscription subscription : mBrowsers.values()){
             subscription.unsubscribe();
