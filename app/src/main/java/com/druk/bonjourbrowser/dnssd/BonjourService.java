@@ -40,6 +40,7 @@ public class BonjourService implements Parcelable {
     public int port;
 
     public long timestamp = -1L;
+    public boolean isDeleted = false;
 
     public BonjourService(int flags, int ifIndex, String serviceName, String regType, String domain){
         this.flags = flags;

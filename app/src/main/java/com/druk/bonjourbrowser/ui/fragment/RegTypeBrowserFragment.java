@@ -84,6 +84,10 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     }
 
     private final Action1<BonjourService> reqTypeAction = service -> {
+        if (service.isDeleted){
+            //Ignore this call
+            return;
+        }
         String[] regTypeParts = service.getRegTypeParts();
         if (regTypeParts.length != 2) {
             //Log.e(TAG, "Incorrect reg type: " + regType);
@@ -116,7 +120,13 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         BonjourService domainService = mServices.get(key1);
         if (domainService != null) {
             Integer serviceCount = (domainService.dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) ?
-                    Integer.parseInt(domainService.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) + 1 : 1;
+                    Integer.parseInt(domainService.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) : 0;
+            if (service.isDeleted){
+                serviceCount--;
+            }
+            else{
+                serviceCount++;
+            }
             domainService.dnsRecords.put(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT, serviceCount.toString());
 
             mAdapter.clear();

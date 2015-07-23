@@ -31,75 +31,82 @@ public class RxDNSSD {
     }
 
     public static Observable<BonjourService> resolve(final Observable<BonjourService> observable){
-        return observable.flatMap(bs -> Observable.create(new Observable.OnSubscribe<BonjourService>() {
-            @Override
-            public void call(final Subscriber<? super BonjourService> subscriber) {
-                try {
-                    DNSSD.resolve(bs.flags, bs.ifIndex, bs.serviceName, bs.regType, bs.domain, new ResolveListener() {
-                        @Override
-                        public void serviceResolved(DNSSDService resolver, int flags, int ifIndex, String fullName, String hostName, int port, TXTRecord txtRecord) {
-                            bs.fullServiceName = fullName;
-                            bs.port = port;
-                            bs.hostname = hostName;
-                            bs.dnsRecords.clear();
-                            bs.dnsRecords.put(BonjourService.DNS_RECORD_KEY_ADDRESS, "0.0.0.0:" + bs.port);
-                            bs.dnsRecords.putAll(parseTXTRecords(txtRecord));
-                            bs.timestamp = System.currentTimeMillis();
-                            subscriber.onNext(bs);
-                            resolver.stop();
-                            subscriber.onCompleted();
-                        }
-
-                        @Override
-                        public void operationFailed(DNSSDService service, int errorCode) {
-                            subscriber.onError(new RuntimeException("DNSSD resolve error: " + errorCode));
-                        }
-                    });
-                } catch (DNSSDException e) {
-                    Log.e(TAG, e.getMessage() + " for " + bs.regType + " " + bs.serviceName + " " + bs.domain);
-                    e.printStackTrace();
-                    subscriber.onError(e);
-                }
+        return observable.flatMap(bs -> {
+            if (bs.isDeleted){
+                return Observable.just(bs);
             }
-        }));
+            return Observable.create(new Observable.OnSubscribe<BonjourService>() {
+                @Override
+                public void call(final Subscriber<? super BonjourService> subscriber) {
+                    try {
+                        DNSSD.resolve(bs.flags, bs.ifIndex, bs.serviceName, bs.regType, bs.domain, new ResolveListener() {
+                            @Override
+                            public void serviceResolved(DNSSDService resolver, int flags, int ifIndex, String fullName, String hostName, int port, TXTRecord txtRecord) {
+                                bs.fullServiceName = fullName;
+                                bs.port = port;
+                                bs.hostname = hostName;
+                                bs.dnsRecords.clear();
+                                bs.dnsRecords.put(BonjourService.DNS_RECORD_KEY_ADDRESS, "0.0.0.0:" + bs.port);
+                                bs.dnsRecords.putAll(parseTXTRecords(txtRecord));
+                                bs.timestamp = System.currentTimeMillis();
+                                subscriber.onNext(bs);
+                                resolver.stop();
+                                subscriber.onCompleted();
+                            }
+
+                            @Override
+                            public void operationFailed(DNSSDService service, int errorCode) {
+                                subscriber.onError(new RuntimeException("DNSSD resolve error: " + errorCode));
+                            }
+                        });
+                    } catch (DNSSDException e) {
+                        Log.e(TAG, e.getMessage() + " for " + bs.regType + " " + bs.serviceName + " " + bs.domain);
+                        e.printStackTrace();
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        });
     }
 
     public static Observable<BonjourService> queryRecords(final Observable<BonjourService> observable){
-        return observable.flatMap(bs -> Observable.create(new Observable.OnSubscribe<BonjourService>() {
-            @Override
-            public void call(final Subscriber<? super BonjourService> subscriber) {
-                try {
-                    // Start a record query to obtain IP address from hostname
-                    DNSSD.queryRecord(0, bs.ifIndex, bs.hostname, 1 /* ns_t_a */, 1 /* ns_c_in */,
-                            new QueryListener() {
-                                @Override
-                                public void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata, int ttl) {
-                                    try {
-                                        InetAddress address = InetAddress.getByAddress(rdata);
-                                        bs.dnsRecords.put(BonjourService.DNS_RECORD_KEY_ADDRESS, address.getHostAddress() + ":" + bs.port);
-                                        subscriber.onNext(bs);
-                                        subscriber.onCompleted();
-                                    } catch (Exception e) {
-                                        subscriber.onError(e);
-                                    } finally {
-                                        query.stop();
-                                    }
-                                }
-
-                                @Override
-                                public void operationFailed(DNSSDService service, int errorCode) {
-                                    subscriber.onError(new RuntimeException("DNSSD queryRecord error: " + errorCode));
-                                }
-                            });
-                } catch (Exception e) {
-                    subscriber.onError(e);
-                }
+        return observable.flatMap(bs -> {
+            if (bs.isDeleted){
+                return Observable.just(bs);
             }
-        }));
+            return Observable.create(new Observable.OnSubscribe<BonjourService>() {
+                @Override
+                public void call(final Subscriber<? super BonjourService> subscriber) {
+                    try {
+                        // Start a record query to obtain IP address from hostname
+                        DNSSD.queryRecord(0, bs.ifIndex, bs.hostname, 1 /* ns_t_a */, 1 /* ns_c_in */,
+                                new QueryListener() {
+                                    @Override
+                                    public void queryAnswered(DNSSDService query, int flags, int ifIndex, String fullName, int rrtype, int rrclass, byte[] rdata, int ttl) {
+                                        try {
+                                            InetAddress address = InetAddress.getByAddress(rdata);
+                                            bs.dnsRecords.put(BonjourService.DNS_RECORD_KEY_ADDRESS, address.getHostAddress() + ":" + bs.port);
+                                            subscriber.onNext(bs);
+                                            subscriber.onCompleted();
+                                        } catch (Exception e) {
+                                            subscriber.onError(e);
+                                        } finally {
+                                            query.stop();
+                                        }
+                                    }
 
-
+                                    @Override
+                                    public void operationFailed(DNSSDService service, int errorCode) {
+                                        subscriber.onError(new RuntimeException("DNSSD queryRecord error: " + errorCode));
+                                    }
+                                });
+                    } catch (Exception e) {
+                        subscriber.onError(e);
+                    }
+                }
+            });
+        });
     }
-
 
     public static Observable<BonjourService> browse(final String regType, final String domain) {
         final DNSSDService[] service = new DNSSDService[1];
@@ -116,9 +123,9 @@ public class RxDNSSD {
 
                         @Override
                         public void serviceLost(DNSSDService browser, int flags, int ifIndex, String serviceName, String regType, String domain) {
-                            //TODO: fix it
-//                            BonjourService service = new BonjourService(flags, ifIndex, serviceName, regType, domain);
-//                            subscriber.onNext(service);
+                            BonjourService service = new BonjourService(flags, ifIndex, serviceName, regType, domain);
+                            service.isDeleted = true;
+                            subscriber.onNext(service);
                         }
 
                         @Override
