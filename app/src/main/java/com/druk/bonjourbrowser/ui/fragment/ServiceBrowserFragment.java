@@ -30,9 +30,6 @@ import com.druk.bonjourbrowser.dnssd.RxDNSSD;
 import com.druk.bonjourbrowser.ui.ServiceActivity;
 import com.druk.bonjourbrowser.ui.adapter.ServiceAdapter;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 

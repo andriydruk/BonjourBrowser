@@ -29,7 +29,6 @@ import android.widget.TextView;
 
 import com.druk.bonjourbrowser.R;
 
-import java.util.Collections;
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -47,7 +46,7 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.service_list_item, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.two_text_item, viewGroup, false);
         view.setBackgroundResource(mBackground);
         return new ViewHolder(view);
     }

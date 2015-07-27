@@ -24,6 +24,7 @@ import android.support.v4.util.ArrayMap;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -77,6 +78,14 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_service);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+
         mService = getIntent().getParcelableExtra(SERVICE);
         mAdapter = new TxtRecordsAdapter(this, new ArrayMap<>());
         serviceName = (TextView) findViewById(R.id.service_name);
@@ -91,6 +100,12 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
         fab.setOnClickListener(this);
 
         updateUI(mService, false);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 
     @Override

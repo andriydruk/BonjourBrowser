@@ -43,6 +43,11 @@ public class RegTypeActivity extends AppCompatActivity {
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+
+
 
         if (getIntent() != null && getIntent().hasExtra(KEY_DOMAIN) && getIntent().hasExtra(KEY_REG_TYPE)){
             String regType = getIntent().getStringExtra(KEY_REG_TYPE);
@@ -59,5 +64,11 @@ public class RegTypeActivity extends AppCompatActivity {
                         replace(R.id.content, ServiceBrowserFragment.newInstance(domain, regType)).commit();
             }
         }
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+        onBackPressed();
+        return true;
     }
 }

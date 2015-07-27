@@ -27,9 +27,7 @@ import com.druk.bonjourbrowser.R;
 import com.druk.bonjourbrowser.dnssd.BonjourService;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 
 public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> {
 
@@ -44,7 +42,7 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.service_list_item, viewGroup, false);
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.two_text_item, viewGroup, false);
         view.setBackgroundResource(mBackground);
         return new ViewHolder(view);
     }
