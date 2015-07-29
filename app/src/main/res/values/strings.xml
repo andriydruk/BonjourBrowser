@@ -33,5 +33,6 @@
     <string name="reg_type">"RegType: %1$s"</string>
     <string name="last_update">"Last update: %1$s"</string>
     <string name="licences">Open-source licences</string>
+    <string name="cannot_open_link">Cannot open link</string>
 
 </resources>

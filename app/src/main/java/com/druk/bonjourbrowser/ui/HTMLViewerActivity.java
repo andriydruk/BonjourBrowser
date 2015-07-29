@@ -27,6 +27,7 @@ import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.Toast;
 
 import com.druk.bonjourbrowser.R;
 
@@ -112,7 +113,7 @@ public class HTMLViewerActivity extends AppCompatActivity {
                 intent = Intent.parseUri(url, Intent.URI_INTENT_SCHEME);
             } catch (URISyntaxException ex) {
                 Log.w(TAG, "Bad URI " + url + ": " + ex.getMessage());
-                //Toast.makeText(HTMLViewerActivity.this, R.string.cannot_open_link, Toast.LENGTH_SHORT).show();
+                Toast.makeText(HTMLViewerActivity.this, R.string.cannot_open_link, Toast.LENGTH_SHORT).show();
                 return true;
             }
             // Sanitize the Intent, ensuring web pages can not bypass browser
@@ -129,7 +130,7 @@ public class HTMLViewerActivity extends AppCompatActivity {
                 view.getContext().startActivity(intent);
             } catch (ActivityNotFoundException ex) {
                 Log.w(TAG, "No application can handle " + url);
-                //Toast.makeText(HTMLViewerActivity.this, R.string.cannot_open_link, Toast.LENGTH_SHORT).show();
+                Toast.makeText(HTMLViewerActivity.this, R.string.cannot_open_link, Toast.LENGTH_SHORT).show();
             }
             return true;
         }

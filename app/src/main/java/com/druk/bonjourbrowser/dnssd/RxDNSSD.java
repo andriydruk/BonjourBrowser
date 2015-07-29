@@ -59,7 +59,6 @@ public class RxDNSSD {
                         continue;
                     }
                     SERVICE_NAMES_TREE.put("_" + rowData[0] + "._" + rowData[2] + ".", rowData[3]);
-                    // do something with "data" and "value"
                 }
             }
             catch (IOException ex) {
@@ -70,15 +69,12 @@ public class RxDNSSD {
                     is.close();
                 }
                 catch (IOException e) {
-                    // handle exception
+                    Log.e(TAG, "init error: ", e);
                 }
-
-//                for (String key : SERVICE_NAMES_TREE.keySet()){
-//                    Log.d("TREE", key + " = " + SERVICE_NAMES_TREE.get(key));
-//                }
             }
         } catch (IOException e) {
             e.printStackTrace();
+            Log.e(TAG, "service-names-port-numbers.csv reading error: ", e);
         }
     }
 
