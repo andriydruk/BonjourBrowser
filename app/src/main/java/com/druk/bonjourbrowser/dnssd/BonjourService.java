@@ -132,4 +132,13 @@ public class BonjourService implements Parcelable {
         }
         return result;
     }
+
+    @Override
+    public String toString() {
+        return "BonjourService{" +
+                "serviceName='" + serviceName + '\'' +
+                ", regType='" + regType + '\'' +
+                ", domain='" + domain + '\'' +
+                '}';
+    }
 }

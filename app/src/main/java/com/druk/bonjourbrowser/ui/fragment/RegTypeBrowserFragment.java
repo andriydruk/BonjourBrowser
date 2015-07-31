@@ -18,6 +18,7 @@ package com.druk.bonjourbrowser.ui.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 
 import com.druk.bonjourbrowser.Config;
 import com.druk.bonjourbrowser.dnssd.BonjourService;
@@ -37,6 +38,8 @@ import static com.druk.bonjourbrowser.Config.TCP_REG_TYPE_SUFFIX;
 import static com.druk.bonjourbrowser.Config.UDP_REG_TYPE_SUFFIX;
 
 public class RegTypeBrowserFragment extends ServiceBrowserFragment {
+
+    private static final String TAG = "RegTypeBrowser";
 
     private final HashMap<String, Subscription> mBrowsers = new HashMap<>();
     private final HashMap<String, BonjourService> mServices = new HashMap<>();
@@ -96,10 +99,6 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
             return;
         }
         String[] regTypeParts = service.getRegTypeParts();
-//        if (regTypeParts.length != 2) {
-//            //Log.e(TAG, "Incorrect reg type: " + regType);
-//            return;
-//        }
         String protocolSuffix = regTypeParts[0];
         String serviceDomain = regTypeParts[1];
         if (TCP_REG_TYPE_SUFFIX.equals(protocolSuffix) || UDP_REG_TYPE_SUFFIX.equals(protocolSuffix)) {
@@ -111,20 +110,16 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
             }
             mServices.put(createKey(service.domain, service.regType, service.serviceName), service);
         } else {
-            //Log.e(TAG, "Unknown protocol suffix: " + protocolSuffix);
+            //Just ignore service with different protocol suffixes
         }
     };
 
     private final Action1<BonjourService> servicesAction = service -> {
         String[] regTypeParts = service.getRegTypeParts();
-//        if (regTypeParts.length != 2) {
-//            //Log.e(TAG, "Incorrect reg type: " + regType);
-//            return;
-//        }
         String serviceRegType = regTypeParts[0];
         String protocolSuffix = regTypeParts[1];
-        String key1 = createKey(EMPTY_DOMAIN, protocolSuffix + "." + service.domain, serviceRegType);
-        BonjourService domainService = mServices.get(key1);
+        String key = createKey(EMPTY_DOMAIN, protocolSuffix + "." + service.domain, serviceRegType);
+        BonjourService domainService = mServices.get(key);
         if (domainService != null) {
             Integer serviceCount = (domainService.dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) ?
                     Integer.parseInt(domainService.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) : 0;
@@ -142,7 +137,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
                         && Integer.parseInt(bonjourService.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) > 0)
                     .subscribe(mAdapter::add, throwable -> {/* empty */}, mAdapter::notifyDataSetChanged);
         } else {
-            //Log.w(TAG, "Service from unknown service type " + key);
+            Log.w(TAG, "Service from unknown service type " + key);
         }
     };
 
