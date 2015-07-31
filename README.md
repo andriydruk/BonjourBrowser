@@ -1,4 +1,4 @@
-# R.tools
+# Bonjour Browser
 Bonjour Browser is a utility that display all available Bonjour services at any domain. Also application provide resolved ip addresses of registered services and all meta-information (TXT Records). This software can be used for development or administration tasks.
 
 License
