@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjourbrowser.ui;
+package com.druk.bonjour.browser.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -22,9 +22,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.druk.bonjourbrowser.Config;
-import com.druk.bonjourbrowser.R;
-import com.druk.bonjourbrowser.ui.fragment.RegTypeBrowserFragment;
+import com.druk.bonjour.browser.Config;
+import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.ui.fragment.RegTypeBrowserFragment;
 
 public class MainActivity extends AppCompatActivity{
 

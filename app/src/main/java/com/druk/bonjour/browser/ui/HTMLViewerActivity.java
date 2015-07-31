@@ -1,4 +1,4 @@
-package com.druk.bonjourbrowser.ui;
+package com.druk.bonjour.browser.ui;
 
 /*
  * Copyright (C) 2008 The Android Open Source Project
@@ -29,7 +29,7 @@ import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
-import com.druk.bonjourbrowser.R;
+import com.druk.bonjour.browser.R;
 
 import java.net.URISyntaxException;
 

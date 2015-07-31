@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjourbrowser.ui;
+package com.druk.bonjour.browser.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -29,10 +29,10 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
-import com.druk.bonjourbrowser.R;
-import com.druk.bonjourbrowser.dnssd.RxDNSSD;
-import com.druk.bonjourbrowser.dnssd.BonjourService;
-import com.druk.bonjourbrowser.ui.adapter.TxtRecordsAdapter;
+import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.dnssd.RxDNSSD;
+import com.druk.bonjour.browser.dnssd.BonjourService;
+import com.druk.bonjour.browser.ui.adapter.TxtRecordsAdapter;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

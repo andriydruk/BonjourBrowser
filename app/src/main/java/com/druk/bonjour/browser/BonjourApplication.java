@@ -13,12 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjourbrowser;
+package com.druk.bonjour.browser;
 
 import android.app.Application;
 import android.os.StrictMode;
 
-import com.druk.bonjourbrowser.dnssd.RxDNSSD;
+import com.druk.bonjour.browser.dnssd.RxDNSSD;
 
 public class BonjourApplication extends Application {
 

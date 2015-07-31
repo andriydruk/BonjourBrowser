@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjourbrowser.ui;
+package com.druk.bonjour.browser.ui;
 
 import android.content.Context;
 import android.content.Intent;
@@ -21,14 +21,14 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-import com.druk.bonjourbrowser.R;
-import com.druk.bonjourbrowser.dnssd.RxDNSSD;
-import com.druk.bonjourbrowser.ui.fragment.ServiceBrowserFragment;
+import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.dnssd.RxDNSSD;
+import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
 
 public class RegTypeActivity extends AppCompatActivity {
 
-    private static final String KEY_REG_TYPE = "com.druk.bonjourbrowser.ui.RegTypeActivity.KEY_DOMAIN";
-    private static final String KEY_DOMAIN = "com.druk.bonjourbrowser.ui.RegTypeActivity.KEY_REG_TYPE";
+    private static final String KEY_REG_TYPE = "com.druk.bonjour.browser.ui.RegTypeActivity.KEY_DOMAIN";
+    private static final String KEY_DOMAIN = "com.druk.bonjour.browser.ui.RegTypeActivity.KEY_REG_TYPE";
 
     public static void startActivity(Context context, String regType, String domain){
         context.startActivity(new Intent(context, RegTypeActivity.class).

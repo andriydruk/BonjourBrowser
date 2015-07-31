@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjourbrowser.ui.fragment;
+package com.druk.bonjour.browser.ui.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -24,11 +24,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.druk.bonjourbrowser.R;
-import com.druk.bonjourbrowser.dnssd.BonjourService;
-import com.druk.bonjourbrowser.dnssd.RxDNSSD;
-import com.druk.bonjourbrowser.ui.ServiceActivity;
-import com.druk.bonjourbrowser.ui.adapter.ServiceAdapter;
+import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.dnssd.BonjourService;
+import com.druk.bonjour.browser.dnssd.RxDNSSD;
+import com.druk.bonjour.browser.ui.ServiceActivity;
+import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;

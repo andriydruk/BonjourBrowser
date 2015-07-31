@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjourbrowser.ui;
+package com.druk.bonjour.browser.ui;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -31,7 +31,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.druk.bonjourbrowser.R;
+import com.druk.bonjour.browser.R;
 
 public class LicensesActivity extends AppCompatActivity implements View.OnClickListener{
 

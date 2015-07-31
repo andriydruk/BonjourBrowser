@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjourbrowser.ui.fragment;
+package com.druk.bonjour.browser.ui.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 
-import com.druk.bonjourbrowser.Config;
-import com.druk.bonjourbrowser.dnssd.BonjourService;
-import com.druk.bonjourbrowser.dnssd.RxDNSSD;
-import com.druk.bonjourbrowser.ui.RegTypeActivity;
-import com.druk.bonjourbrowser.ui.adapter.ServiceAdapter;
+import com.druk.bonjour.browser.Config;
+import com.druk.bonjour.browser.dnssd.BonjourService;
+import com.druk.bonjour.browser.dnssd.RxDNSSD;
+import com.druk.bonjour.browser.ui.RegTypeActivity;
+import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
 
 import java.util.HashMap;
 
@@ -33,9 +33,9 @@ import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
 
-import static com.druk.bonjourbrowser.Config.EMPTY_DOMAIN;
-import static com.druk.bonjourbrowser.Config.TCP_REG_TYPE_SUFFIX;
-import static com.druk.bonjourbrowser.Config.UDP_REG_TYPE_SUFFIX;
+import static com.druk.bonjour.browser.Config.EMPTY_DOMAIN;
+import static com.druk.bonjour.browser.Config.TCP_REG_TYPE_SUFFIX;
+import static com.druk.bonjour.browser.Config.UDP_REG_TYPE_SUFFIX;
 
 public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 

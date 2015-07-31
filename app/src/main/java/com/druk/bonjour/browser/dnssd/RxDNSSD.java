@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjourbrowser.dnssd;
+package com.druk.bonjour.browser.dnssd;
 
 import android.content.Context;
 import android.support.v4.util.ArrayMap;
