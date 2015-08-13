@@ -15,11 +15,6 @@
  */
 package com.druk.bonjour.browser.dnssd;
 
-import android.content.Context;
-import android.support.v4.util.ArrayMap;
-import android.text.TextUtils;
-import android.util.Log;
-
 import com.apple.dnssd.BrowseListener;
 import com.apple.dnssd.DNSSD;
 import com.apple.dnssd.DNSSDException;
@@ -27,6 +22,11 @@ import com.apple.dnssd.DNSSDService;
 import com.apple.dnssd.QueryListener;
 import com.apple.dnssd.ResolveListener;
 import com.apple.dnssd.TXTRecord;
+
+import android.content.Context;
+import android.support.v4.util.ArrayMap;
+import android.text.TextUtils;
+import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -44,7 +44,7 @@ public class RxDNSSD {
     private static final String TAG = "RxDNSSD";
     private static final TreeMap<String, String> SERVICE_NAMES_TREE = new TreeMap<>();
 
-    public static void init(Context ctx){
+    public static void init(Context ctx) {
         ctx.getSystemService(Context.NSD_SERVICE);
 
         try {
@@ -55,20 +55,17 @@ public class RxDNSSD {
                 String line;
                 while ((line = reader.readLine()) != null) {
                     String[] rowData = line.split(",");
-                    if (rowData.length < 4 || TextUtils.isEmpty(rowData[0]) || TextUtils.isEmpty(rowData[2]) || TextUtils.isEmpty(rowData[3])){
+                    if (rowData.length < 4 || TextUtils.isEmpty(rowData[0]) || TextUtils.isEmpty(rowData[2]) || TextUtils.isEmpty(rowData[3])) {
                         continue;
                     }
                     SERVICE_NAMES_TREE.put("_" + rowData[0] + "._" + rowData[2] + ".", rowData[3]);
                 }
-            }
-            catch (IOException ex) {
+            } catch (IOException ex) {
                 // handle exception
-            }
-            finally {
+            } finally {
                 try {
                     is.close();
-                }
-                catch (IOException e) {
+                } catch (IOException e) {
                     Log.e(TAG, "init error: ", e);
                 }
             }
@@ -78,9 +75,9 @@ public class RxDNSSD {
         }
     }
 
-    public static Observable<BonjourService> resolve(final Observable<BonjourService> observable){
+    public static Observable<BonjourService> resolve(final Observable<BonjourService> observable) {
         return observable.flatMap(bs -> {
-            if (bs.isDeleted){
+            if (bs.isDeleted) {
                 return Observable.just(bs);
             }
             return Observable.create(new Observable.OnSubscribe<BonjourService>() {
@@ -116,9 +113,9 @@ public class RxDNSSD {
         });
     }
 
-    public static Observable<BonjourService> queryRecords(final Observable<BonjourService> observable){
+    public static Observable<BonjourService> queryRecords(final Observable<BonjourService> observable) {
         return observable.flatMap(bs -> {
-            if (bs.isDeleted){
+            if (bs.isDeleted) {
                 return Observable.just(bs);
             }
             return Observable.create(new Observable.OnSubscribe<BonjourService>() {
@@ -186,20 +183,20 @@ public class RxDNSSD {
                 }
             }
         }).doOnUnsubscribe(() -> {
-            if (service[0] != null){
+            if (service[0] != null) {
                 service[0].stop();
                 service[0] = null;
             }
         });
     }
 
-    public static String getRegTypeDescription(String regType){
+    public static String getRegTypeDescription(String regType) {
         return SERVICE_NAMES_TREE.get(regType);
     }
 
-    private static Map<String, String> parseTXTRecords(TXTRecord record){
+    private static Map<String, String> parseTXTRecords(TXTRecord record) {
         Map<String, String> result = new ArrayMap<>();
-        for (int i = 0; i < record.size(); i++){
+        for (int i = 0; i < record.size(); i++) {
             if (!TextUtils.isEmpty(record.getKey(i)) && !TextUtils.isEmpty(record.getValueAsString(i)))
                 result.put(record.getKey(i), record.getValueAsString(i));
         }

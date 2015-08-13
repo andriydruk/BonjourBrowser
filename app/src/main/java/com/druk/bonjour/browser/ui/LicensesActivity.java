@@ -15,6 +15,8 @@
  */
 package com.druk.bonjour.browser.ui;
 
+import com.druk.bonjour.browser.R;
+
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
@@ -31,9 +33,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.druk.bonjour.browser.R;
-
-public class LicensesActivity extends AppCompatActivity implements View.OnClickListener{
+public class LicensesActivity extends AppCompatActivity implements View.OnClickListener {
 
     private static String[] LICENSE_SOFTWARE = new String[]{"Android Compatibility Library v4", "Android Compatibility Library v7", "Android Design Support Library", "Android SDK", "mDNSResponder", "RxAndroid"};
 
@@ -104,7 +104,7 @@ public class LicensesActivity extends AppCompatActivity implements View.OnClickL
         }
     }
 
-    private static class OpenSourceComponentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>  {
+    private static class OpenSourceComponentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
         private final int mBackground;
         private String[] componentNames;
@@ -112,7 +112,7 @@ public class LicensesActivity extends AppCompatActivity implements View.OnClickL
 
         private View.OnClickListener listener;
 
-        private OpenSourceComponentAdapter(Context context, String[] names, String[] paths){
+        private OpenSourceComponentAdapter(Context context, String[] names, String[] paths) {
             this.componentNames = names;
             this.licensePaths = paths;
             TypedValue mTypedValue = new TypedValue();
@@ -122,14 +122,15 @@ public class LicensesActivity extends AppCompatActivity implements View.OnClickL
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            RecyclerView.ViewHolder vh = new RecyclerView.ViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_text_item, viewGroup, false)){};
+            RecyclerView.ViewHolder vh = new RecyclerView.ViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_text_item, viewGroup, false)) {
+            };
             vh.itemView.setBackgroundResource(mBackground);
             return vh;
         }
 
         @Override
         public void onBindViewHolder(RecyclerView.ViewHolder viewHolder, int i) {
-            ((AppCompatTextView)viewHolder.itemView).setText(componentNames[i]);
+            ((AppCompatTextView) viewHolder.itemView).setText(componentNames[i]);
             viewHolder.itemView.setOnClickListener(listener);
         }
 
@@ -138,7 +139,7 @@ public class LicensesActivity extends AppCompatActivity implements View.OnClickL
             return componentNames.length;
         }
 
-        public void setListener(View.OnClickListener listener){
+        public void setListener(View.OnClickListener listener) {
             this.listener = listener;
         }
 

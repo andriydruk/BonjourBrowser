@@ -15,6 +15,9 @@
  */
 package com.druk.bonjour.browser.ui.adapter;
 
+import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.dnssd.BonjourService;
+
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
@@ -22,9 +25,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-
-import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.dnssd.BonjourService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +34,7 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
     private final int mBackground;
     private final ArrayList<BonjourService> services = new ArrayList<>();
 
-    public ServiceAdapter(Context context){
+    public ServiceAdapter(Context context) {
         TypedValue mTypedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
         mBackground = mTypedValue.resourceId;
@@ -56,11 +56,11 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
         return services.get(position);
     }
 
-    public void clear(){
+    public void clear() {
         this.services.clear();
     }
 
-    public void add(BonjourService service){
+    public void add(BonjourService service) {
         this.services.remove(service);
         this.services.add(service);
         Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
@@ -72,7 +72,7 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
         }
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView domain;
         public TextView serviceCount;
 

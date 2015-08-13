@@ -15,6 +15,11 @@
  */
 package com.druk.bonjour.browser.ui;
 
+import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.dnssd.BonjourService;
+import com.druk.bonjour.browser.dnssd.RxDNSSD;
+import com.druk.bonjour.browser.ui.adapter.TxtRecordsAdapter;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
@@ -29,11 +34,6 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
 
-import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.dnssd.RxDNSSD;
-import com.druk.bonjour.browser.dnssd.BonjourService;
-import com.druk.bonjour.browser.ui.adapter.TxtRecordsAdapter;
-
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -44,7 +44,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class ServiceActivity extends AppCompatActivity implements OnClickListener{
+public class ServiceActivity extends AppCompatActivity implements OnClickListener {
 
     private static final String SERVICE = "mService";
     private static final String TIME_FORMAT = "HH:mm:ss";
@@ -59,12 +59,12 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
     private BonjourService mService;
     private Subscription mResolveSubscription;
 
-    public static void startActivity(Context context, BonjourService service){
+    public static void startActivity(Context context, BonjourService service) {
         context.startActivity(new Intent(context, ServiceActivity.class).
                 putExtra(ServiceActivity.SERVICE, service));
     }
 
-    private static String getTime(long timestamp){
+    private static String getTime(long timestamp) {
         Calendar cal = Calendar.getInstance();
         TimeZone tz = cal.getTimeZone();
 
@@ -116,7 +116,7 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
         }
     }
 
-    private void updateUI(BonjourService service, boolean withSnakeBar){
+    private void updateUI(BonjourService service, boolean withSnakeBar) {
         serviceName.setText(service.serviceName);
         domain.setText(getString(R.string.domain, service.domain));
         regType.setText(getString(R.string.reg_type, service.regType));
@@ -124,7 +124,7 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
         mAdapter.swap(service.dnsRecords);
         mAdapter.notifyDataSetChanged();
 
-        if (withSnakeBar){
+        if (withSnakeBar) {
             Snackbar.make(serviceName, getString(R.string.service_was_resolved), Snackbar.LENGTH_LONG).show();
         }
     }
@@ -134,7 +134,7 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
         mResolveSubscription = RxDNSSD.queryRecords(RxDNSSD.resolve(Observable.just(mService)))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
-                    if (bonjourService.isDeleted){
+                    if (bonjourService.isDeleted) {
                         return;
                     }
                     updateUI(bonjourService, true);

@@ -15,6 +15,10 @@
  */
 package com.druk.bonjour.browser.ui;
 
+import com.druk.bonjour.browser.Config;
+import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.ui.fragment.RegTypeBrowserFragment;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
@@ -22,11 +26,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
-import com.druk.bonjour.browser.Config;
-import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.ui.fragment.RegTypeBrowserFragment;
-
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

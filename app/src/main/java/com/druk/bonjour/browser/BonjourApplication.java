@@ -15,10 +15,10 @@
  */
 package com.druk.bonjour.browser;
 
+import com.druk.bonjour.browser.dnssd.RxDNSSD;
+
 import android.app.Application;
 import android.os.StrictMode;
-
-import com.druk.bonjour.browser.dnssd.RxDNSSD;
 
 public class BonjourApplication extends Application {
 
@@ -26,7 +26,7 @@ public class BonjourApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        if (BuildConfig.DEBUG){
+        if (BuildConfig.DEBUG) {
 
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder()
                     .detectDiskReads()

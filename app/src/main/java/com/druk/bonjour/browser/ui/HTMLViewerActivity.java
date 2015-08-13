@@ -16,6 +16,8 @@ package com.druk.bonjour.browser.ui;
  * limitations under the License.
  */
 
+import com.druk.bonjour.browser.R;
+
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.os.Bundle;
@@ -28,8 +30,6 @@ import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
-
-import com.druk.bonjour.browser.R;
 
 import java.net.URISyntaxException;
 

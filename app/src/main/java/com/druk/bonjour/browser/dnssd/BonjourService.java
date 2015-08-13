@@ -40,7 +40,7 @@ public class BonjourService implements Parcelable {
     public long timestamp = -1L;
     public boolean isDeleted = false;
 
-    public BonjourService(int flags, int ifIndex, String serviceName, String regType, String domain){
+    public BonjourService(int flags, int ifIndex, String serviceName, String regType, String domain) {
         this.flags = flags;
         this.ifIndex = ifIndex;
         this.serviceName = serviceName;
@@ -48,7 +48,7 @@ public class BonjourService implements Parcelable {
         this.domain = domain;
     }
 
-    public String[] getRegTypeParts(){
+    public String[] getRegTypeParts() {
         return regType.split(REG_TYPE_SEPARATOR);
     }
 
@@ -123,7 +123,7 @@ public class BonjourService implements Parcelable {
 
     public final Map<String, String> readMap(Parcel in) {
         int N = in.readInt();
-        if (N < 0){
+        if (N < 0) {
             return null;
         }
         Map<String, String> result = new ArrayMap<>();

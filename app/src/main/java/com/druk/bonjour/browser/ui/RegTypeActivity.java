@@ -15,22 +15,22 @@
  */
 package com.druk.bonjour.browser.ui;
 
+import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.dnssd.RxDNSSD;
+import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
+
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.dnssd.RxDNSSD;
-import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
-
 public class RegTypeActivity extends AppCompatActivity {
 
     private static final String KEY_REG_TYPE = "com.druk.bonjour.browser.ui.RegTypeActivity.KEY_DOMAIN";
     private static final String KEY_DOMAIN = "com.druk.bonjour.browser.ui.RegTypeActivity.KEY_REG_TYPE";
 
-    public static void startActivity(Context context, String regType, String domain){
+    public static void startActivity(Context context, String regType, String domain) {
         context.startActivity(new Intent(context, RegTypeActivity.class).
                 putExtra(RegTypeActivity.KEY_DOMAIN, domain).
                 putExtra(RegTypeActivity.KEY_REG_TYPE, regType));
@@ -48,15 +48,13 @@ public class RegTypeActivity extends AppCompatActivity {
         }
 
 
-
-        if (getIntent() != null && getIntent().hasExtra(KEY_DOMAIN) && getIntent().hasExtra(KEY_REG_TYPE)){
+        if (getIntent() != null && getIntent().hasExtra(KEY_DOMAIN) && getIntent().hasExtra(KEY_REG_TYPE)) {
             String regType = getIntent().getStringExtra(KEY_REG_TYPE);
             String domain = getIntent().getStringExtra(KEY_DOMAIN);
             String description = RxDNSSD.getRegTypeDescription(regType);
-            if (description != null){
+            if (description != null) {
                 setTitle(description);
-            }
-            else {
+            } else {
                 setTitle(regType);
             }
             if (savedInstanceState == null) {

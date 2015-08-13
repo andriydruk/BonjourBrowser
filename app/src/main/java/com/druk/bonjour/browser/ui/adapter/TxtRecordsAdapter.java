@@ -15,6 +15,8 @@
  */
 package com.druk.bonjour.browser.ui.adapter;
 
+import com.druk.bonjour.browser.R;
+
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
@@ -27,8 +29,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import com.druk.bonjour.browser.R;
-
 import java.util.Map;
 import java.util.TreeMap;
 
@@ -37,7 +37,7 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
     private final int mBackground;
     private final ArrayMap<String, String> mRecords = new ArrayMap<>();
 
-    public TxtRecordsAdapter(Context context, Map<String, String> records){
+    public TxtRecordsAdapter(Context context, Map<String, String> records) {
         TypedValue mTypedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
         mBackground = mTypedValue.resourceId;
@@ -78,12 +78,12 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
         return mRecords.valueAt(position);
     }
 
-    public void swap(Map<String, String> records){
+    public void swap(Map<String, String> records) {
         this.mRecords.clear();
         this.mRecords.putAll(new TreeMap<>(records));
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder {
         public TextView key;
         public TextView value;
 
