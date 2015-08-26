@@ -28,51 +28,18 @@ import android.support.v4.util.ArrayMap;
 import android.text.TextUtils;
 import android.util.Log;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.util.Map;
-import java.util.TreeMap;
 
 import rx.Observable;
 import rx.Subscriber;
 
-public class RxDNSSD {
+public final class RxDNSSD {
 
     private static final String TAG = "RxDNSSD";
-    private static final TreeMap<String, String> SERVICE_NAMES_TREE = new TreeMap<>();
 
     public static void init(Context ctx) {
         ctx.getSystemService(Context.NSD_SERVICE);
-
-        try {
-            InputStream is = ctx.getAssets().open("service-names-port-numbers.csv");
-            try {
-
-                BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                String line;
-                while ((line = reader.readLine()) != null) {
-                    String[] rowData = line.split(",");
-                    if (rowData.length < 4 || TextUtils.isEmpty(rowData[0]) || TextUtils.isEmpty(rowData[2]) || TextUtils.isEmpty(rowData[3])) {
-                        continue;
-                    }
-                    SERVICE_NAMES_TREE.put("_" + rowData[0] + "._" + rowData[2] + ".", rowData[3]);
-                }
-            } catch (IOException ex) {
-                // handle exception
-            } finally {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                    Log.e(TAG, "init error: ", e);
-                }
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            Log.e(TAG, "service-names-port-numbers.csv reading error: ", e);
-        }
     }
 
     public static Observable<BonjourService> resolve(final Observable<BonjourService> observable) {
@@ -188,10 +155,6 @@ public class RxDNSSD {
                 service[0] = null;
             }
         });
-    }
-
-    public static String getRegTypeDescription(String regType) {
-        return SERVICE_NAMES_TREE.get(regType);
     }
 
     private static Map<String, String> parseTXTRecords(TXTRecord record) {

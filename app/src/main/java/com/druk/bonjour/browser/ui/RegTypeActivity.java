@@ -15,6 +15,7 @@
  */
 package com.druk.bonjour.browser.ui;
 
+import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.dnssd.RxDNSSD;
 import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
@@ -51,7 +52,7 @@ public class RegTypeActivity extends AppCompatActivity {
         if (getIntent() != null && getIntent().hasExtra(KEY_DOMAIN) && getIntent().hasExtra(KEY_REG_TYPE)) {
             String regType = getIntent().getStringExtra(KEY_REG_TYPE);
             String domain = getIntent().getStringExtra(KEY_DOMAIN);
-            String description = RxDNSSD.getRegTypeDescription(regType);
+            String description = BonjourApplication.getRegTypeDescription(this, regType);
             if (description != null) {
                 setTitle(description);
             } else {

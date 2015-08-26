@@ -18,9 +18,22 @@ package com.druk.bonjour.browser;
 import com.druk.bonjour.browser.dnssd.RxDNSSD;
 
 import android.app.Application;
+import android.content.Context;
 import android.os.StrictMode;
+import android.support.annotation.NonNull;
+import android.text.TextUtils;
+import android.util.Log;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.TreeMap;
 
 public class BonjourApplication extends Application {
+
+    private static final String TAG = "BonjourApplication";
+    private TreeMap<String, String> mServiceNamesTree;
 
     @Override
     public void onCreate() {
@@ -46,4 +59,39 @@ public class BonjourApplication extends Application {
         RxDNSSD.init(this);
     }
 
+    public static String getRegTypeDescription(@NonNull Context context, String regType) {
+        return ((BonjourApplication) context.getApplicationContext()).getRegTypeDescription(regType);
+    }
+
+    private String getRegTypeDescription(String regType) {
+        if (mServiceNamesTree == null){
+            mServiceNamesTree = new TreeMap<>();
+            try {
+                InputStream is = getAssets().open("service-names-port-numbers.csv");
+                try {
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                    String line;
+                    while ((line = reader.readLine()) != null) {
+                        String[] rowData = line.split(",");
+                        if (rowData.length < 4 || TextUtils.isEmpty(rowData[0]) || TextUtils.isEmpty(rowData[2]) || TextUtils.isEmpty(rowData[3])) {
+                            continue;
+                        }
+                        mServiceNamesTree.put("_" + rowData[0] + "._" + rowData[2] + ".", rowData[3]);
+                    }
+                } catch (IOException ex) {
+                    // handle exception
+                } finally {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        Log.e(TAG, "init error: ", e);
+                    }
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+                Log.e(TAG, "service-names-port-numbers.csv reading error: ", e);
+            }
+        }
+        return mServiceNamesTree.get(regType);
+    }
 }

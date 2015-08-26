@@ -39,3 +39,6 @@ out/
 # Keys
 keys/
 
+# Test reports
+/*.html
+

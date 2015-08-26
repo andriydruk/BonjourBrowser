@@ -15,6 +15,7 @@
  */
 package com.druk.bonjour.browser.ui.fragment;
 
+import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.Config;
 import com.druk.bonjour.browser.dnssd.BonjourService;
 import com.druk.bonjour.browser.dnssd.RxDNSSD;
@@ -56,7 +57,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
             public void onBindViewHolder(ViewHolder viewHolder, int i) {
                 final BonjourService service = getItem(i);
                 String regType = service.serviceName + "." + service.getRegTypeParts()[0] + ".";
-                String regTypeDescription = RxDNSSD.getRegTypeDescription(regType);
+                String regTypeDescription = BonjourApplication.getRegTypeDescription(viewHolder.itemView.getContext(), regType);
                 if (regTypeDescription != null) {
                     viewHolder.domain.setText(regType + " (" + regTypeDescription + ")");
                 } else {
