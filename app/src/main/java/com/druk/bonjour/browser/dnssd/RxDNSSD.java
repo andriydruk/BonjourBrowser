@@ -35,10 +35,11 @@ import rx.Subscriber;
 
 public final class RxDNSSD {
 
-    private static final String TAG = "RxDNSSD";
+    private static final RxDNSSD INSTANCE = new RxDNSSD();
+    private Context mContext;
 
     public static void init(Context ctx) {
-        ctx.getSystemService(Context.NSD_SERVICE);
+        INSTANCE.mContext = ctx;
     }
 
     public static Observable<BonjourService> resolve(Observable<BonjourService> observable) {
@@ -46,7 +47,7 @@ public final class RxDNSSD {
             if (bs.isDeleted) {
                 return Observable.just(bs);
             }
-            return new RxDNSSDService(null){
+            return new RxDNSSDService(){
 
                 @Override
                 protected DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
@@ -72,7 +73,7 @@ public final class RxDNSSD {
                     });
 
                 }
-            }.getObservable();
+            }.getObservable(INSTANCE.mContext);
         });
     }
 
@@ -81,7 +82,7 @@ public final class RxDNSSD {
             if (bs.isDeleted) {
                 return Observable.just(bs);
             }
-            return new RxDNSSDService(null){
+            return new RxDNSSDService() {
 
                 @Override
                 protected DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
@@ -108,12 +109,12 @@ public final class RxDNSSD {
                     });
                 }
 
-            }.getObservable();
+            }.getObservable(INSTANCE.mContext);
         });
     }
 
     public static Observable<BonjourService> browse(final String regType, final String domain) {
-        return new RxDNSSDService(null){
+        return new RxDNSSDService(){
 
             @Override
             protected DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
@@ -137,7 +138,7 @@ public final class RxDNSSD {
                     }
                 });
             }
-        }.getObservable();
+        }.getObservable(INSTANCE.mContext);
     }
 
     private static Map<String, String> parseTXTRecords(TXTRecord record) {
@@ -153,19 +154,20 @@ public final class RxDNSSD {
 
         private DNSSDService mService;
 
-        private RxDNSSDService(Context ctx){
-            if (ctx != null){
-                ctx.getSystemService(Context.NSD_SERVICE);
-            }
+        private RxDNSSDService(){}
+
+        private void startDaemonProcess(Context ctx) {
+            ctx.getSystemService(Context.NSD_SERVICE);
         }
 
         protected abstract DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException;
 
-        protected Observable<BonjourService> getObservable(){
+        protected Observable<BonjourService> getObservable(final Context context){
             return Observable.create(new Observable.OnSubscribe<BonjourService>() {
                 @Override
                 public void call(Subscriber<? super BonjourService> subscriber) {
                     try {
+                        startDaemonProcess(context);
                         mService = getService(subscriber);
                     } catch (DNSSDException e) {
                         e.printStackTrace();
