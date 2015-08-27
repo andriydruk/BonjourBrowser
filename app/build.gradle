@@ -25,12 +25,11 @@ android {
     }
 }
 
-ext{
-    //Android Support Libraries Version
-    supportLibrary = '23.0.0'
-}
 
 dependencies {
+    //Android Support Libraries Version
+    def supportLibrary = '23.0.0'
+
     compile project(':mDNSShared')
     compile "com.android.support:support-v4:${supportLibrary}"
     compile "com.android.support:appcompat-v7:${supportLibrary}"

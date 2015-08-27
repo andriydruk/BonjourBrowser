@@ -33,6 +33,8 @@ public class RxDNSSDTest extends InstrumentationTestCase {
     private static final String TAG = "RxDNSSDTest";
     private static final int TIME_LIMIT = 5000; //5 second
 
+    private Throwable error;
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
@@ -40,7 +42,6 @@ public class RxDNSSDTest extends InstrumentationTestCase {
     }
 
     public void testRxDNSSD() throws Throwable {
-        Throwable[] errors = new Throwable[1];
         Thread mainThread = Thread.currentThread();
         HashMap<String, Subscription> subscriptions = new HashMap<>();
         Subscription mainSubscription = RxDNSSD.browse(Config.SERVICES_DOMAIN, "")
@@ -62,8 +63,8 @@ public class RxDNSSDTest extends InstrumentationTestCase {
                                             Log.d(TAG, "Found " + service2.toString() + " with port " + service2.port);
                                         }
                                     }, throwable -> {
-                                        if (errors[0] == null) {
-                                            errors[0] = throwable;
+                                        if (error == null) {
+                                            error = throwable;
                                             mainThread.interrupt();
                                         }
                                     }));
@@ -72,16 +73,16 @@ public class RxDNSSDTest extends InstrumentationTestCase {
                     }
                 }, throwable -> {
                     Log.e(TAG, "Error: ", throwable);
-                    if (errors[0] == null) {
-                        errors[0] = throwable;
+                    if (error == null) {
+                        error = throwable;
                         mainThread.interrupt();
                     }
                 });
         try {
             Thread.sleep(TIME_LIMIT);
         } catch (InterruptedException e) {
-            Log.e(TAG, "Error: ", errors[0]);
-            throw errors[0];
+            Log.e(TAG, "Error: ", error);
+            throw error;
         } finally {
             mainSubscription.unsubscribe();
             for (Subscription subscription : subscriptions.values()) {
