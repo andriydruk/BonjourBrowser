@@ -79,7 +79,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     @Override
     protected void startDiscovery() {
         mSubscription = RxDNSSD.browse(Config.SERVICES_DOMAIN, "")
-                .subscribe(reqTypeAction);
+                .subscribe(reqTypeAction, errorAction);
     }
 
     @Override
@@ -105,12 +105,16 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
             if (!mBrowsers.containsKey(key)) {
                 mBrowsers.put(key, RxDNSSD.browse(key, serviceDomain)
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(RegTypeBrowserFragment.this.servicesAction));
+                        .subscribe(RegTypeBrowserFragment.this.servicesAction, RegTypeBrowserFragment.this.errorAction));
             }
             mServices.put(createKey(service.domain, service.regType, service.serviceName), service);
         } else {
             //Just ignore service with different protocol suffixes
         }
+    };
+
+    protected final Action1<Throwable> errorAction = (Throwable throwable) -> {
+        Log.e("DNSSD", "Error: ", throwable);
     };
 
     private final Action1<BonjourService> servicesAction = service -> {

@@ -30,6 +30,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.TextView;
@@ -43,6 +44,7 @@ import java.util.TimeZone;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 
 public class ServiceActivity extends AppCompatActivity implements OnClickListener {
 
@@ -138,6 +140,8 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
                         return;
                     }
                     updateUI(bonjourService, true);
+                }, throwable -> {
+                    Log.e("DNSSD", "Error: ", throwable);
                 });
     }
 }

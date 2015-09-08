@@ -19,6 +19,7 @@ import com.apple.dnssd.BrowseListener;
 import com.apple.dnssd.DNSSD;
 import com.apple.dnssd.DNSSDException;
 import com.apple.dnssd.DNSSDService;
+import com.apple.dnssd.DomainListener;
 import com.apple.dnssd.QueryListener;
 import com.apple.dnssd.ResolveListener;
 import com.apple.dnssd.TXTRecord;
@@ -47,7 +48,7 @@ public final class RxDNSSD {
             if (bs.isDeleted) {
                 return Observable.just(bs);
             }
-            return new RxDNSSDService(){
+            return new RxDNSSDService<BonjourService> (){
 
                 @Override
                 protected DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
@@ -82,7 +83,7 @@ public final class RxDNSSD {
             if (bs.isDeleted) {
                 return Observable.just(bs);
             }
-            return new RxDNSSDService() {
+            return new RxDNSSDService<BonjourService> () {
 
                 @Override
                 protected DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
@@ -114,11 +115,11 @@ public final class RxDNSSD {
     }
 
     public static Observable<BonjourService> browse(final String regType, final String domain) {
-        return new RxDNSSDService(){
+        return new RxDNSSDService<BonjourService> (){
 
             @Override
             protected DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                return DNSSD.browse(0, 0, regType, domain, new BrowseListener() {
+                return DNSSD.browse(0, DNSSD.ALL_INTERFACES, regType, domain, new BrowseListener() {
                     @Override
                     public void serviceFound(DNSSDService browser, int flags, int ifIndex, String serviceName, String regType, String domain) {
                         BonjourService service = new BonjourService(flags, ifIndex, serviceName, regType, domain);
@@ -141,6 +142,31 @@ public final class RxDNSSD {
         }.getObservable(INSTANCE.mContext);
     }
 
+    public static Observable<String> enumerateDomains() {
+        return new RxDNSSDService<String>(){
+
+            @Override
+            protected DNSSDService getService(Subscriber<? super String> subscriber) throws DNSSDException {
+                return DNSSD.enumerateDomains(DNSSD.BROWSE_DOMAINS, DNSSD.ALL_INTERFACES, new DomainListener() {
+                    @Override
+                    public void domainFound(DNSSDService domainEnum, int flags, int ifIndex, String domain) {
+                        subscriber.onNext(domain);
+                    }
+
+                    @Override
+                    public void domainLost(DNSSDService domainEnum, int flags, int ifIndex, String domain) {
+
+                    }
+
+                    @Override
+                    public void operationFailed(DNSSDService service, int errorCode) {
+                        subscriber.onError(new RuntimeException("DNSSD browse error: " + errorCode));
+                    }
+                });
+            }
+        }.getObservable(INSTANCE.mContext);
+    }
+
     private static Map<String, String> parseTXTRecords(TXTRecord record) {
         Map<String, String> result = new ArrayMap<>();
         for (int i = 0; i < record.size(); i++) {
@@ -150,7 +176,7 @@ public final class RxDNSSD {
         return result;
     }
 
-    private abstract static class RxDNSSDService {
+    private abstract static class RxDNSSDService<T> {
 
         private DNSSDService mService;
 
@@ -160,14 +186,14 @@ public final class RxDNSSD {
             ctx.getSystemService(Context.NSD_SERVICE);
         }
 
-        protected abstract DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException;
+        protected abstract DNSSDService getService(Subscriber<? super T> subscriber) throws DNSSDException;
 
-        protected Observable<BonjourService> getObservable(final Context context){
-            return Observable.create(new Observable.OnSubscribe<BonjourService>() {
+        protected Observable<T> getObservable(final Context context){
+            return Observable.create(new Observable.OnSubscribe<T>() {
                 @Override
-                public void call(Subscriber<? super BonjourService> subscriber) {
+                public void call(Subscriber<? super T> subscriber) {
+                    startDaemonProcess(context);
                     try {
-                        startDaemonProcess(context);
                         mService = getService(subscriber);
                     } catch (DNSSDException e) {
                         e.printStackTrace();
@@ -175,7 +201,7 @@ public final class RxDNSSD {
                     }
                 }
             }).doOnUnsubscribe(() -> {
-                if (mService != null){
+                if (mService != null) {
                     mService.stop();
                     mService = null;
                 }
