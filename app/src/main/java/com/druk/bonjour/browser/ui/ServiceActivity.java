@@ -136,7 +136,7 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
         mResolveSubscription = RxDNSSD.queryRecords(RxDNSSD.resolve(Observable.just(mService)))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
-                    if (bonjourService.isDeleted) {
+                    if ((bonjourService.flags & BonjourService.DELETED_MASK) == BonjourService.DELETED_MASK) {
                         return;
                     }
                     updateUI(bonjourService, true);

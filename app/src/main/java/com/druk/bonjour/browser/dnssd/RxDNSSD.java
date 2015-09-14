@@ -45,7 +45,7 @@ public final class RxDNSSD {
 
     public static Observable<BonjourService> resolve(Observable<BonjourService> observable) {
         return observable.flatMap(bs -> {
-            if (bs.isDeleted) {
+            if ((bs.flags & BonjourService.DELETED_MASK) == BonjourService.DELETED_MASK) {
                 return Observable.just(bs);
             }
             return new RxDNSSDService<BonjourService> (){
@@ -80,7 +80,7 @@ public final class RxDNSSD {
 
     public static Observable<BonjourService> queryRecords(Observable<BonjourService> observable) {
         return observable.flatMap(bs -> {
-            if (bs.isDeleted) {
+            if ((bs.flags & BonjourService.DELETED_MASK) == BonjourService.DELETED_MASK) {
                 return Observable.just(bs);
             }
             return new RxDNSSDService<BonjourService> () {
@@ -122,20 +122,25 @@ public final class RxDNSSD {
                 return DNSSD.browse(0, DNSSD.ALL_INTERFACES, regType, domain, new BrowseListener() {
                     @Override
                     public void serviceFound(DNSSDService browser, int flags, int ifIndex, String serviceName, String regType, String domain) {
-                        BonjourService service = new BonjourService(flags, ifIndex, serviceName, regType, domain);
-                        subscriber.onNext(service);
+                        if (!subscriber.isUnsubscribed()) {
+                            BonjourService service = new BonjourService(flags, ifIndex, serviceName, regType, domain);
+                            subscriber.onNext(service);
+                        }
                     }
 
                     @Override
                     public void serviceLost(DNSSDService browser, int flags, int ifIndex, String serviceName, String regType, String domain) {
-                        BonjourService service = new BonjourService(flags, ifIndex, serviceName, regType, domain);
-                        service.isDeleted = true;
-                        subscriber.onNext(service);
+                        if (!subscriber.isUnsubscribed()) {
+                            BonjourService service = new BonjourService(flags | BonjourService.DELETED_MASK, ifIndex, serviceName, regType, domain);
+                            subscriber.onNext(service);
+                        }
                     }
 
                     @Override
                     public void operationFailed(DNSSDService service, int errorCode) {
-                        subscriber.onError(new RuntimeException("DNSSD browse error: " + errorCode));
+                        if (!subscriber.isUnsubscribed()) {
+                            subscriber.onError(new RuntimeException("DNSSD browse error: " + errorCode));
+                        }
                     }
                 });
             }
@@ -192,12 +197,14 @@ public final class RxDNSSD {
             return Observable.create(new Observable.OnSubscribe<T>() {
                 @Override
                 public void call(Subscriber<? super T> subscriber) {
-                    startDaemonProcess(context);
-                    try {
-                        mService = getService(subscriber);
-                    } catch (DNSSDException e) {
-                        e.printStackTrace();
-                        subscriber.onError(e);
+                    if (!subscriber.isUnsubscribed()) {
+                        startDaemonProcess(context);
+                        try {
+                            mService = getService(subscriber);
+                        } catch (DNSSDException e) {
+                            e.printStackTrace();
+                            subscriber.onError(e);
+                        }
                     }
                 }
             }).doOnUnsubscribe(() -> {

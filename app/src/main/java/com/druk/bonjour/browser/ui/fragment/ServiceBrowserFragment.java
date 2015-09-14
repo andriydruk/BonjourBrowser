@@ -105,7 +105,7 @@ public class ServiceBrowserFragment extends Fragment {
         mSubscription = RxDNSSD.queryRecords(RxDNSSD.resolve(RxDNSSD.browse(mReqType, mDomain)))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
-                    if (!bonjourService.isDeleted) {
+                    if ((bonjourService.flags & BonjourService.DELETED_MASK) != BonjourService.DELETED_MASK) {
                         mAdapter.add(bonjourService);
                     } else {
                         mAdapter.remove(bonjourService);

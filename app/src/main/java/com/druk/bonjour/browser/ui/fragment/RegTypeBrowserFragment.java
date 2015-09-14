@@ -93,7 +93,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     }
 
     private final Action1<BonjourService> reqTypeAction = service -> {
-        if (service.isDeleted) {
+        if ((service.flags & BonjourService.DELETED_MASK) == BonjourService.DELETED_MASK){
             //Ignore this call
             return;
         }
@@ -126,7 +126,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         if (domainService != null) {
             Integer serviceCount = (domainService.dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) ?
                     Integer.parseInt(domainService.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) : 0;
-            if (service.isDeleted) {
+            if ((service.flags & BonjourService.DELETED_MASK) == BonjourService.DELETED_MASK){
                 serviceCount--;
             } else {
                 serviceCount++;
