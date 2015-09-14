@@ -17,15 +17,19 @@ package com.druk.bonjour.browser.ui.fragment;
 
 import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.Config;
+import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.databinding.RegTypeItemBinding;
+import com.druk.bonjour.browser.databinding.ServiceItemBinding;
 import com.druk.bonjour.browser.dnssd.BonjourService;
 import com.druk.bonjour.browser.dnssd.RxDNSSD;
 import com.druk.bonjour.browser.ui.RegTypeActivity;
 import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.ViewGroup;
 
 import java.util.HashMap;
 
@@ -52,28 +56,15 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mAdapter = new ServiceAdapter(getActivity()) {
-            @Override
-            public void onBindViewHolder(ViewHolder viewHolder, int i) {
-                final BonjourService service = getItem(i);
-                String regType = service.serviceName + "." + service.getRegTypeParts()[0] + ".";
-                String regTypeDescription = BonjourApplication.getRegTypeDescription(viewHolder.itemView.getContext(), regType);
-                if (regTypeDescription != null) {
-                    viewHolder.domain.setText(regType + " (" + regTypeDescription + ")");
-                } else {
-                    viewHolder.domain.setText(regType);
-                }
-                viewHolder.serviceCount.setText(service.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT) + " services");
-
-                viewHolder.itemView.setOnClickListener(v -> {
-                    Context context = v.getContext();
-                    String[] regTypeParts = service.getRegTypeParts();
-                    String reqType = service.serviceName + "." + regTypeParts[0] + ".";
-                    String domain = regTypeParts[1] + ".";
-                    RegTypeActivity.startActivity(context, reqType, domain);
-                });
-            }
-        };
+        mAdapter = new ServiceAdapter<>(getContext(), ViewHolder::new, v -> {
+            int position = mRecyclerView.getLayoutManager().getPosition(v);
+            BonjourService service = mAdapter.getItem(position);
+            String[] regTypeParts = service.getRegTypeParts();
+            String reqType = service.serviceName + "." + regTypeParts[0] + ".";
+            String domain = regTypeParts[1] + ".";
+            RegTypeActivity.startActivity(v.getContext(), reqType, domain);
+        });
+        mAdapter.setHasStableIds(false);
     }
 
     @Override
@@ -94,9 +85,11 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 
     private final Action1<BonjourService> reqTypeAction = service -> {
         if ((service.flags & BonjourService.DELETED_MASK) == BonjourService.DELETED_MASK){
+            Log.d("TAG", "Lose reg type: " + service);
             //Ignore this call
             return;
         }
+        Log.d("TAG", "Found reg type: " + service);
         String[] regTypeParts = service.getRegTypeParts();
         String protocolSuffix = regTypeParts[0];
         String serviceDomain = regTypeParts[1];
@@ -127,8 +120,10 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
             Integer serviceCount = (domainService.dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) ?
                     Integer.parseInt(domainService.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) : 0;
             if ((service.flags & BonjourService.DELETED_MASK) == BonjourService.DELETED_MASK){
+                Log.d("TAG", "Lst service: " + service);
                 serviceCount--;
             } else {
+                Log.d("TAG", "Found service: " + service);
                 serviceCount++;
             }
             domainService.dnsRecords.put(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT, serviceCount.toString());
@@ -145,5 +140,22 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 
     public static String createKey(String domain, String regType, String serviceName) {
         return domain + regType + serviceName;
+    }
+
+    public static class ViewHolder extends ServiceAdapter.ViewHolder{
+
+        private final RegTypeItemBinding mBinding;
+
+        public ViewHolder(ViewGroup parent) {
+            super(LayoutInflater.from(parent.getContext()).inflate(R.layout.reg_type_item, parent, false));
+            mBinding = RegTypeItemBinding.bind(itemView);
+        }
+
+        @Override
+        public void setService(BonjourService service) {
+            String regType = service.serviceName + "." + service.getRegTypeParts()[0] + ".";
+            mBinding.setService(service);
+            mBinding.setDescription(BonjourApplication.getRegTypeDescription(itemView.getContext(), regType));
+        }
     }
 }

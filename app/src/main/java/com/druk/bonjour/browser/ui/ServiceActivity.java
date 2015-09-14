@@ -16,90 +16,59 @@
 package com.druk.bonjour.browser.ui;
 
 import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.databinding.ActivityServiceBinding;
 import com.druk.bonjour.browser.dnssd.BonjourService;
 import com.druk.bonjour.browser.dnssd.RxDNSSD;
 import com.druk.bonjour.browser.ui.adapter.TxtRecordsAdapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
-import android.widget.TextView;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
 
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 public class ServiceActivity extends AppCompatActivity implements OnClickListener {
 
     private static final String SERVICE = "mService";
-    private static final String TIME_FORMAT = "HH:mm:ss";
-
-    private TextView serviceName;
-    private TextView domain;
-    private TextView regType;
-    private TextView lastUpdate;
 
     private TxtRecordsAdapter mAdapter;
 
     private BonjourService mService;
     private Subscription mResolveSubscription;
 
+    private ActivityServiceBinding mBinding;
+
     public static void startActivity(Context context, BonjourService service) {
         context.startActivity(new Intent(context, ServiceActivity.class).
                 putExtra(ServiceActivity.SERVICE, service));
     }
 
-    private static String getTime(long timestamp) {
-        Calendar cal = Calendar.getInstance();
-        TimeZone tz = cal.getTimeZone();
-
-        SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
-        sdf.setTimeZone(tz);
-
-        return sdf.format(new Date(timestamp));
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_service);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_service);
+
+        setSupportActionBar(mBinding.toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-
         mService = getIntent().getParcelableExtra(SERVICE);
         mAdapter = new TxtRecordsAdapter(this, new ArrayMap<>());
-        serviceName = (TextView) findViewById(R.id.service_name);
-        domain = (TextView) findViewById(R.id.domain);
-        regType = (TextView) findViewById(R.id.reg_type);
-        lastUpdate = (TextView) findViewById(R.id.last_timestamp);
-        RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler_view);
-        recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));
-        recyclerView.setAdapter(mAdapter);
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(this);
+        mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
+        mBinding.recyclerView.setAdapter(mAdapter);
+        mBinding.fab.setOnClickListener(this);
 
         updateUI(mService, false);
     }
@@ -119,15 +88,12 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
     }
 
     private void updateUI(BonjourService service, boolean withSnakeBar) {
-        serviceName.setText(service.serviceName);
-        domain.setText(getString(R.string.domain, service.domain));
-        regType.setText(getString(R.string.reg_type, service.regType));
-        lastUpdate.setText(getString(R.string.last_update, getTime(service.timestamp)));
+        mBinding.setService(service);
         mAdapter.swap(service.dnsRecords);
         mAdapter.notifyDataSetChanged();
 
         if (withSnakeBar) {
-            Snackbar.make(serviceName, getString(R.string.service_was_resolved), Snackbar.LENGTH_LONG).show();
+            Snackbar.make(mBinding.serviceName, getString(R.string.service_was_resolved), Snackbar.LENGTH_LONG).show();
         }
     }
 

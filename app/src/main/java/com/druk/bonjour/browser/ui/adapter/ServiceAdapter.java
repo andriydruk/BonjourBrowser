@@ -24,27 +24,36 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
 
-public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> {
+public class ServiceAdapter<VH extends ServiceAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
 
     private final int mBackground;
     private final ArrayList<BonjourService> services = new ArrayList<>();
+    private final ViewHolderCreator<VH> mViewHolderCreator;
+    private final View.OnClickListener mListener;
 
-    public ServiceAdapter(Context context) {
+    public ServiceAdapter(Context context, ViewHolderCreator<VH> viewHolderCreator, View.OnClickListener listener) {
         TypedValue mTypedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
         mBackground = mTypedValue.resourceId;
+        mViewHolderCreator = viewHolderCreator;
+        mListener = listener;
     }
 
     @Override
-    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.two_text_item, viewGroup, false);
-        view.setBackgroundResource(mBackground);
-        return new ViewHolder(view);
+    public VH onCreateViewHolder(ViewGroup parent, int viewType) {
+        VH viewHolder = mViewHolderCreator.bind(parent);
+        viewHolder.itemView.setBackgroundResource(mBackground);
+        viewHolder.itemView.setOnClickListener(mListener);
+        return viewHolder;
+    }
+
+    @Override
+    public void onBindViewHolder(VH holder, int position) {
+        holder.setService(getItem(position));
     }
 
     @Override
@@ -63,23 +72,25 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
     public void add(BonjourService service) {
         this.services.remove(service);
         this.services.add(service);
-        Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
+        //Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
     }
 
     public void remove(BonjourService bonjourService) {
         if (this.services.remove(bonjourService)) {
-            Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
+            //Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
         }
     }
 
-    public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TextView domain;
-        public TextView serviceCount;
+    public static abstract class ViewHolder extends RecyclerView.ViewHolder{
 
         public ViewHolder(View itemView) {
             super(itemView);
-            domain = (TextView) itemView.findViewById(R.id.text1);
-            serviceCount = (TextView) itemView.findViewById(R.id.text2);
         }
+
+        abstract public void setService(BonjourService service);
+    }
+
+    public interface ViewHolderCreator<VH>{
+        VH bind(ViewGroup parent);
     }
 }

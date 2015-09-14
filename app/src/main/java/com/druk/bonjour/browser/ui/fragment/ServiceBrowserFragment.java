@@ -16,6 +16,7 @@
 package com.druk.bonjour.browser.ui.fragment;
 
 import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.databinding.ServiceItemBinding;
 import com.druk.bonjour.browser.dnssd.BonjourService;
 import com.druk.bonjour.browser.dnssd.RxDNSSD;
 import com.druk.bonjour.browser.ui.ServiceActivity;
@@ -24,6 +25,7 @@ import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -33,7 +35,6 @@ import android.view.ViewGroup;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 public class ServiceBrowserFragment extends Fragment {
 
@@ -44,6 +45,8 @@ public class ServiceBrowserFragment extends Fragment {
     protected ServiceAdapter mAdapter;
     protected String mReqType;
     protected String mDomain;
+
+    protected RecyclerView mRecyclerView;
 
     public static Fragment newInstance(String domain, String regType) {
         return fillArguments(new ServiceBrowserFragment(), domain, regType);
@@ -64,29 +67,24 @@ public class ServiceBrowserFragment extends Fragment {
             mReqType = getArguments().getString(KEY_REG_TYPE);
             mDomain = getArguments().getString(KEY_DOMAIN);
         }
-        mAdapter = new ServiceAdapter(getActivity()) {
-            @Override
-            public void onBindViewHolder(ViewHolder viewHolder, int i) {
-                final BonjourService service = getItem(i);
-                viewHolder.domain.setText(service.serviceName);
-                if (service.timestamp > 0) {
-                    viewHolder.serviceCount.setText(service.dnsRecords.get(BonjourService.DNS_RECORD_KEY_ADDRESS));
-                } else {
-                    viewHolder.serviceCount.setText(R.string.not_resolved_yet);
-                }
-                viewHolder.itemView.setOnClickListener(v -> ServiceActivity.startActivity(v.getContext(), service));
+        mAdapter = new ServiceAdapter<>(getContext(), ViewHolder::new, v -> {
+            if (mRecyclerView != null) {
+                int position = mRecyclerView.getLayoutManager().getPosition(v);
+                ServiceActivity.startActivity(v.getContext(), mAdapter.getItem(position));
             }
-        };
+        });
+        mAdapter.setHasStableIds(false);
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        RecyclerView recyclerView = (RecyclerView) inflater.inflate(
+        mRecyclerView = (RecyclerView) inflater.inflate(
                 R.layout.fragment_service_browser, container, false);
-        recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));
-        recyclerView.setAdapter(mAdapter);
-        return recyclerView;
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mRecyclerView.getContext()));
+        mRecyclerView.setAdapter(mAdapter);
+        return mRecyclerView;
     }
 
     @Override
@@ -99,6 +97,8 @@ public class ServiceBrowserFragment extends Fragment {
     public void onPause() {
         super.onPause();
         stopDiscovery();
+        mAdapter.clear();
+        mAdapter.notifyDataSetChanged();
     }
 
     protected void startDiscovery() {
@@ -119,6 +119,21 @@ public class ServiceBrowserFragment extends Fragment {
     protected void stopDiscovery() {
         if (mSubscription != null) {
             mSubscription.unsubscribe();
+        }
+    }
+
+    public static class ViewHolder extends ServiceAdapter.ViewHolder{
+
+        private final ServiceItemBinding mBinding;
+
+        public ViewHolder(ViewGroup parent) {
+            super(LayoutInflater.from(parent.getContext()).inflate(R.layout.service_item, parent, false));
+            mBinding = ServiceItemBinding.bind(itemView);
+        }
+
+        @Override
+        public void setService(BonjourService service) {
+            mBinding.setService(service);
         }
     }
 }
