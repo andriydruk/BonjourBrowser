@@ -99,10 +99,11 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
 
     @Override
     public void onClick(View v) {
+        v.animate().rotationBy(180).start();
         mResolveSubscription = RxDNSSD.queryRecords(RxDNSSD.resolve(Observable.just(mService)))
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
-                    if ((bonjourService.flags & BonjourService.DELETED_MASK) == BonjourService.DELETED_MASK) {
+                    if ((bonjourService.flags & BonjourService.DELETED) == BonjourService.DELETED) {
                         return;
                     }
                     updateUI(bonjourService, true);

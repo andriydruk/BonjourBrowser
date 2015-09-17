@@ -26,7 +26,7 @@ public class BonjourService implements Parcelable {
 
     public static final String DNS_RECORD_KEY_SERVICE_COUNT = "dns_record_key_service_count";
     public static final String DNS_RECORD_KEY_ADDRESS = "IP address";
-    public static final int DELETED_MASK = 4;
+    public static final int DELETED = ( 1 << 8 );
 
     private static final String REG_TYPE_SEPARATOR = Pattern.quote(".");
 

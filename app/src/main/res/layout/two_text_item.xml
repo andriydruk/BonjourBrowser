@@ -15,11 +15,7 @@
   ~ limitations under the License.
 -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
-    <data>
-        <import type="java.util.Map"/>
-        <import type="com.druk.bonjour.browser.dnssd.BonjourService"/>
-        <variable name="service" type="com.druk.bonjour.browser.dnssd.BonjourService"/>
-    </data>
+    <data/>
     <TwoLineListItem
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,8 +31,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"
-            android:text="@{service.serviceName}"/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
 
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/text2"
@@ -45,8 +40,7 @@
             android:layout_below="@id/text1"
             android:layout_alignStart="@id/text1"
             android:layout_alignLeft="@id/text1"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"
-            android:text="@{service.dnsRecords[BonjourService.DNS_RECORD_KEY_ADDRESS] ?? @string/not_resolved_yet}"/>
+            android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
     </TwoLineListItem>
 </layout>

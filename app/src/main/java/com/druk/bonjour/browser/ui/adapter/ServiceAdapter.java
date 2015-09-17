@@ -16,6 +16,7 @@
 package com.druk.bonjour.browser.ui.adapter;
 
 import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.databinding.TwoTextItemBinding;
 import com.druk.bonjour.browser.dnssd.BonjourService;
 
 import android.content.Context;
@@ -28,32 +29,22 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.Collections;
 
-public class ServiceAdapter<VH extends ServiceAdapter.ViewHolder> extends RecyclerView.Adapter<VH> {
+public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> {
 
     private final int mBackground;
     private final ArrayList<BonjourService> services = new ArrayList<>();
-    private final ViewHolderCreator<VH> mViewHolderCreator;
-    private final View.OnClickListener mListener;
 
-    public ServiceAdapter(Context context, ViewHolderCreator<VH> viewHolderCreator, View.OnClickListener listener) {
+    public ServiceAdapter(Context context) {
         TypedValue mTypedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
         mBackground = mTypedValue.resourceId;
-        mViewHolderCreator = viewHolderCreator;
-        mListener = listener;
     }
 
     @Override
-    public VH onCreateViewHolder(ViewGroup parent, int viewType) {
-        VH viewHolder = mViewHolderCreator.bind(parent);
-        viewHolder.itemView.setBackgroundResource(mBackground);
-        viewHolder.itemView.setOnClickListener(mListener);
-        return viewHolder;
-    }
-
-    @Override
-    public void onBindViewHolder(VH holder, int position) {
-        holder.setService(getItem(position));
+    public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.two_text_item, viewGroup, false);
+        view.setBackgroundResource(mBackground);
+        return new ViewHolder(view);
     }
 
     @Override
@@ -72,25 +63,21 @@ public class ServiceAdapter<VH extends ServiceAdapter.ViewHolder> extends Recycl
     public void add(BonjourService service) {
         this.services.remove(service);
         this.services.add(service);
-        //Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
+        Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
     }
 
     public void remove(BonjourService bonjourService) {
         if (this.services.remove(bonjourService)) {
-            //Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
+            Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
         }
     }
 
-    public static abstract class ViewHolder extends RecyclerView.ViewHolder{
+    public static class ViewHolder extends RecyclerView.ViewHolder {
+        public TwoTextItemBinding binding;
 
         public ViewHolder(View itemView) {
             super(itemView);
+            binding = TwoTextItemBinding.bind(itemView);
         }
-
-        abstract public void setService(BonjourService service);
-    }
-
-    public interface ViewHolderCreator<VH>{
-        VH bind(ViewGroup parent);
     }
 }

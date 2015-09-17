@@ -16,6 +16,7 @@
 package com.druk.bonjour.test;
 
 import com.druk.bonjour.browser.Config;
+import com.druk.bonjour.browser.dnssd.BonjourService;
 import com.druk.bonjour.browser.dnssd.RxDNSSD;
 
 import android.test.InstrumentationTestCase;
@@ -46,7 +47,7 @@ public class RxDNSSDTest extends InstrumentationTestCase {
         HashMap<String, Subscription> subscriptions = new HashMap<>();
         Subscription mainSubscription = RxDNSSD.browse(Config.SERVICES_DOMAIN, "")
                 .subscribe(service -> {
-                    if (service.isDeleted) {
+                    if ((service.flags & BonjourService.DELETED) == BonjourService.DELETED) {
                         return;
                     }
                     String[] regTypeParts = service.getRegTypeParts();
@@ -57,7 +58,7 @@ public class RxDNSSDTest extends InstrumentationTestCase {
                         if (!subscriptions.containsKey(key)) {
                             subscriptions.put(key, RxDNSSD.queryRecords(RxDNSSD.resolve(RxDNSSD.browse(key, serviceDomain)))
                                     .subscribe(service2 -> {
-                                        if (service2.isDeleted) {
+                                        if ((service.flags & BonjourService.DELETED) == BonjourService.DELETED) {
                                             Log.d(TAG, "Lost " + service2.toString());
                                         } else {
                                             Log.d(TAG, "Found " + service2.toString() + " with port " + service2.port);
