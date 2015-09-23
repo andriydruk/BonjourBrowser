@@ -18,33 +18,17 @@ package com.druk.bonjour.browser.ui;
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.databinding.ActivityServiceBinding;
 import com.druk.bonjour.browser.dnssd.BonjourService;
-import com.druk.bonjour.browser.dnssd.RxDNSSD;
-import com.druk.bonjour.browser.ui.adapter.TxtRecordsAdapter;
+import com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment;
 
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.support.design.widget.Snackbar;
-import android.support.v4.util.ArrayMap;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.LinearLayoutManager;
-import android.util.Log;
-import android.view.View;
-import android.view.View.OnClickListener;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-
-public class ServiceActivity extends AppCompatActivity implements OnClickListener {
+public class ServiceActivity extends AppCompatActivity implements ServiceDetailFragment.ServiceDetailListener {
 
     private static final String SERVICE = "mService";
-
-    private TxtRecordsAdapter mAdapter;
-
-    private BonjourService mService;
-    private Subscription mResolveSubscription;
 
     private ActivityServiceBinding mBinding;
 
@@ -64,13 +48,18 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        mService = getIntent().getParcelableExtra(SERVICE);
-        mAdapter = new TxtRecordsAdapter(this, new ArrayMap<>());
-        mBinding.recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        mBinding.recyclerView.setAdapter(mAdapter);
-        mBinding.fab.setOnClickListener(this);
+        ServiceDetailFragment serviceDetailFragment;
 
-        updateUI(mService, false);
+        if (savedInstanceState == null){
+            BonjourService service = getIntent().getParcelableExtra(SERVICE);
+            serviceDetailFragment = ServiceDetailFragment.newInstance(service);
+            getSupportFragmentManager().beginTransaction().replace(R.id.content, serviceDetailFragment).commit();
+        }
+        else {
+            serviceDetailFragment = (ServiceDetailFragment) getSupportFragmentManager().findFragmentById(R.id.content);
+        }
+
+        mBinding.fab.setOnClickListener(serviceDetailFragment);
     }
 
     @Override
@@ -80,35 +69,7 @@ public class ServiceActivity extends AppCompatActivity implements OnClickListene
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
-        if (mResolveSubscription != null) {
-            mResolveSubscription.unsubscribe();
-        }
-    }
-
-    private void updateUI(BonjourService service, boolean withSnakeBar) {
+    public void onServiceUpdated(BonjourService service) {
         mBinding.setService(service);
-        mAdapter.swap(service.dnsRecords);
-        mAdapter.notifyDataSetChanged();
-
-        if (withSnakeBar) {
-            Snackbar.make(mBinding.serviceName, getString(R.string.service_was_resolved), Snackbar.LENGTH_LONG).show();
-        }
-    }
-
-    @Override
-    public void onClick(View v) {
-        v.animate().rotationBy(180).start();
-        mResolveSubscription = RxDNSSD.queryRecords(RxDNSSD.resolve(Observable.just(mService)))
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bonjourService -> {
-                    if ((bonjourService.flags & BonjourService.DELETED) == BonjourService.DELETED) {
-                        return;
-                    }
-                    updateUI(bonjourService, true);
-                }, throwable -> {
-                    Log.e("DNSSD", "Error: ", throwable);
-                });
     }
 }

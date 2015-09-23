@@ -17,7 +17,9 @@ package com.druk.bonjour.browser.ui;
 
 import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.dnssd.BonjourService;
 import com.druk.bonjour.browser.dnssd.RxDNSSD;
+import com.druk.bonjour.browser.ui.fragment.RegTypeBrowserFragment;
 import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
 
 import android.content.Context;
@@ -26,7 +28,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 
-public class RegTypeActivity extends AppCompatActivity {
+public class RegTypeActivity extends AppCompatActivity implements ServiceBrowserFragment.ServiceListener {
 
     private static final String KEY_REG_TYPE = "com.druk.bonjour.browser.ui.RegTypeActivity.KEY_DOMAIN";
     private static final String KEY_DOMAIN = "com.druk.bonjour.browser.ui.RegTypeActivity.KEY_REG_TYPE";
@@ -69,5 +71,10 @@ public class RegTypeActivity extends AppCompatActivity {
     public boolean onSupportNavigateUp() {
         onBackPressed();
         return true;
+    }
+
+    @Override
+    public void onServiceWasSelected(String domain, String regType, BonjourService service) {
+        ServiceActivity.startActivity(this, service);
     }
 }

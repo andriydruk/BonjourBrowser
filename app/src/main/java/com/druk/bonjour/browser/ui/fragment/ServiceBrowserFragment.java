@@ -22,7 +22,9 @@ import com.druk.bonjour.browser.dnssd.RxDNSSD;
 import com.druk.bonjour.browser.ui.ServiceActivity;
 import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
 
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Nullable;
@@ -42,11 +44,23 @@ public class ServiceBrowserFragment extends Fragment {
 
     private static final String KEY_REG_TYPE = "reg_type";
     private static final String KEY_DOMAIN = "domain";
+    private static final String KEY_SELECTED_POSITION = "selected_position";
 
     protected Subscription mSubscription;
     protected ServiceAdapter mAdapter;
     protected String mReqType;
     protected String mDomain;
+    protected RecyclerView mRecyclerView;
+
+    protected View.OnClickListener mListener = v -> {
+        int position = mRecyclerView.getLayoutManager().getPosition(v);
+        mAdapter.setSelectedItemId(mAdapter.getItemId(position));
+        mAdapter.notifyDataSetChanged();
+        if (isAdded()){
+            BonjourService service = mAdapter.getItem(position);
+            ((ServiceListener) getActivity()).onServiceWasSelected(mDomain, mReqType, service);
+        }
+    };
 
     public static Fragment newInstance(String domain, String regType) {
         return fillArguments(new ServiceBrowserFragment(), domain, regType);
@@ -61,6 +75,15 @@ public class ServiceBrowserFragment extends Fragment {
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+
+        if (!(context instanceof ServiceListener)) {
+            throw new IllegalArgumentException("Fragment context should implement ServiceListener interface");
+        }
+    }
+
+    @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
@@ -70,14 +93,15 @@ public class ServiceBrowserFragment extends Fragment {
         mAdapter = new ServiceAdapter(getActivity()) {
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, int i) {
-                final BonjourService service = getItem(i);
+                BonjourService service = getItem(i);
                 viewHolder.binding.text1.setText(service.serviceName);
                 if (service.timestamp > 0) {
                     viewHolder.binding.text2.setText(service.dnsRecords.get(BonjourService.DNS_RECORD_KEY_ADDRESS));
                 } else {
                     viewHolder.binding.text2.setText(R.string.not_resolved_yet);
                 }
-                viewHolder.itemView.setOnClickListener(v -> ServiceActivity.startActivity(v.getContext(), service));
+                viewHolder.itemView.setOnClickListener(mListener);
+                viewHolder.itemView.setBackgroundResource(getBackground(i));
             }
         };
     }
@@ -85,12 +109,14 @@ public class ServiceBrowserFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        RecyclerView recyclerView = (RecyclerView) inflater.inflate(
-                R.layout.fragment_service_browser, container, false);
-        recyclerView.setLayoutManager(new LinearLayoutManager(recyclerView.getContext()));
-        recyclerView.setHasFixedSize(true);
-        recyclerView.setAdapter(mAdapter);
-        return recyclerView;
+        mRecyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_service_browser, container, false);
+        mRecyclerView.setLayoutManager(new LinearLayoutManager(mRecyclerView.getContext()));
+        mRecyclerView.setHasFixedSize(true);
+        mRecyclerView.setAdapter(mAdapter);
+        if (savedInstanceState != null){
+            mAdapter.setSelectedItemId(savedInstanceState.getLong(KEY_SELECTED_POSITION, -1L));
+        }
+        return mRecyclerView;
     }
 
     @Override
@@ -103,6 +129,12 @@ public class ServiceBrowserFragment extends Fragment {
     public void onPause() {
         super.onPause();
         stopDiscovery();
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putLong(KEY_SELECTED_POSITION, mAdapter.getSelectedItemId());
     }
 
     protected void startDiscovery() {
@@ -126,5 +158,9 @@ public class ServiceBrowserFragment extends Fragment {
         if (mSubscription != null) {
             mSubscription.unsubscribe();
         }
+    }
+
+    public interface ServiceListener{
+        void onServiceWasSelected(String domain, String regType, BonjourService service);
     }
 }

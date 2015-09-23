@@ -36,6 +36,7 @@ dependencies {
     compile "com.android.support:appcompat-v7:${supportLibrary}"
     compile "com.android.support:design:${supportLibrary}"
     compile "com.android.support:recyclerview-v7:${supportLibrary}"
+    compile "com.android.support:cardview-v7:${supportLibrary}"
     compile "com.android.support:support-annotations:${supportLibrary}"
     compile 'io.reactivex:rxandroid:1.0.1'
 }

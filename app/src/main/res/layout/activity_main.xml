@@ -14,31 +14,40 @@
   v See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<android.support.design.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/main_content"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent">
-
-    <android.support.design.widget.AppBarLayout
-        android:id="@+id/appbar"
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:bind="http://schemas.android.com/apk/res-auto">
+    <data>
+        <variable name="domain" type="java.lang.String"/>
+        <variable name="regType" type="java.lang.String"/>
+        <variable name="serviceName" type="java.lang.String"/>
+    </data>
+    <android.support.design.widget.CoordinatorLayout
+        android:id="@+id/main_content"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+        android:layout_height="match_parent">
 
-        <android.support.v7.widget.Toolbar
-            android:id="@+id/toolbar"
+        <android.support.design.widget.AppBarLayout
+            android:id="@+id/appbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:background="?attr/colorPrimary"
-            app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
+            android:layout_height="wrap_content"
+            android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-    </android.support.design.widget.AppBarLayout>
+            <android.support.v7.widget.Toolbar
+                android:id="@+id/toolbar"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:background="?attr/colorPrimary"
+                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
+                app:title='@{domain + ((regType != null) ? "   >   " + regType + ((serviceName != null) ? "   >   " + serviceName : "") : "")}'/>
 
-    <FrameLayout
-        android:id="@+id/fragment_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+        </android.support.design.widget.AppBarLayout>
 
-</android.support.design.widget.CoordinatorLayout>
+        <FrameLayout
+                android:id="@+id/first_panel"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="?attr/actionBarSize"/>
+
+    </android.support.design.widget.CoordinatorLayout>
+</layout>

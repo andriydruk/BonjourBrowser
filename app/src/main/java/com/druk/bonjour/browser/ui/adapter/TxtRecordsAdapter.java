@@ -61,7 +61,9 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
             ClipData clip = ClipData.newPlainText(getKey(position), getValue(position));
             clipboard.setPrimaryClip(clip);
 
-            Snackbar.make(v, context.getResources().getString(R.string.copy_toast_message, getKey(position)), Snackbar.LENGTH_LONG).show();
+            Snackbar snackbar = Snackbar.make(v, context.getResources().getString(R.string.copy_toast_message, getKey(position)), Snackbar.LENGTH_LONG);
+            snackbar.getView().setBackgroundResource(R.color.accent);
+            snackbar.show();
         });
     }
 

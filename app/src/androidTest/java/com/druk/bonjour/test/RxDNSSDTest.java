@@ -58,7 +58,7 @@ public class RxDNSSDTest extends InstrumentationTestCase {
                         if (!subscriptions.containsKey(key)) {
                             subscriptions.put(key, RxDNSSD.queryRecords(RxDNSSD.resolve(RxDNSSD.browse(key, serviceDomain)))
                                     .subscribe(service2 -> {
-                                        if ((service.flags & BonjourService.DELETED) == BonjourService.DELETED) {
+                                        if ((service2.flags & BonjourService.DELETED) == BonjourService.DELETED) {
                                             Log.d(TAG, "Lost " + service2.toString());
                                         } else {
                                             Log.d(TAG, "Found " + service2.toString() + " with port " + service2.port);

@@ -56,7 +56,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         mAdapter = new ServiceAdapter(getActivity()) {
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, int i) {
-                final BonjourService service = getItem(i);
+                BonjourService service = getItem(i);
                 String regType = service.serviceName + "." + service.getRegTypeParts()[0] + ".";
                 String regTypeDescription = BonjourApplication.getRegTypeDescription(viewHolder.itemView.getContext(), regType);
                 if (regTypeDescription != null) {
@@ -65,21 +65,15 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
                     viewHolder.binding.text1.setText(regType);
                 }
                 viewHolder.binding.text2.setText(service.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT) + " services");
-
-                viewHolder.itemView.setOnClickListener(v -> {
-                    Context context = v.getContext();
-                    String[] regTypeParts = service.getRegTypeParts();
-                    String reqType = service.serviceName + "." + regTypeParts[0] + ".";
-                    String domain = regTypeParts[1] + ".";
-                    RegTypeActivity.startActivity(context, reqType, domain);
-                });
+                viewHolder.itemView.setOnClickListener(mListener);
+                viewHolder.itemView.setBackgroundResource(getBackground(i));
             }
         };
     }
 
     @Override
     protected void startDiscovery() {
-        mSubscription = RxDNSSD.browse(Config.SERVICES_DOMAIN, "")
+        mSubscription = RxDNSSD.browse(Config.SERVICES_DOMAIN, "local.")
                 .subscribe(reqTypeAction, errorAction);
     }
 

@@ -83,8 +83,8 @@
             </android.support.v7.widget.Toolbar>
         </android.support.design.widget.AppBarLayout>
 
-        <android.support.v7.widget.RecyclerView
-            android:id="@+id/recycler_view"
+        <FrameLayout
+            android:id="@+id/content"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:layout_behavior="@string/appbar_scrolling_view_behavior"/>

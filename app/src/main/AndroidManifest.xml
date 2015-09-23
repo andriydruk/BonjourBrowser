@@ -21,22 +21,13 @@
 
     <application
         android:name=".BonjourApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-
         <activity
             android:name=".ui.RegTypeActivity"
             android:label="@string/title_activity_bonjour_domain" >
-        </activity>
-        <activity
-            android:name=".ui.MainActivity"
-            android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
         </activity>
         <activity
             android:name=".ui.ServiceActivity"
@@ -47,8 +38,15 @@
             android:label="@string/licences"
             android:parentActivityName=".ui.MainActivity" >
         </activity>
+        <activity android:name=".ui.HTMLViewerActivity" >
+        </activity>
         <activity
-            android:name=".ui.HTMLViewerActivity">
+            android:name=".ui.MainActivity"
+            android:label="@string/app_name">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

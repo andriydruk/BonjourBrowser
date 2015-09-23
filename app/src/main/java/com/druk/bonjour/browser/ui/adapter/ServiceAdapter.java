@@ -20,6 +20,7 @@ import com.druk.bonjour.browser.databinding.TwoTextItemBinding;
 import com.druk.bonjour.browser.dnssd.BonjourService;
 
 import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -31,25 +32,34 @@ import java.util.Collections;
 
 public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> {
 
+    private final int mSelectedBackground;
     private final int mBackground;
     private final ArrayList<BonjourService> services = new ArrayList<>();
+
+    private long mSelectedItemId = -1;
 
     public ServiceAdapter(Context context) {
         TypedValue mTypedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
         mBackground = mTypedValue.resourceId;
+
+        context.getTheme().resolveAttribute(R.attr.selectedItemBackground, mTypedValue, true);
+        mSelectedBackground = mTypedValue.resourceId;
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.two_text_item, viewGroup, false);
-        view.setBackgroundResource(mBackground);
-        return new ViewHolder(view);
+        return new ViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.two_text_item, viewGroup, false));
     }
 
     @Override
     public int getItemCount() {
         return services.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return services.get(position).hashCode();
     }
 
     public BonjourService getItem(int position) {
@@ -58,6 +68,18 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
 
     public void clear() {
         this.services.clear();
+    }
+
+    public long getSelectedItemId() {
+        return mSelectedItemId;
+    }
+
+    public void setSelectedItemId(long selectedPosition) {
+        mSelectedItemId = selectedPosition;
+    }
+
+    public int getBackground(int position){
+        return (getItemId(position) == mSelectedItemId) ? mSelectedBackground : mBackground;
     }
 
     public void add(BonjourService service) {
@@ -77,7 +99,7 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
 
         public ViewHolder(View itemView) {
             super(itemView);
-            binding = TwoTextItemBinding.bind(itemView);
+            binding = DataBindingUtil.bind(itemView);
         }
     }
 }

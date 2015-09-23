@@ -35,4 +35,7 @@
     <string name="licences">Open-source licences</string>
     <string name="cannot_open_link">Cannot open link</string>
 
+    <string name="local_domain">local.</string>
+    <string name="no_service">No selected service</string>
+
 </resources>
