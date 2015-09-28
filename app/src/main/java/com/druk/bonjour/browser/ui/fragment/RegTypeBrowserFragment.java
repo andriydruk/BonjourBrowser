@@ -15,15 +15,12 @@
  */
 package com.druk.bonjour.browser.ui.fragment;
 
-import com.apple.dnssd.DNSSD;
 import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.Config;
 import com.druk.bonjour.browser.dnssd.BonjourService;
 import com.druk.bonjour.browser.dnssd.RxDNSSD;
-import com.druk.bonjour.browser.ui.RegTypeActivity;
 import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
 
-import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -129,14 +126,11 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
                 serviceCount++;
             }
             domainService.dnsRecords.put(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT, serviceCount.toString());
-
-            if ((service.flags & DNSSD.MORE_COMING) != DNSSD.MORE_COMING){
-                mAdapter.clear();
-                Observable.from(mServices.values())
-                        .filter(bonjourService -> bonjourService.dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)
-                                && Integer.parseInt(bonjourService.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) > 0)
-                        .subscribe(mAdapter::add, throwable -> {/* empty */}, mAdapter::notifyDataSetChanged);
-            }
+            mAdapter.clear();
+            Observable.from(mServices.values())
+                .filter(bonjourService -> bonjourService.dnsRecords.containsKey(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)
+                        && Integer.parseInt(bonjourService.dnsRecords.get(BonjourService.DNS_RECORD_KEY_SERVICE_COUNT)) > 0)
+                .subscribe(mAdapter::add, throwable -> {/* empty */}, mAdapter::notifyDataSetChanged);
         } else {
             Log.w(TAG, "Service from unknown service type " + key);
         }

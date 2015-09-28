@@ -15,18 +15,13 @@
  */
 package com.druk.bonjour.browser.ui.fragment;
 
-import com.apple.dnssd.DNSSD;
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.dnssd.BonjourService;
 import com.druk.bonjour.browser.dnssd.RxDNSSD;
-import com.druk.bonjour.browser.ui.ServiceActivity;
 import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
 
 import android.content.Context;
-import android.content.Intent;
-import android.graphics.Color;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -38,7 +33,6 @@ import android.view.ViewGroup;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 public class ServiceBrowserFragment extends Fragment {
 
@@ -146,9 +140,7 @@ public class ServiceBrowserFragment extends Fragment {
                     } else {
                         mAdapter.remove(bonjourService);
                     }
-                    if ((bonjourService.flags & DNSSD.MORE_COMING) != DNSSD.MORE_COMING) {
-                        mAdapter.notifyDataSetChanged();
-                    }
+                    mAdapter.notifyDataSetChanged();
                 }, throwable -> {
                     Log.e("DNSSD", "Error: ", throwable);
                 });

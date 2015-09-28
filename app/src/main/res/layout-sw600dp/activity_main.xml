@@ -57,14 +57,14 @@
 
                         <FrameLayout
                                 android:id="@+id/first_panel"
-                                android:layout_width="320dp"
+                                android:layout_width="@dimen/panel_width"
                                 android:layout_height="match_parent"
                                 android:layout_gravity="start|left"
                                 android:background="@android:color/white"
                                 android:elevation="5dp"/>
 
                         <RelativeLayout
-                                android:layout_width="650dp"
+                                android:layout_width="@dimen/content_width"
                                 android:layout_weight="1"
                                 android:layout_height="match_parent"
                                 android:layout_gravity="end|right"
@@ -73,7 +73,7 @@
 
                                 <FrameLayout
                                         android:id="@+id/second_panel"
-                                        android:layout_width="320dp"
+                                        android:layout_width="@dimen/panel_width"
                                         android:background="@android:color/white"
                                         android:layout_height="match_parent"/>
 
