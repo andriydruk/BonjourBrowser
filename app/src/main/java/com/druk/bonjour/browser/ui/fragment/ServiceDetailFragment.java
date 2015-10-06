@@ -98,7 +98,9 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     @Override
     public void onClick(View v) {
         v.animate().rotationBy(180).start();
-        mResolveSubscription = RxDNSSD.queryRecords(RxDNSSD.resolve(Observable.just(mService)))
+        mResolveSubscription = Observable.just(mService)
+                .compose(RxDNSSD.resolve())
+                .compose(RxDNSSD.queryRecords())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
                     if ((bonjourService.flags & BonjourService.DELETED) == BonjourService.DELETED) {
