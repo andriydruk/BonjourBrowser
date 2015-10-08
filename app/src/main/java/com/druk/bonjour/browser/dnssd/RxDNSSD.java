@@ -41,50 +41,36 @@ public final class RxDNSSD {
         INSTANCE.mContext = ctx.getApplicationContext();
     }
 
-    private abstract static class RxDNSSDService<T> {
+    public interface DNSSDServiceCreator<T>{
+        DNSSDService getService(Subscriber<? super T> subscriber) throws DNSSDException;
+    }
 
-        private DNSSDService mService;;
-
-        private RxDNSSDService(){}
-
-        private void startDaemonProcess(Context ctx) {
-            ctx.getSystemService(Context.NSD_SERVICE);
-        }
-
-        protected abstract DNSSDService getService(Subscriber<? super T> subscriber) throws DNSSDException;
-
-        protected Observable<T> getObservable(final Context context){
-            return Observable.create(new OnSubscribe<T>() {
-                @Override
-                public void call(Subscriber<? super T> subscriber) {
-                    if (!subscriber.isUnsubscribed()) {
-                        startDaemonProcess(context);
-                        try {
-                            mService = getService(subscriber);
-                        } catch (DNSSDException e) {
-                            e.printStackTrace();
-                            subscriber.onError(e);
-                        }
+    private <T> Observable<T> createObservable(DNSSDServiceCreator<T> mCreator){
+        final DNSSDService[] mService = new DNSSDService[1];
+        return Observable.create(new OnSubscribe<T>() {
+            @Override
+            public void call(Subscriber<? super T> subscriber) {
+                if (!subscriber.isUnsubscribed()) {
+                    mContext.getSystemService(Context.NSD_SERVICE);
+                    try {
+                        mService[0] = mCreator.getService(subscriber);
+                    } catch (DNSSDException e) {
+                        e.printStackTrace();
+                        subscriber.onError(e);
                     }
                 }
-            }).doOnUnsubscribe(() -> {
-                if (mService != null) {
-                    mService.stop();
-                    mService = null;
-                }
-            });
-        }
+            }
+        }).doOnUnsubscribe(() -> {
+            if (mService[0] != null) {
+                mService[0].stop();
+                mService[0] = null;
+            }
+        });
     }
 
     public static Observable<BonjourService> browse(final String regType, final String domain) {
-        return new RxDNSSDService<BonjourService> (){
-
-            @Override
-            protected DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                return DNSSD.browse(0, DNSSD.ALL_INTERFACES, regType, domain,
-                        new RxDNSSD.BrowseListener(subscriber));
-            }
-        }.getObservable(INSTANCE.mContext);
+        return INSTANCE.createObservable(subscriber -> DNSSD.browse(0, DNSSD.ALL_INTERFACES, regType, domain,
+                new BrowseListener(subscriber)));
     }
 
     public static Observable.Transformer<BonjourService, BonjourService> resolve() {
@@ -92,13 +78,8 @@ public final class RxDNSSD {
             if ((bs.flags & BonjourService.DELETED) == BonjourService.DELETED) {
                 return Observable.just(bs);
             }
-            return new RxDNSSDService<BonjourService>() {
-                @Override
-                protected DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                    return DNSSD.resolve(bs.flags, bs.ifIndex, bs.serviceName, bs.regType, bs.domain,
-                            new ResolveListener(subscriber, bs));
-                }
-            }.getObservable(INSTANCE.mContext);
+            return INSTANCE.createObservable(subscriber -> DNSSD.resolve(bs.flags, bs.ifIndex, bs.serviceName, bs.regType, bs.domain,
+                    new ResolveListener(subscriber, bs)));
         });
     }
 
@@ -107,47 +88,35 @@ public final class RxDNSSD {
             if ((bs.flags & BonjourService.DELETED) == BonjourService.DELETED) {
                 return Observable.just(bs);
             }
-            return new RxDNSSDService<BonjourService>() {
-
-                @Override
-                protected DNSSDService getService(Subscriber<? super BonjourService> subscriber) throws DNSSDException {
-                    return DNSSD.queryRecord(0, bs.ifIndex, bs.hostname, 1 /* ns_t_a */, 1 /* ns_c_in */,
-                            new QueryListener(subscriber, bs));
-                }
-
-            }.getObservable(INSTANCE.mContext);
+            return INSTANCE.createObservable(subscriber -> DNSSD.queryRecord(0, bs.ifIndex, bs.hostname, 1 /* ns_t_a */, 1 /* ns_c_in */,
+                    new QueryListener(subscriber, bs)));
         });
     }
 
     public static Observable<String> enumerateDomains() {
-        return new RxDNSSDService<String>(){
+        return INSTANCE.createObservable(subscriber -> DNSSD.enumerateDomains(DNSSD.BROWSE_DOMAINS, DNSSD.ALL_INTERFACES, new DomainListener() {
 
             @Override
-            protected DNSSDService getService(Subscriber<? super String> subscriber) throws DNSSDException {
-                return DNSSD.enumerateDomains(DNSSD.BROWSE_DOMAINS, DNSSD.ALL_INTERFACES, new DomainListener() {
-                    @Override
-                    public void domainFound(DNSSDService domainEnum, int flags, int ifIndex, String domain) {
-                        if (subscriber.isUnsubscribed()){
-                            return;
-                        }
-                        subscriber.onNext(domain);
-                    }
-
-                    @Override
-                    public void domainLost(DNSSDService domainEnum, int flags, int ifIndex, String domain) {
-
-                    }
-
-                    @Override
-                    public void operationFailed(DNSSDService service, int errorCode) {
-                        if (subscriber.isUnsubscribed()){
-                            return;
-                        }
-                        subscriber.onError(new RuntimeException("DNSSD browse error: " + errorCode));
-                    }
-                });
+            public void domainFound(DNSSDService domainEnum, int flags, int ifIndex, String domain) {
+                if (subscriber.isUnsubscribed()) {
+                    return;
+                }
+                subscriber.onNext(domain);
             }
-        }.getObservable(INSTANCE.mContext);
+
+            @Override
+            public void domainLost(DNSSDService domainEnum, int flags, int ifIndex, String domain) {
+
+            }
+
+            @Override
+            public void operationFailed(DNSSDService service, int errorCode) {
+                if (subscriber.isUnsubscribed()) {
+                    return;
+                }
+                subscriber.onError(new RuntimeException("DNSSD browse error: " + errorCode));
+            }
+        }));
     }
 
     private static class BrowseListener implements com.apple.dnssd.BrowseListener{
