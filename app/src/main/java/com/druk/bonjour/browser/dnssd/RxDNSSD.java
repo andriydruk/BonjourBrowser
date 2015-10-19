@@ -31,6 +31,7 @@ import java.util.Map;
 import rx.Observable;
 import rx.Observable.OnSubscribe;
 import rx.Subscriber;
+import rx.android.schedulers.AndroidSchedulers;
 
 public final class RxDNSSD {
 
@@ -62,7 +63,9 @@ public final class RxDNSSD {
             }
         }).doOnUnsubscribe(() -> {
             if (mService[0] != null) {
-                mService[0].stop();
+                Observable.just(mService[0])
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(DNSSDService::stop);
                 mService[0] = null;
             }
         });
@@ -175,7 +178,6 @@ public final class RxDNSSD {
             mBonjourService.timestamp = System.currentTimeMillis();
             mSubscriber.onNext(mBonjourService);
             mSubscriber.onCompleted();
-            resolver.stop();
         }
 
         @Override
@@ -209,8 +211,6 @@ public final class RxDNSSD {
                 mSubscriber.onCompleted();
             } catch (Exception e) {
                 mSubscriber.onError(e);
-            } finally {
-                query.stop();
             }
         }
 
