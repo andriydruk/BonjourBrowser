@@ -1,9 +1,9 @@
 package com.druk.bonjour.browser.ui.fragment;
 
 import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.dnssd.BonjourService;
-import com.druk.bonjour.browser.dnssd.RxDNSSD;
 import com.druk.bonjour.browser.ui.adapter.TxtRecordsAdapter;
+import com.github.druk.BonjourService;
+import com.github.druk.RxDnssd;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -18,13 +18,13 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import java.net.Inet4Address;
+import java.util.Map;
+
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-/**
- * Created by Andrew Druk on 9/22/15.
- */
 public class ServiceDetailFragment extends Fragment implements View.OnClickListener {
 
     private static final String KEY_SERVICE = "com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment.key_service";
@@ -81,17 +81,24 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     }
 
     private void updateUI(BonjourService service, boolean withSnakeBar) {
-        mAdapter.swap(service.dnsRecords);
+        Map<String, String> metaInfo = new ArrayMap<>();
+        if (service.getInet4Address() != null){
+            metaInfo.put("Address IPv4", service.getInet4Address().getHostAddress() + ":" + service.getPort());
+        }
+        if (service.getInet6Address() != null){
+            metaInfo.put("Address IPv6", service.getInet6Address().getHostAddress() + ":" + service.getPort());
+        }
+        metaInfo.putAll(service.getDnsRecords());
+        mAdapter.swap(metaInfo);
         mAdapter.notifyDataSetChanged();
 
         if (isAdded()){
             ((ServiceDetailListener)getActivity()).onServiceUpdated(service);
-        }
-
-        if (withSnakeBar) {
-            Snackbar snackbar = Snackbar.make(mRecyclerView, getString(R.string.service_was_resolved), Snackbar.LENGTH_LONG);
-            snackbar.getView().setBackgroundResource(R.color.accent);
-            snackbar.show();
+            if (withSnakeBar) {
+                Snackbar snackbar = Snackbar.make(mRecyclerView, getString(R.string.service_was_resolved), Snackbar.LENGTH_LONG);
+                snackbar.getView().setBackgroundResource(R.color.accent);
+                snackbar.show();
+            }
         }
     }
 
@@ -99,14 +106,14 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     public void onClick(View v) {
         v.animate().rotationBy(180).start();
         mResolveSubscription = Observable.just(mService)
-                .compose(RxDNSSD.resolve())
-                .compose(RxDNSSD.queryRecords())
+                .compose(RxDnssd.resolve())
+                .compose(RxDnssd.queryRecords())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
-                    if ((bonjourService.flags & BonjourService.DELETED) == BonjourService.DELETED) {
+                    if ((bonjourService.getFlags() & BonjourService.DELETED) == BonjourService.DELETED) {
                         return;
                     }
-                    updateUI(bonjourService, true);
+                    ServiceDetailFragment.this.updateUI(bonjourService, true);
                 }, throwable -> {
                     Log.e("DNSSD", "Error: ", throwable);
                 });

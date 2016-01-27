@@ -18,10 +18,10 @@ package com.druk.bonjour.browser.ui;
 import com.druk.bonjour.browser.Config;
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.databinding.ActivityMainBinding;
-import com.druk.bonjour.browser.dnssd.BonjourService;
 import com.druk.bonjour.browser.ui.fragment.RegTypeBrowserFragment;
 import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
 import com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment;
+import com.github.druk.BonjourService;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
     public void onServiceWasSelected(String domain, String regType, BonjourService service) {
         if (domain.equals(Config.EMPTY_DOMAIN)) {
             String[] regTypeParts = service.getRegTypeParts();
-            String serviceRegType = service.serviceName + "." + regTypeParts[0] + ".";
+            String serviceRegType = service.getServiceName() + "." + regTypeParts[0] + ".";
             String serviceDomain = regTypeParts[1] + ".";
 
             if (mBinding.slidingPanelLayout != null) {
@@ -114,7 +114,7 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
                     replace(R.id.third_panel, fragment).commit();
             mBinding.slidingPanelLayout.closePane();
             mBinding.setFabOnClickListener(fragment);
-            mBinding.setServiceName(service.serviceName);
+            mBinding.setServiceName(service.getServiceName());
         }
     }
 
@@ -143,6 +143,6 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
 
     @Override
     public void onServiceUpdated(BonjourService service) {
-        mBinding.setLastUpdate(service.timestamp);
+        mBinding.setLastUpdate(service.getTimestamp());
     }
 }

@@ -1,0 +1,3 @@
+[submodule "RxDNSSD"]
+	path = RxDNSSD
+	url = git@github.com:andriydruk/RxDNSSD.git

@@ -18,7 +18,7 @@
         xmlns:app="http://schemas.android.com/apk/res-auto">
     <data>
         <import type="com.druk.bonjour.browser.Utils"/>
-        <variable name="service" type="com.druk.bonjour.browser.dnssd.BonjourService"/>
+        <variable name="service" type="com.github.druk.BonjourService"/>
     </data>
     <android.support.design.widget.CoordinatorLayout
         android:id="@+id/main_content"
@@ -51,7 +51,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="@style/TextAppearance.AppCompat.Title"
-                        android:text="@{service.serviceName}"/>
+                        android:text="@{service.getServiceName()}"/>
 
                     <android.support.v7.widget.AppCompatTextView
                         android:id="@+id/reg_type"
@@ -59,7 +59,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                        android:text="@{@string/domain(service.domain)}"/>
+                        android:text="@{@string/domain(service.getDomain())}"/>
 
                     <android.support.v7.widget.AppCompatTextView
                         android:id="@+id/domain"
@@ -67,7 +67,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                        android:text="@{@string/reg_type(service.regType)}"/>
+                        android:text="@{@string/reg_type(service.getRegType())}"/>
 
                     <android.support.v7.widget.AppCompatTextView
                         android:id="@+id/last_timestamp"
@@ -76,7 +76,7 @@
                         android:layout_marginTop="8dp"
                         android:layout_marginBottom="8dp"
                         android:textAppearance="@style/TextAppearance.AppCompat.Subhead"
-                        android:text="@{@string/last_update(Utils.formatTime(service.timestamp))}"/>
+                        android:text="@{@string/last_update(Utils.formatTime(service.getTimestamp()))}"/>
 
                 </LinearLayout>
 

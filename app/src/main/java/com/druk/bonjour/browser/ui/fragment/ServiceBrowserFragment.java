@@ -16,9 +16,9 @@
 package com.druk.bonjour.browser.ui.fragment;
 
 import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.dnssd.BonjourService;
-import com.druk.bonjour.browser.dnssd.RxDNSSD;
 import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
+import com.github.druk.BonjourService;
+import com.github.druk.RxDnssd;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -34,7 +34,7 @@ import android.view.ViewGroup;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 
-public class ServiceBrowserFragment extends Fragment {
+public class ServiceBrowserFragment<T> extends Fragment {
 
     private static final String KEY_REG_TYPE = "reg_type";
     private static final String KEY_DOMAIN = "domain";
@@ -46,13 +46,16 @@ public class ServiceBrowserFragment extends Fragment {
     protected String mDomain;
     protected RecyclerView mRecyclerView;
 
-    protected View.OnClickListener mListener = v -> {
-        int position = mRecyclerView.getLayoutManager().getPosition(v);
-        mAdapter.setSelectedItemId(mAdapter.getItemId(position));
-        mAdapter.notifyDataSetChanged();
-        if (isAdded()){
-            BonjourService service = mAdapter.getItem(position);
-            ((ServiceListener) getActivity()).onServiceWasSelected(mDomain, mReqType, service);
+    protected View.OnClickListener mListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            int position = mRecyclerView.getLayoutManager().getPosition(v);
+            mAdapter.setSelectedItemId(mAdapter.getItemId(position));
+            mAdapter.notifyDataSetChanged();
+            if (ServiceBrowserFragment.this.isAdded()) {
+                BonjourService service = mAdapter.getItem(position);
+                ((ServiceListener) ServiceBrowserFragment.this.getActivity()).onServiceWasSelected(mDomain, mReqType, service);
+            }
         }
     };
 
@@ -88,10 +91,14 @@ public class ServiceBrowserFragment extends Fragment {
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, int i) {
                 BonjourService service = getItem(i);
-                viewHolder.binding.text1.setText(service.serviceName);
-                if (service.timestamp > 0) {
-                    viewHolder.binding.text2.setText(service.dnsRecords.get(BonjourService.DNS_RECORD_KEY_ADDRESS));
-                } else {
+                viewHolder.binding.text1.setText(service.getServiceName());
+                if (service.getInet4Address() != null) {
+                    viewHolder.binding.text2.setText(service.getInet4Address().getHostAddress());
+                }
+                else if (service.getInet6Address() != null) {
+                    viewHolder.binding.text2.setText(service.getInet6Address().getHostAddress());
+                }
+                else {
                     viewHolder.binding.text2.setText(R.string.not_resolved_yet);
                 }
                 viewHolder.itemView.setOnClickListener(mListener);
@@ -107,7 +114,7 @@ public class ServiceBrowserFragment extends Fragment {
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mRecyclerView.getContext()));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);
-        if (savedInstanceState != null){
+        if (savedInstanceState != null) {
             mAdapter.setSelectedItemId(savedInstanceState.getLong(KEY_SELECTED_POSITION, -1L));
         }
         return mRecyclerView;
@@ -132,12 +139,12 @@ public class ServiceBrowserFragment extends Fragment {
     }
 
     protected void startDiscovery() {
-        mSubscription = RxDNSSD.browse(mReqType, mDomain)
-                .compose(RxDNSSD.resolve())
-                .compose(RxDNSSD.queryRecords())
+        mSubscription = RxDnssd.browse(mReqType, mDomain)
+                .compose(RxDnssd.resolve())
+                .compose(RxDnssd.queryRecords())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
-                    if ((bonjourService.flags & BonjourService.DELETED) != BonjourService.DELETED) {
+                    if ((bonjourService.getFlags() & BonjourService.DELETED) != BonjourService.DELETED) {
                         mAdapter.add(bonjourService);
                     } else {
                         mAdapter.remove(bonjourService);
@@ -154,7 +161,7 @@ public class ServiceBrowserFragment extends Fragment {
         }
     }
 
-    public interface ServiceListener{
+    public interface ServiceListener {
         void onServiceWasSelected(String domain, String regType, BonjourService service);
     }
 }

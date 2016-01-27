@@ -16,11 +16,11 @@
 -->
 <layout xmlns:android="http://schemas.android.com/apk/res/android">
     <data/>
-    <TwoLineListItem
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/listPreferredItemHeight"
-        android:mode="twoLine"
+        android:orientation="vertical"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingStart="@dimen/activity_horizontal_margin"
@@ -38,11 +38,8 @@
             android:id="@+id/text2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_below="@id/text1"
-            android:layout_alignStart="@id/text1"
-            android:layout_alignLeft="@id/text1"
             android:textColor="@color/secondary_text"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
-    </TwoLineListItem>
+    </LinearLayout>
 </layout>

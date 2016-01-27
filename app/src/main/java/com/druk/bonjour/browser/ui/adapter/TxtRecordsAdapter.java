@@ -21,6 +21,7 @@ import com.druk.bonjour.browser.databinding.TwoTextItemBinding;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.databinding.DataBindingUtil;
 import android.support.design.widget.Snackbar;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.widget.RecyclerView;
@@ -90,7 +91,7 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
 
         public ViewHolder(View itemView) {
             super(itemView);
-            mBinding = TwoTextItemBinding.bind(itemView);
+            mBinding = DataBindingUtil.bind(itemView);
         }
     }
 }

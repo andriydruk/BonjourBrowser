@@ -15,7 +15,7 @@
  */
 package com.druk.bonjour.browser;
 
-import com.druk.bonjour.browser.dnssd.RxDNSSD;
+import com.github.druk.RxDnssd;
 
 import android.app.Application;
 import android.content.Context;
@@ -56,7 +56,7 @@ public class BonjourApplication extends Application {
                     .build());
         }
 
-        RxDNSSD.init(this);
+        RxDnssd.init(this);
     }
 
     public static String getRegTypeDescription(@NonNull Context context, String regType) {

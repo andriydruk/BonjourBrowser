@@ -17,7 +17,7 @@ package com.druk.bonjour.browser.ui.adapter;
 
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.databinding.TwoTextItemBinding;
-import com.druk.bonjour.browser.dnssd.BonjourService;
+import com.github.druk.BonjourService;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;
@@ -85,12 +85,12 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
     public void add(BonjourService service) {
         this.services.remove(service);
         this.services.add(service);
-        Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
+        Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
     }
 
     public void remove(BonjourService bonjourService) {
         if (this.services.remove(bonjourService)) {
-            Collections.sort(services, (lhs, rhs) -> lhs.serviceName.compareTo(rhs.serviceName));
+            Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
         }
     }
 
