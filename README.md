@@ -1,4 +1,5 @@
-# Bonjour Browser
+# Bonjour Browser [![Circle CI](https://circleci.com/gh/andriydruk/BonjourBrowser.svg?style=shield&circle-token=8df2706f8f9aaa62b617722a3d90561781aa4c68)](https://circleci.com/gh/andriydruk/BonjourBrowser)
+
 Bonjour Browser is a utility that display all available Bonjour services at any domain. Also application provide resolved ip addresses of registered services and all meta-information (TXT Records). This software can be used for development or administration tasks.
 
 License
