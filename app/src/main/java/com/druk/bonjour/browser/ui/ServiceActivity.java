@@ -18,7 +18,7 @@ package com.druk.bonjour.browser.ui;
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.databinding.ActivityServiceBinding;
 import com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment;
-import com.github.druk.BonjourService;
+import com.github.druk.rxdnssd.BonjourService;
 
 import android.content.Context;
 import android.content.Intent;
@@ -71,5 +71,6 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
     @Override
     public void onServiceUpdated(BonjourService service) {
         mBinding.setService(service);
+        mBinding.setTimestamp(System.currentTimeMillis());
     }
 }

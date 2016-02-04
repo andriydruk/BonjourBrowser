@@ -15,7 +15,7 @@
  */
 package com.druk.bonjour.browser;
 
-import com.github.druk.RxDnssd;
+import com.github.druk.rxdnssd.RxDnssd;
 
 import android.app.Application;
 import android.content.Context;

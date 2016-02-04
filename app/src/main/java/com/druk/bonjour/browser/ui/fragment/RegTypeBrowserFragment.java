@@ -18,8 +18,8 @@ package com.druk.bonjour.browser.ui.fragment;
 import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.Config;
 import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
-import com.github.druk.BonjourService;
-import com.github.druk.RxDnssd;
+import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rxdnssd.RxDnssd;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -54,7 +54,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, int i) {
                 BonjourDomain domain = (BonjourDomain) getItem(i);
-                String regType = domain.getServiceName() + "." + domain.getRegTypeParts()[0] + ".";
+                String regType = domain.getServiceName() + "." + domain.getRegType().split(Config.REG_TYPE_SEPARATOR)[0] + ".";
                 String regTypeDescription = BonjourApplication.getRegTypeDescription(viewHolder.itemView.getContext(), regType);
                 if (regTypeDescription != null) {
                     viewHolder.binding.text1.setText(regType + " (" + regTypeDescription + ")");
@@ -85,12 +85,12 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     }
 
     private final Action1<BonjourService> reqTypeAction = service -> {
-        if ((service.getFlags() & BonjourService.DELETED) == BonjourService.DELETED){
+        if ((service.getFlags() & BonjourService.LOST) == BonjourService.LOST){
             Log.d("TAG", "Lose reg type: " + service);
             //Ignore this call
             return;
         }
-        String[] regTypeParts = service.getRegTypeParts();
+        String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
         String protocolSuffix = regTypeParts[0];
         String serviceDomain = regTypeParts[1];
         if (TCP_REG_TYPE_SUFFIX.equals(protocolSuffix) || UDP_REG_TYPE_SUFFIX.equals(protocolSuffix)) {
@@ -109,13 +109,13 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     protected final Action1<Throwable> errorAction = throwable -> Log.e("DNSSD", "Error: ", throwable);
 
     private final Action1<BonjourService> servicesAction = service -> {
-        String[] regTypeParts = service.getRegTypeParts();
+        String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
         String serviceRegType = regTypeParts[0];
         String protocolSuffix = regTypeParts[1];
         String key = createKey(EMPTY_DOMAIN, protocolSuffix + "." + service.getDomain(), serviceRegType);
         BonjourDomain domain = mServices.get(key);
         if (domain != null) {
-            if ((service.getFlags() & BonjourService.DELETED) == BonjourService.DELETED){
+            if ((service.getFlags() & BonjourService.LOST) == BonjourService.LOST){
                 Log.d("TAG", "Lst service: " + service);
                 domain.serviceCount--;
             } else {

@@ -17,8 +17,8 @@ package com.druk.bonjour.browser.ui.fragment;
 
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
-import com.github.druk.BonjourService;
-import com.github.druk.RxDnssd;
+import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rxdnssd.RxDnssd;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -144,7 +144,7 @@ public class ServiceBrowserFragment<T> extends Fragment {
                 .compose(RxDnssd.queryRecords())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
-                    if ((bonjourService.getFlags() & BonjourService.DELETED) != BonjourService.DELETED) {
+                    if ((bonjourService.getFlags() & BonjourService.LOST) != BonjourService.LOST) {
                         mAdapter.add(bonjourService);
                     } else {
                         mAdapter.remove(bonjourService);

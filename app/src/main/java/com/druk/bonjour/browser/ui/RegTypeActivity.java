@@ -18,7 +18,7 @@ package com.druk.bonjour.browser.ui;
 import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
-import com.github.druk.BonjourService;
+import com.github.druk.rxdnssd.BonjourService;
 
 import android.content.Context;
 import android.content.Intent;

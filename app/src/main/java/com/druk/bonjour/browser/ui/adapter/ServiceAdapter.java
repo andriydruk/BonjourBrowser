@@ -17,7 +17,7 @@ package com.druk.bonjour.browser.ui.adapter;
 
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.databinding.TwoTextItemBinding;
-import com.github.druk.BonjourService;
+import com.github.druk.rxdnssd.BonjourService;
 
 import android.content.Context;
 import android.databinding.DataBindingUtil;

@@ -21,7 +21,7 @@ import com.druk.bonjour.browser.databinding.ActivityMainBinding;
 import com.druk.bonjour.browser.ui.fragment.RegTypeBrowserFragment;
 import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
 import com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment;
-import com.github.druk.BonjourService;
+import com.github.druk.rxdnssd.BonjourService;
 
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
     @Override
     public void onServiceWasSelected(String domain, String regType, BonjourService service) {
         if (domain.equals(Config.EMPTY_DOMAIN)) {
-            String[] regTypeParts = service.getRegTypeParts();
+            String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
             String serviceRegType = service.getServiceName() + "." + regTypeParts[0] + ".";
             String serviceDomain = regTypeParts[1] + ".";
 
@@ -143,6 +143,6 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
 
     @Override
     public void onServiceUpdated(BonjourService service) {
-        mBinding.setLastUpdate(service.getTimestamp());
+        mBinding.setLastUpdate(System.currentTimeMillis());
     }
 }

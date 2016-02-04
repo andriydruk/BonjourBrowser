@@ -23,7 +23,7 @@
                 <variable name="domain" type="java.lang.String"/>
                 <variable name="regType" type="java.lang.String"/>
                 <variable name="serviceName" type="java.lang.String"/>
-                <variable name="lastUpdate" type="long"/>
+                <variable name="lastUpdate" type="java.lang.Long"/>
                 <variable
                         name="fabOnClickListener"
                         type="android.view.View.OnClickListener"/>

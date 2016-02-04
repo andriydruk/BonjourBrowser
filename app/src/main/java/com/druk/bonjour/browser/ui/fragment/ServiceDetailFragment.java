@@ -2,8 +2,8 @@ package com.druk.bonjour.browser.ui.fragment;
 
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.ui.adapter.TxtRecordsAdapter;
-import com.github.druk.BonjourService;
-import com.github.druk.RxDnssd;
+import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rxdnssd.RxDnssd;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -18,7 +18,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import java.net.Inet4Address;
 import java.util.Map;
 
 import rx.Observable;
@@ -88,7 +87,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         if (service.getInet6Address() != null){
             metaInfo.put("Address IPv6", service.getInet6Address().getHostAddress() + ":" + service.getPort());
         }
-        metaInfo.putAll(service.getDnsRecords());
+        metaInfo.putAll(service.getTxtRecords());
         mAdapter.swap(metaInfo);
         mAdapter.notifyDataSetChanged();
 
@@ -110,7 +109,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
                 .compose(RxDnssd.queryRecords())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
-                    if ((bonjourService.getFlags() & BonjourService.DELETED) == BonjourService.DELETED) {
+                    if ((bonjourService.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
                         return;
                     }
                     ServiceDetailFragment.this.updateUI(bonjourService, true);

@@ -15,6 +15,8 @@
  */
 package com.druk.bonjour.browser;
 
+import java.util.regex.Pattern;
+
 public final class Config {
 
     private static final boolean VERBOSE = false;
@@ -27,4 +29,6 @@ public final class Config {
     public static final String EMPTY_DOMAIN = ".";
     public static final String TCP_REG_TYPE_SUFFIX = "_tcp";
     public static final String UDP_REG_TYPE_SUFFIX = "_udp";
+
+    public static final String REG_TYPE_SEPARATOR = Pattern.quote(".");
 }
