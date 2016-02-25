@@ -141,7 +141,7 @@
                         android:layout_height="wrap_content"
                         android:layout_width="wrap_content"
                         android:layout_gravity="end|right|bottom"
-                        android:src="@mipmap/ic_action_refresh"
+                        app:srcCompat="@drawable/ic_autorenew"
                         android:layout_margin="@dimen/fab_margin"
                         android:visibility="@{serviceName == null ? View.GONE : View.VISIBLE}"
                         android:onClick="@{fabOnClickListener}"
