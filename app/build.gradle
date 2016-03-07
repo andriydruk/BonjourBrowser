@@ -42,7 +42,7 @@ dependencies {
     //Android Support Libraries Version
     def supportLibrary = '23.2.0'
 
-    compile 'com.github.andriydruk:rxdnssd:0.5.0'
+    compile 'com.github.andriydruk:rxdnssd:0.6.2'
     compile "com.android.support:support-v4:$supportLibrary"
     compile "com.android.support:appcompat-v7:$supportLibrary"
     compile "com.android.support:design:$supportLibrary"
