@@ -26,7 +26,10 @@ public class Utils {
 
     private static final String TIME_FORMAT = "HH:mm:ss";
 
-    public static String formatTime(long timestamp) {
+    public static String formatTime(Long timestamp) {
+        if (timestamp == null){
+            return "";
+        }
         Calendar cal = Calendar.getInstance();
         TimeZone tz = cal.getTimeZone();
 
