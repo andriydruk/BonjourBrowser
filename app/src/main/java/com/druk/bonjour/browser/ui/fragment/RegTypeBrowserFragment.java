@@ -19,7 +19,6 @@ import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.Config;
 import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
 import com.github.druk.rxdnssd.BonjourService;
-import com.github.druk.rxdnssd.RxDnssd;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -31,6 +30,7 @@ import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Action1;
+import rx.schedulers.Schedulers;
 
 import static com.druk.bonjour.browser.Config.EMPTY_DOMAIN;
 import static com.druk.bonjour.browser.Config.TCP_REG_TYPE_SUFFIX;
@@ -70,7 +70,8 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 
     @Override
     protected void startDiscovery() {
-        mSubscription = RxDnssd.browse(Config.SERVICES_DOMAIN, "local.")
+        mSubscription = mRxDnssd.browse(Config.SERVICES_DOMAIN, "local.")
+                .subscribeOn(Schedulers.io())
                 .subscribe(reqTypeAction, errorAction);
     }
 
@@ -86,7 +87,6 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 
     private final Action1<BonjourService> reqTypeAction = service -> {
         if ((service.getFlags() & BonjourService.LOST) == BonjourService.LOST){
-            Log.d("TAG", "Lose reg type: " + service);
             //Ignore this call
             return;
         }
@@ -96,17 +96,22 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         if (TCP_REG_TYPE_SUFFIX.equals(protocolSuffix) || UDP_REG_TYPE_SUFFIX.equals(protocolSuffix)) {
             String key = service.getServiceName() + "." + protocolSuffix;
             if (!mBrowsers.containsKey(key)) {
-                mBrowsers.put(key, RxDnssd.browse(key, serviceDomain)
+                mBrowsers.put(key, mRxDnssd.browse(key, serviceDomain)
+                        .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(RegTypeBrowserFragment.this.servicesAction, RegTypeBrowserFragment.this.errorAction));
             }
             mServices.put(createKey(service.getDomain(), service.getRegType(), service.getServiceName()), new BonjourDomain(service));
         } else {
+            Log.e("TAG", "Unknown service protocol " + protocolSuffix);
             //Just ignore service with different protocol suffixes
         }
     };
 
-    protected final Action1<Throwable> errorAction = throwable -> Log.e("DNSSD", "Error: ", throwable);
+    protected final Action1<Throwable> errorAction = throwable -> {
+        Log.e("DNSSD", "Error: ", throwable);
+        showError(throwable);
+    };
 
     private final Action1<BonjourService> servicesAction = service -> {
         String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
@@ -121,10 +126,14 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
             } else {
                 domain.serviceCount++;
             }
+            final int itemsCount = mAdapter.getItemCount();
             mAdapter.clear();
             Observable.from(mServices.values())
                 .filter(bonjourDomain -> bonjourDomain.serviceCount > 0)
-                .subscribe(mAdapter::add, throwable -> {/* empty */}, mAdapter::notifyDataSetChanged);
+                .subscribe(mAdapter::add, throwable -> {/* empty */}, () -> {
+                    showList(itemsCount);
+                    mAdapter.notifyDataSetChanged();
+                });
         } else {
             Log.w(TAG, "Service from unknown service type " + key);
         }

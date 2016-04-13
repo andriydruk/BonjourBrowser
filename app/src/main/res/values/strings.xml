@@ -37,5 +37,7 @@
 
     <string name="local_domain">local.</string>
     <string name="no_service">No selected service</string>
+    <string name="error_occurred">Error occurred\nPlease send report to developer</string>
+    <string name="send_report">Send report</string>
 
 </resources>

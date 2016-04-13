@@ -3,13 +3,13 @@ apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.2'
+    buildToolsVersion '23.0.3'
 
     defaultConfig {
-        minSdkVersion 16
+        minSdkVersion 14
         targetSdkVersion 23
-        versionCode 7
-        versionName "1.2.1"
+        versionCode 8
+        versionName "1.3.0"
     }
 
     buildTypes {
@@ -27,22 +27,13 @@ android {
     dataBinding {
         enabled true
     }
-
-    defaultConfig {
-        // Stops the Gradle’s automatic rasterization of vectors
-        generatedDensities = []
-    }
-    // Flag that tells aapt to keep the attribute ids
-    aaptOptions {
-        additionalParameters "--no-version-vectors"
-    }
 }
 
 dependencies {
     //Android Support Libraries Version
-    def supportLibrary = '23.2.0'
+    def supportLibrary = '23.3.0'
 
-    compile 'com.github.andriydruk:rxdnssd:0.6.3'
+    compile 'com.github.andriydruk:rxdnssd:0.7.0'
     compile "com.android.support:support-v4:$supportLibrary"
     compile "com.android.support:appcompat-v7:$supportLibrary"
     compile "com.android.support:design:$supportLibrary"
@@ -50,5 +41,5 @@ dependencies {
     compile "com.android.support:cardview-v7:$supportLibrary"
     compile "com.android.support:support-annotations:$supportLibrary"
     compile 'io.reactivex:rxandroid:1.1.0'
-    compile 'io.reactivex:rxjava:1.1.0'
+    compile 'io.reactivex:rxjava:1.1.3'
 }

@@ -15,11 +15,14 @@
  */
 package com.druk.bonjour.browser.ui.fragment;
 
+import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
 
+import android.animation.Animator;
+import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -30,9 +33,14 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AccelerateDecelerateInterpolator;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class ServiceBrowserFragment<T> extends Fragment {
 
@@ -45,6 +53,9 @@ public class ServiceBrowserFragment<T> extends Fragment {
     protected String mReqType;
     protected String mDomain;
     protected RecyclerView mRecyclerView;
+    protected ProgressBar mProgressView;
+    protected LinearLayout mErrorView;
+    protected RxDnssd mRxDnssd;
 
     protected View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -78,6 +89,8 @@ public class ServiceBrowserFragment<T> extends Fragment {
         if (!(context instanceof ServiceListener)) {
             throw new IllegalArgumentException("Fragment context should implement ServiceListener interface");
         }
+
+        mRxDnssd = BonjourApplication.getRxDnssd(context);
     }
 
     @Override
@@ -110,14 +123,17 @@ public class ServiceBrowserFragment<T> extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mRecyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_service_browser, container, false);
+        FrameLayout rootView = (FrameLayout) inflater.inflate(R.layout.fragment_service_browser, container, false);
+        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
+        mProgressView = (ProgressBar) rootView.findViewById(R.id.progress);
+        mErrorView = (LinearLayout) rootView.findViewById(R.id.error_container);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mRecyclerView.getContext()));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);
         if (savedInstanceState != null) {
             mAdapter.setSelectedItemId(savedInstanceState.getLong(KEY_SELECTED_POSITION, -1L));
         }
-        return mRecyclerView;
+        return rootView;
     }
 
     @Override
@@ -139,20 +155,73 @@ public class ServiceBrowserFragment<T> extends Fragment {
     }
 
     protected void startDiscovery() {
-        mSubscription = RxDnssd.browse(mReqType, mDomain)
-                .compose(RxDnssd.resolve())
-                .compose(RxDnssd.queryRecords())
+        mSubscription = mRxDnssd.browse(mReqType, mDomain)
+                .compose(mRxDnssd.resolve())
+                .compose(mRxDnssd.queryRecords())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
+                    int itemsCount = mAdapter.getItemCount();
                     if ((bonjourService.getFlags() & BonjourService.LOST) != BonjourService.LOST) {
                         mAdapter.add(bonjourService);
                     } else {
                         mAdapter.remove(bonjourService);
                     }
+                    showList(itemsCount);
                     mAdapter.notifyDataSetChanged();
                 }, throwable -> {
                     Log.e("DNSSD", "Error: ", throwable);
+                    showError(throwable);
                 });
+    }
+
+    protected boolean showList(int itemsBefore){
+        if (itemsBefore > 0 && mAdapter.getItemCount() == 0) {
+            mRecyclerView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRecyclerView.setVisibility(View.GONE);
+                }
+            }).start();
+            mProgressView.setAlpha(0.0f);
+            mProgressView.setVisibility(View.VISIBLE);
+            mProgressView.animate().alpha(1.0f).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+            return true;
+        }
+        if (itemsBefore == 0 && mAdapter.getItemCount() > 0) {
+            mProgressView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(View.GONE);
+                }
+            }).start();
+            mRecyclerView.setAlpha(0.0f);
+            mRecyclerView.setVisibility(View.VISIBLE);
+            mRecyclerView.animate().alpha(1.0f).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+            return false;
+        }
+        return mAdapter.getItemCount() > 0;
+    }
+
+    protected void showError(final Throwable e){
+        getActivity().runOnUiThread(() -> {
+            mRecyclerView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRecyclerView.setVisibility(View.GONE);
+                }
+            }).start();
+            mProgressView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(View.GONE);
+                }
+            }).start();
+            mErrorView.setAlpha(0.0f);
+            mErrorView.setVisibility(View.VISIBLE);
+            mErrorView.animate().alpha(1.0f).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+            mErrorView.findViewById(R.id.send_report).setOnClickListener(v -> Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e));
+        });
     }
 
     protected void stopDiscovery() {

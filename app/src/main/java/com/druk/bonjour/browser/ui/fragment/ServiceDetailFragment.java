@@ -1,5 +1,6 @@
 package com.druk.bonjour.browser.ui.fragment;
 
+import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.ui.adapter.TxtRecordsAdapter;
 import com.github.druk.rxdnssd.BonjourService;
@@ -21,8 +22,10 @@ import android.view.ViewGroup;
 import java.util.Map;
 
 import rx.Observable;
+import rx.Scheduler;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.schedulers.Schedulers;
 
 public class ServiceDetailFragment extends Fragment implements View.OnClickListener {
 
@@ -63,7 +66,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mRecyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_service_browser, container, false);
+        mRecyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_service_detail, container, false);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mRecyclerView.getContext()));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);
@@ -103,10 +106,12 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        RxDnssd mRxDnssd = BonjourApplication.getRxDnssd(getContext());
         v.animate().rotationBy(180).start();
         mResolveSubscription = Observable.just(mService)
-                .compose(RxDnssd.resolve())
-                .compose(RxDnssd.queryRecords())
+                .compose(mRxDnssd.resolve())
+                .compose(mRxDnssd.queryRecords())
+                .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
                     if ((bonjourService.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
