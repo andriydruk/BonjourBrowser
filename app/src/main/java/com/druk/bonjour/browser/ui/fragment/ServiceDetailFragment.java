@@ -114,7 +114,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
-                    if ((bonjourService.getFlags() & BonjourService.LOST) == BonjourService.LOST) {
+                    if (bonjourService.isLost()) {
                         return;
                     }
                     ServiceDetailFragment.this.updateUI(bonjourService, true);

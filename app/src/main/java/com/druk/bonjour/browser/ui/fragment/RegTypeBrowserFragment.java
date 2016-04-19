@@ -86,7 +86,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     }
 
     private final Action1<BonjourService> reqTypeAction = service -> {
-        if ((service.getFlags() & BonjourService.LOST) == BonjourService.LOST){
+        if (service.isLost()) {
             //Ignore this call
             return;
         }
@@ -120,8 +120,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         String key = createKey(EMPTY_DOMAIN, protocolSuffix + "." + service.getDomain(), serviceRegType);
         BonjourDomain domain = mServices.get(key);
         if (domain != null) {
-            if ((service.getFlags() & BonjourService.LOST) == BonjourService.LOST){
-                Log.d("TAG", "Lst service: " + service);
+            if (service.isLost()) {
                 domain.serviceCount--;
             } else {
                 domain.serviceCount++;

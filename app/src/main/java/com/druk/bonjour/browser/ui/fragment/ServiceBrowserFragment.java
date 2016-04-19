@@ -162,7 +162,7 @@ public class ServiceBrowserFragment<T> extends Fragment {
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
                     int itemsCount = mAdapter.getItemCount();
-                    if ((bonjourService.getFlags() & BonjourService.LOST) != BonjourService.LOST) {
+                    if (!bonjourService.isLost()) {
                         mAdapter.add(bonjourService);
                     } else {
                         mAdapter.remove(bonjourService);
