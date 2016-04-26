@@ -29,6 +29,7 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> {
 
@@ -86,6 +87,13 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
         this.services.remove(service);
         this.services.add(service);
         Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
+    }
+
+    public void swap(List<BonjourService> service) {
+        this.services.clear();
+        this.services.addAll(service);
+        Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
+        notifyDataSetChanged();
     }
 
     public void remove(BonjourService bonjourService) {

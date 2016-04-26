@@ -26,12 +26,13 @@ import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
-import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.TreeMap;
 
 public class BonjourApplication extends Application {
@@ -39,6 +40,7 @@ public class BonjourApplication extends Application {
     private static final String TAG = "BonjourApplication";
     private TreeMap<String, String> mServiceNamesTree;
     private RxDnssd mRxDnssd;
+    private RegistrationManager mRegistrationManager;
 
     @Override
     public void onCreate() {
@@ -59,6 +61,7 @@ public class BonjourApplication extends Application {
                     .build());
         }
         mRxDnssd = createDnssd();
+        mRegistrationManager = new RegistrationManager();
     }
 
     public static RxDnssd getRxDnssd(@NonNull Context context){
@@ -67,6 +70,18 @@ public class BonjourApplication extends Application {
 
     public static String getRegTypeDescription(@NonNull Context context, String regType) {
         return ((BonjourApplication) context.getApplicationContext()).getRegTypeDescription(regType);
+    }
+
+    public static List<String> getListRegTypes(@NonNull Context context) {
+        BonjourApplication bonjourApplication = (BonjourApplication) context.getApplicationContext();
+        if (bonjourApplication.mServiceNamesTree == null){
+            return new LinkedList<>();
+        }
+        return new LinkedList<>(bonjourApplication.mServiceNamesTree.keySet());
+    }
+
+    public static RegistrationManager getRegistrationManager(@NonNull Context context){
+        return ((BonjourApplication) context.getApplicationContext()).mRegistrationManager;
     }
 
     private RxDnssd createDnssd(){
@@ -93,6 +108,9 @@ public class BonjourApplication extends Application {
                     while ((line = reader.readLine()) != null) {
                         String[] rowData = line.split(",");
                         if (rowData.length < 4 || TextUtils.isEmpty(rowData[0]) || TextUtils.isEmpty(rowData[2]) || TextUtils.isEmpty(rowData[3])) {
+                            continue;
+                        }
+                        if (rowData[0].contains(" ") || rowData[2].contains(" ")){
                             continue;
                         }
                         mServiceNamesTree.put("_" + rowData[0] + "._" + rowData[2] + ".", rowData[3]);

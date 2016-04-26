@@ -40,4 +40,14 @@
     <string name="error_occurred">Error occurred\nPlease send report to developer</string>
     <string name="send_report">Send report</string>
 
+    <string name="title_activity_registrations">Registrations</string>
+    <string name="no_services_registered">No services registered</string>
+    <string name="unregister_all_services">Unregister all services</string>
+    <string name="register_new_service">Register new service</string>
+    <string name="register_service">Register service</string>
+    <string name="service_name">"Service name"</string>
+    <string name="reg_type_eg">"Reg type (e.g. _ftp._tcp)"</string>
+    <string name="port_eg">"Port (0-63535)"</string>
+    <string name="txt_records">TXT Records</string>
+
 </resources>

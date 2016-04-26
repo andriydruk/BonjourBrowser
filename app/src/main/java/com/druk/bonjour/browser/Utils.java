@@ -16,6 +16,10 @@
 
 package com.druk.bonjour.browser;
 
+import android.content.Context;
+import android.os.Build;
+import android.provider.Settings;
+
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -37,5 +41,24 @@ public class Utils {
         sdf.setTimeZone(tz);
 
         return sdf.format(new Date(timestamp));
+    }
+
+
+    public static boolean isDevSettingEnabled(Context context){
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                if (Settings.Secure.getInt(context.getContentResolver(), Settings.Global.DEVELOPMENT_SETTINGS_ENABLED) > 0) {
+                    return true;
+                }
+            }
+            else{
+                if (Settings.Secure.getInt(context.getContentResolver(), Settings.Secure.DEVELOPMENT_SETTINGS_ENABLED) > 0) {
+                    return true;
+                }
+            }
+        } catch (Settings.SettingNotFoundException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

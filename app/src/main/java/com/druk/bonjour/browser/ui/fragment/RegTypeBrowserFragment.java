@@ -26,9 +26,12 @@ import android.util.Log;
 
 import java.util.HashMap;
 
+import rx.BackpressureOverflow;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.exceptions.MissingBackpressureException;
+import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
@@ -97,6 +100,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
             String key = service.getServiceName() + "." + protocolSuffix;
             if (!mBrowsers.containsKey(key)) {
                 mBrowsers.put(key, mRxDnssd.browse(key, serviceDomain)
+                        .onBackpressureBuffer(1000, () -> Log.e(TAG, "Back pressure buffer overflow"), () -> true)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
                         .subscribe(RegTypeBrowserFragment.this.servicesAction, RegTypeBrowserFragment.this.errorAction));

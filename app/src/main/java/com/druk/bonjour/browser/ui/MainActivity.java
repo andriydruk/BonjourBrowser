@@ -17,6 +17,8 @@ package com.druk.bonjour.browser.ui;
 
 import com.druk.bonjour.browser.Config;
 import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.RegistrationManager;
+import com.druk.bonjour.browser.Utils;
 import com.druk.bonjour.browser.databinding.ActivityMainBinding;
 import com.druk.bonjour.browser.ui.fragment.RegTypeBrowserFragment;
 import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
@@ -26,6 +28,7 @@ import com.github.druk.rxdnssd.BonjourService;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -66,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_bonjour_browser, menu);
+        getMenuInflater().inflate(Utils.isDevSettingEnabled(this) ? R.menu.menu_bonjour_browser_for_developers : R.menu.menu_bonjour_browser, menu);
         return true;
     }
 
@@ -80,6 +83,10 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_license) {
             startActivity(new Intent(this, LicensesActivity.class));
+            return true;
+        }
+        else if (id == R.id.action_register) {
+            RegistrationsActivity.startActivity(this);
             return true;
         }
 

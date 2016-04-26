@@ -29,12 +29,18 @@ import android.support.v7.app.AppCompatActivity;
 public class ServiceActivity extends AppCompatActivity implements ServiceDetailFragment.ServiceDetailListener {
 
     private static final String SERVICE = "mService";
+    private static final String REGISTERED = "registered";
 
     private ActivityServiceBinding mBinding;
 
     public static void startActivity(Context context, BonjourService service) {
         context.startActivity(new Intent(context, ServiceActivity.class).
                 putExtra(ServiceActivity.SERVICE, service));
+    }
+
+    public static void startActivity(Context context, BonjourService service, boolean isRegistered) {
+        context.startActivity(new Intent(context, ServiceActivity.class).
+                putExtra(ServiceActivity.SERVICE, service).putExtra(REGISTERED, isRegistered));
     }
 
     @Override
@@ -49,16 +55,18 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
         }
 
         ServiceDetailFragment serviceDetailFragment;
+        boolean isRegistered = getIntent().getBooleanExtra(REGISTERED, false);
 
         if (savedInstanceState == null){
             BonjourService service = getIntent().getParcelableExtra(SERVICE);
-            serviceDetailFragment = ServiceDetailFragment.newInstance(service);
+            serviceDetailFragment = ServiceDetailFragment.newInstance(service, isRegistered);
             getSupportFragmentManager().beginTransaction().replace(R.id.content, serviceDetailFragment).commit();
         }
         else {
             serviceDetailFragment = (ServiceDetailFragment) getSupportFragmentManager().findFragmentById(R.id.content);
         }
 
+        mBinding.fab.setImageResource(isRegistered ? R.drawable.ic_stop : R.drawable.ic_autorenew);
         mBinding.fab.setOnClickListener(serviceDetailFragment);
     }
 

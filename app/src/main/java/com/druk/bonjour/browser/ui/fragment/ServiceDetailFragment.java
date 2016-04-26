@@ -30,9 +30,11 @@ import rx.schedulers.Schedulers;
 public class ServiceDetailFragment extends Fragment implements View.OnClickListener {
 
     private static final String KEY_SERVICE = "com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment.key_service";
+    private static final String KEY_REGISTERED = "com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment.key_registered";
 
     private BonjourService mService;
     private Subscription mResolveSubscription;
+    private boolean isRegistered;
 
     private TxtRecordsAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -41,6 +43,15 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         ServiceDetailFragment fragment = new ServiceDetailFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(KEY_SERVICE, service);
+        fragment.setArguments(bundle);
+        return fragment;
+    }
+
+    public static ServiceDetailFragment newInstance(BonjourService service, boolean isRegistered){
+        ServiceDetailFragment fragment = new ServiceDetailFragment();
+        Bundle bundle = new Bundle();
+        bundle.putParcelable(KEY_SERVICE, service);
+        bundle.putBoolean(KEY_REGISTERED, isRegistered);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -59,6 +70,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mService = getArguments().getParcelable(KEY_SERVICE);
+            isRegistered = getArguments().getBoolean(KEY_REGISTERED, false);
         }
         mAdapter = new TxtRecordsAdapter(getActivity(), new ArrayMap<>());
     }
@@ -106,6 +118,11 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        if (isRegistered){
+            BonjourApplication.getRegistrationManager(getContext()).unregister(mService);
+            getActivity().finish();
+            return;
+        }
         RxDnssd mRxDnssd = BonjourApplication.getRxDnssd(getContext());
         v.animate().rotationBy(180).start();
         mResolveSubscription = Observable.just(mService)
