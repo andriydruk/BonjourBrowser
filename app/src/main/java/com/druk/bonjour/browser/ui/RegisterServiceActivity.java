@@ -17,6 +17,7 @@ package com.druk.bonjour.browser.ui;
 
 import com.druk.bonjour.browser.BonjourApplication;
 import com.druk.bonjour.browser.R;
+import com.druk.bonjour.browser.ui.adapter.TxtRecordsAdapter;
 import com.github.druk.rxdnssd.BonjourService;
 
 import android.app.Activity;
@@ -25,12 +26,19 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.util.ArrayMap;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatAutoCompleteTextView;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
@@ -39,9 +47,8 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.HashMap;
 import java.util.List;
-
-import rx.Subscription;
 
 public class RegisterServiceActivity extends AppCompatActivity {
 
@@ -82,11 +89,17 @@ public class RegisterServiceActivity extends AppCompatActivity {
 
     public static class RegisterServiceFragment extends Fragment implements TextView.OnEditorActionListener, View.OnClickListener {
 
-        EditText serviceNameEditText;
-        AppCompatAutoCompleteTextView regTypeEditText;
-        EditText portEditText;
+        private EditText serviceNameEditText;
+        private AppCompatAutoCompleteTextView regTypeEditText;
+        private EditText portEditText;
+        private TxtRecordsAdapter adapter;
+        private final ArrayMap<String, String> mRecords = new ArrayMap<>();
 
-        Subscription mSubscription;
+        @Override
+        public void onAttach(Context context) {
+            super.onAttach(context);
+            setHasOptionsMenu(true);
+        }
 
         @Nullable
         @Override
@@ -100,20 +113,74 @@ public class RegisterServiceActivity extends AppCompatActivity {
             regTypeEditText.setOnEditorActionListener(this);
             portEditText.setOnEditorActionListener(this);
 
+            adapter = new TxtRecordsAdapter(getContext(), new HashMap<>()){
+
+                @Override
+                public void onItemClick(View view, int position) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                    final String key = getKey(position);
+                    String value = getValue(position);
+                    // Inflate and set the layout for the dialog
+                    // Pass null as the parent view because its going in the dialog layout
+                    builder.setMessage("Do you really want to delete " + key + "=" + value + " ?")
+                            .setPositiveButton(android.R.string.ok, (dialog, id1) -> {
+                                mRecords.remove(key);
+                                adapter.swap(mRecords);
+                                adapter.notifyDataSetChanged();
+                            })
+                            .setNegativeButton(android.R.string.cancel, (dialog, id1) -> {
+
+                            });
+                    builder.create().show();
+                }
+            };
+
+            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+            recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false));
+            recyclerView.setAdapter(adapter);
+
             List<String> regTypes = BonjourApplication.getListRegTypes(getContext());
             regTypeEditText.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.select_dialog_item, regTypes));
 
-            view.findViewById(R.id.action_register).setOnClickListener(this);
+            view.findViewById(R.id.fab).setOnClickListener(this);
 
             return view;
         }
 
+        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+            inflater.inflate(R.menu.menu_registered_services, menu);
+        }
+
         @Override
-        public void onDestroyView() {
-            super.onDestroyView();
-            if (mSubscription != null && !mSubscription.isUnsubscribed()) {
-                mSubscription.unsubscribe();
+        public boolean onOptionsItemSelected(MenuItem item) {
+            // Handle action bar item clicks here. The action bar will
+            // automatically handle clicks on the Home/Up button, so long
+            // as you specify a parent activity in AndroidManifest.xml.
+            int id = item.getItemId();
+
+            //noinspection SimplifiableIfStatement
+            if (id == R.id.action_add) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
+                View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_add_txt_records, null);
+                final TextView keyTextView = (TextView) view.findViewById(R.id.key);
+                final TextView valueTextView = (TextView) view.findViewById(R.id.value);
+                // Inflate and set the layout for the dialog
+                // Pass null as the parent view because its going in the dialog layout
+                builder.setMessage("Add TXT record")
+                        .setView(view)
+                        .setPositiveButton(android.R.string.ok, (dialog, id1) -> {
+                            mRecords.put(keyTextView.getText().toString(), valueTextView.getText().toString());
+                            adapter.swap(mRecords);
+                            adapter.notifyDataSetChanged();
+                        })
+                        .setNegativeButton(android.R.string.cancel, (dialog, id1) -> {
+
+                        });
+                builder.create().show();
+                return true;
             }
+
+            return super.onOptionsItemSelected(item);
         }
 
         @Override
@@ -174,7 +241,7 @@ public class RegisterServiceActivity extends AppCompatActivity {
             if (isValid) {
                 if (getActivity() instanceof RegisterServiceActivity) {
                     ((RegisterServiceActivity) getActivity()).setResult(
-                            new BonjourService.Builder(0, 0, serviceName, reqType, null).port(portNumber).build());
+                            new BonjourService.Builder(0, 0, serviceName, reqType, null).port(portNumber).dnsRecords(mRecords).build());
                 }
             }
         }

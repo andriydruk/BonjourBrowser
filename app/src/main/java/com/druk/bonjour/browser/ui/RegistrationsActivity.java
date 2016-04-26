@@ -31,9 +31,6 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -71,7 +68,8 @@ public class RegistrationsActivity extends AppCompatActivity {
 
     public static class RegistrationsFragment extends Fragment {
 
-        private static final int REQUEST_CODE = 100;
+        private static final int REGISTER_REQUEST_CODE = 100;
+        private static final int STOP_REQUEST_CODE = 101;
 
         private ServiceAdapter adapter;
         private Subscription mSubscription;
@@ -86,47 +84,33 @@ public class RegistrationsActivity extends AppCompatActivity {
                 public void onBindViewHolder(ViewHolder holder, int position) {
                     holder.binding.text1.setText(getItem(position).getServiceName());
                     holder.binding.text2.setText(getItem(position).getRegType());
-                    holder.itemView.setOnClickListener(v -> {
-                        ServiceActivity.startActivity(getContext(), getItem(position), true);
-                    });
+                    holder.itemView.setOnClickListener(v ->
+                            startActivityForResult(ServiceActivity.startActivity(getContext(), getItem(position), true), STOP_REQUEST_CODE));
                 }
             };
-            setHasOptionsMenu(true);
-        }
-
-        public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-            inflater.inflate(R.menu.menu_registered_services, menu);
-        }
-
-        @Override
-        public boolean onOptionsItemSelected(MenuItem item) {
-            // Handle action bar item clicks here. The action bar will
-            // automatically handle clicks on the Home/Up button, so long
-            // as you specify a parent activity in AndroidManifest.xml.
-            int id = item.getItemId();
-
-            //noinspection SimplifiableIfStatement
-            if (id == R.id.action_add) {
-                startActivityForResult(RegisterServiceActivity.createIntent(getContext()), REQUEST_CODE);
-                return true;
-            }
-
-            return super.onOptionsItemSelected(item);
         }
 
         @Override
         public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            if (requestCode == REQUEST_CODE) {
+            if (requestCode == REGISTER_REQUEST_CODE) {
                 if (resultCode == Activity.RESULT_OK) {
                     BonjourService bonjourService = RegisterServiceActivity.parseResult(data);
                     mSubscription = BonjourApplication.getRegistrationManager(getContext())
                             .register(getContext(), bonjourService)
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(service -> {
+                                updateServices();
                             }, throwable -> {
                                 Toast.makeText(getContext(), "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                updateServices();
                             });
+                }
+                return;
+            }
+            else if (requestCode == STOP_REQUEST_CODE) {
+                if (resultCode == Activity.RESULT_OK) {
+                    BonjourService bonjourService = ServiceActivity.parseResult(data);
+                    BonjourApplication.getRegistrationManager(getContext()).unregister(bonjourService);
+                    updateServices();
                 }
                 return;
             }
@@ -141,19 +125,10 @@ public class RegistrationsActivity extends AppCompatActivity {
             mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false));
             mRecyclerView.setAdapter(adapter);
             mNoServiceView = view.findViewById(R.id.no_service);
-            return view;
-        }
-
-        @Override
-        public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-            super.onViewCreated(view, savedInstanceState);
-
-        }
-
-        @Override
-        public void onStart() {
-            super.onStart();
+            view.findViewById(R.id.fab).setOnClickListener(v ->
+                    startActivityForResult(RegisterServiceActivity.createIntent(getContext()), REGISTER_REQUEST_CODE));
             updateServices();
+            return view;
         }
 
         @Override

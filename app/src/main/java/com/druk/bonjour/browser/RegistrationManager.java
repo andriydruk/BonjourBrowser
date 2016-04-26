@@ -21,11 +21,11 @@ public class RegistrationManager {
 
     public Observable<BonjourService> register(Context context, BonjourService bonjourService) {
         PublishSubject<BonjourService> subject = PublishSubject.create();
-        Subscription subscription = BonjourApplication.getRxDnssd(context).register(bonjourService)
-                .doOnError(throwable -> mRegistrations.remove(bonjourService))
+        final Subscription[] subscriptions = new Subscription[1];
+        subscriptions[0] = BonjourApplication.getRxDnssd(context).register(bonjourService)
+                .doOnNext(service -> mRegistrations.put(service, subscriptions[0]))
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(subject);
-        mRegistrations.put(bonjourService, subscription);
         return subject;
     }
 

@@ -20,6 +20,7 @@ import com.druk.bonjour.browser.databinding.ActivityServiceBinding;
 import com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment;
 import com.github.druk.rxdnssd.BonjourService;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
@@ -38,9 +39,12 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
                 putExtra(ServiceActivity.SERVICE, service));
     }
 
-    public static void startActivity(Context context, BonjourService service, boolean isRegistered) {
-        context.startActivity(new Intent(context, ServiceActivity.class).
-                putExtra(ServiceActivity.SERVICE, service).putExtra(REGISTERED, isRegistered));
+    public static Intent startActivity(Context context, BonjourService service, boolean isRegistered) {
+        return new Intent(context, ServiceActivity.class).putExtra(ServiceActivity.SERVICE, service).putExtra(REGISTERED, isRegistered);
+    }
+
+    public static BonjourService parseResult(Intent intent) {
+        return intent.getParcelableExtra(SERVICE);
     }
 
     @Override
@@ -80,5 +84,11 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
     public void onServiceUpdated(BonjourService service) {
         mBinding.setService(service);
         mBinding.setTimestamp(System.currentTimeMillis());
+    }
+
+    @Override
+    public void onServiceStopped(BonjourService service) {
+        setResult(Activity.RESULT_OK, new Intent().putExtra(SERVICE, service));
+        finish();
     }
 }

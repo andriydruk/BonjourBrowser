@@ -49,5 +49,7 @@
     <string name="reg_type_eg">"Reg type (e.g. _ftp._tcp)"</string>
     <string name="port_eg">"Port (0-63535)"</string>
     <string name="txt_records">TXT Records</string>
+    <string name="key">Key</string>
+    <string name="value">Value</string>
 
 </resources>

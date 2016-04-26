@@ -17,7 +17,6 @@ package com.druk.bonjour.browser.ui;
 
 import com.druk.bonjour.browser.Config;
 import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.RegistrationManager;
 import com.druk.bonjour.browser.Utils;
 import com.druk.bonjour.browser.databinding.ActivityMainBinding;
 import com.druk.bonjour.browser.ui.fragment.RegTypeBrowserFragment;
@@ -28,7 +27,6 @@ import com.github.druk.rxdnssd.BonjourService;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
-import android.provider.Settings;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -151,5 +149,10 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
     @Override
     public void onServiceUpdated(BonjourService service) {
         mBinding.setLastUpdate(System.currentTimeMillis());
+    }
+
+    @Override
+    public void onServiceStopped(BonjourService service) {
+        //Ignore this
     }
 }

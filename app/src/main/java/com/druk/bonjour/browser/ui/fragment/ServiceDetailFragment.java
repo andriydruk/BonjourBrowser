@@ -22,7 +22,6 @@ import android.view.ViewGroup;
 import java.util.Map;
 
 import rx.Observable;
-import rx.Scheduler;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
@@ -83,6 +82,9 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);
         updateUI(mService, false);
+        if (isRegistered){
+            resolve(false);
+        }
         return mRecyclerView;
     }
 
@@ -119,12 +121,15 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     @Override
     public void onClick(View v) {
         if (isRegistered){
-            BonjourApplication.getRegistrationManager(getContext()).unregister(mService);
-            getActivity().finish();
+            ((ServiceDetailListener)getActivity()).onServiceStopped(mService);
             return;
         }
-        RxDnssd mRxDnssd = BonjourApplication.getRxDnssd(getContext());
         v.animate().rotationBy(180).start();
+        resolve(true);
+    }
+
+    private void resolve(boolean withSnakeBar){
+        RxDnssd mRxDnssd = BonjourApplication.getRxDnssd(getContext());
         mResolveSubscription = Observable.just(mService)
                 .compose(mRxDnssd.resolve())
                 .compose(mRxDnssd.queryRecords())
@@ -134,7 +139,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
                     if (bonjourService.isLost()) {
                         return;
                     }
-                    ServiceDetailFragment.this.updateUI(bonjourService, true);
+                    ServiceDetailFragment.this.updateUI(bonjourService, withSnakeBar);
                 }, throwable -> {
                     Log.e("DNSSD", "Error: ", throwable);
                 });
@@ -142,5 +147,6 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
 
     public interface ServiceDetailListener{
         void onServiceUpdated(BonjourService service);
+        void onServiceStopped(BonjourService service);
     }
 }
