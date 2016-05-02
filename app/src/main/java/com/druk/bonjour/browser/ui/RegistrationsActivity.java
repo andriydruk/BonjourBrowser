@@ -141,14 +141,8 @@ public class RegistrationsActivity extends AppCompatActivity {
 
         private void updateServices() {
             List<BonjourService> registeredServices = BonjourApplication.getRegistrationManager(getContext()).getRegisteredServices();
-            if (registeredServices.size() > 0) {
-                adapter.swap(registeredServices);
-                mRecyclerView.setVisibility(View.VISIBLE);
-                mNoServiceView.setVisibility(View.GONE);
-            } else {
-                mRecyclerView.setVisibility(View.GONE);
-                mNoServiceView.setVisibility(View.VISIBLE);
-            }
+            adapter.swap(registeredServices);
+            mNoServiceView.setVisibility(registeredServices.size() > 0 ? View.GONE : View.VISIBLE);
         }
     }
 }
