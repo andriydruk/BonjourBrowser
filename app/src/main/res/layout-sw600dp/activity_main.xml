@@ -24,9 +24,6 @@
                 <variable name="regType" type="java.lang.String"/>
                 <variable name="serviceName" type="java.lang.String"/>
                 <variable name="lastUpdate" type="java.lang.Long"/>
-                <variable
-                        name="fabOnClickListener"
-                        type="android.view.View.OnClickListener"/>
         </data>
         <android.support.design.widget.CoordinatorLayout
                 android:id="@+id/main_content"
@@ -135,17 +132,6 @@
                         </RelativeLayout>
 
                 </android.support.v4.widget.SlidingPaneLayout>
-
-                <android.support.design.widget.FloatingActionButton
-                        android:id="@+id/fab"
-                        android:layout_height="wrap_content"
-                        android:layout_width="wrap_content"
-                        android:layout_gravity="end|right|bottom"
-                        app:srcCompat="@drawable/ic_autorenew"
-                        android:layout_margin="@dimen/fab_margin"
-                        android:visibility="@{serviceName == null ? View.GONE : View.VISIBLE}"
-                        android:onClick="@{fabOnClickListener}"
-                        android:clickable="true"/>
 
         </android.support.design.widget.CoordinatorLayout>
 </layout>

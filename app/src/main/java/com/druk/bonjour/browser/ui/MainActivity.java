@@ -54,7 +54,6 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
                     replace(R.id.first_panel, RegTypeBrowserFragment.newInstance(Config.TCP_REG_TYPE_SUFFIX)).commit();
         }
         else{
-            mBinding.setFabOnClickListener((ServiceDetailFragment) getSupportFragmentManager().findFragmentById(R.id.third_panel));
             mBinding.setDomain(savedInstanceState.getString("domain"));
             mBinding.setRegType(savedInstanceState.getString("reg_type"));
             mBinding.setServiceName(savedInstanceState.getString("service_name"));
@@ -105,7 +104,6 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
                 if (fragment != null) {
                     getSupportFragmentManager().beginTransaction().remove(fragment).commit();
                 }
-                mBinding.setFabOnClickListener(null);
                 mBinding.setRegType(serviceRegType);
                 mBinding.setServiceName(null);
             }
@@ -115,10 +113,8 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
         }
         else{
             ServiceDetailFragment fragment = ServiceDetailFragment.newInstance(service);
-            getSupportFragmentManager().beginTransaction().
-                    replace(R.id.third_panel, fragment).commit();
+            getSupportFragmentManager().beginTransaction().replace(R.id.third_panel, fragment).commit();
             mBinding.slidingPanelLayout.closePane();
-            mBinding.setFabOnClickListener(fragment);
             mBinding.setServiceName(service.getServiceName());
         }
     }

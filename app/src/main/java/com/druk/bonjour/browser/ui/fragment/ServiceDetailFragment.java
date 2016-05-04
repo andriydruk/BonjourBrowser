@@ -29,11 +29,9 @@ import rx.schedulers.Schedulers;
 public class ServiceDetailFragment extends Fragment implements View.OnClickListener {
 
     private static final String KEY_SERVICE = "com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment.key_service";
-    private static final String KEY_REGISTERED = "com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment.key_registered";
 
     private BonjourService mService;
     private Subscription mResolveSubscription;
-    private boolean isRegistered;
 
     private TxtRecordsAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -42,15 +40,6 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         ServiceDetailFragment fragment = new ServiceDetailFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(KEY_SERVICE, service);
-        fragment.setArguments(bundle);
-        return fragment;
-    }
-
-    public static ServiceDetailFragment newInstance(BonjourService service, boolean isRegistered){
-        ServiceDetailFragment fragment = new ServiceDetailFragment();
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(KEY_SERVICE, service);
-        bundle.putBoolean(KEY_REGISTERED, isRegistered);
         fragment.setArguments(bundle);
         return fragment;
     }
@@ -69,7 +58,6 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             mService = getArguments().getParcelable(KEY_SERVICE);
-            isRegistered = getArguments().getBoolean(KEY_REGISTERED, false);
         }
         mAdapter = new TxtRecordsAdapter(getActivity(), new ArrayMap<>());
     }
@@ -82,15 +70,31 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);
         updateUI(mService, false);
-        if (isRegistered){
-            resolve(false);
-        }
         return mRecyclerView;
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
+    public void onStart() {
+        super.onStart();
+        RxDnssd mRxDnssd = BonjourApplication.getRxDnssd(getContext());
+        mResolveSubscription = Observable.just(mService)
+                .compose(mRxDnssd.resolve())
+                .compose(mRxDnssd.queryRecords())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(bonjourService -> {
+                    if (bonjourService.isLost()) {
+                        return;
+                    }
+                    ServiceDetailFragment.this.updateUI(bonjourService, false);
+                }, throwable -> {
+                    Log.e("DNSSD", "Error: ", throwable);
+                });
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
         if (mResolveSubscription != null) {
             mResolveSubscription.unsubscribe();
         }
@@ -120,29 +124,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        if (isRegistered){
-            ((ServiceDetailListener)getActivity()).onServiceStopped(mService);
-            return;
-        }
-        v.animate().rotationBy(180).start();
-        resolve(true);
-    }
-
-    private void resolve(boolean withSnakeBar){
-        RxDnssd mRxDnssd = BonjourApplication.getRxDnssd(getContext());
-        mResolveSubscription = Observable.just(mService)
-                .compose(mRxDnssd.resolve())
-                .compose(mRxDnssd.queryRecords())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bonjourService -> {
-                    if (bonjourService.isLost()) {
-                        return;
-                    }
-                    ServiceDetailFragment.this.updateUI(bonjourService, withSnakeBar);
-                }, throwable -> {
-                    Log.e("DNSSD", "Error: ", throwable);
-                });
+        ((ServiceDetailListener)getActivity()).onServiceStopped(mService);
     }
 
     public interface ServiceDetailListener{

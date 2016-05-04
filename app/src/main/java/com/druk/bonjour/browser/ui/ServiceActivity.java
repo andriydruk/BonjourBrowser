@@ -26,6 +26,7 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.View;
 
 public class ServiceActivity extends AppCompatActivity implements ServiceDetailFragment.ServiceDetailListener {
 
@@ -63,15 +64,17 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
 
         if (savedInstanceState == null){
             BonjourService service = getIntent().getParcelableExtra(SERVICE);
-            serviceDetailFragment = ServiceDetailFragment.newInstance(service, isRegistered);
+            serviceDetailFragment = ServiceDetailFragment.newInstance(service);
             getSupportFragmentManager().beginTransaction().replace(R.id.content, serviceDetailFragment).commit();
         }
         else {
             serviceDetailFragment = (ServiceDetailFragment) getSupportFragmentManager().findFragmentById(R.id.content);
         }
 
-        mBinding.fab.setImageResource(isRegistered ? R.drawable.ic_stop : R.drawable.ic_autorenew);
-        mBinding.fab.setOnClickListener(serviceDetailFragment);
+        if (isRegistered) {
+            mBinding.fab.setVisibility(View.VISIBLE);
+            mBinding.fab.setOnClickListener(serviceDetailFragment);
+        }
     }
 
     @Override
