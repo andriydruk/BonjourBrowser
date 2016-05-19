@@ -1,15 +1,22 @@
 apply plugin: 'com.android.application'
-apply plugin: 'me.tatarka.retrolambda'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '23.0.3'
+    buildToolsVersion '24.0.0 rc4'
 
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 23
-        versionCode 11
-        versionName "1.4.0"
+        versionCode 13
+        versionName "1.4.1"
+
+        jackOptions {
+            enabled true
+        }
+    }
+
+    compileOptions {
+        incremental false
     }
 
     buildTypes {
@@ -23,15 +30,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
     }
-
-    dataBinding {
-        enabled true
-    }
 }
 
 dependencies {
     //Android Support Libraries Version
-    def supportLibrary = '23.3.0'
+    def supportLibrary = '23.4.0'
 
     compile 'com.github.andriydruk:rxdnssd:0.8.0'
     compile "com.android.support:support-v4:$supportLibrary"

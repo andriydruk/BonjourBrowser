@@ -18,49 +18,72 @@ package com.druk.bonjour.browser.ui;
 import com.druk.bonjour.browser.Config;
 import com.druk.bonjour.browser.R;
 import com.druk.bonjour.browser.Utils;
-import com.druk.bonjour.browser.databinding.ActivityMainBinding;
 import com.druk.bonjour.browser.ui.fragment.RegTypeBrowserFragment;
 import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
 import com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment;
 import com.github.druk.rxdnssd.BonjourService;
 
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SlidingPaneLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import android.view.View;
+import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements ServiceBrowserFragment.ServiceListener, ServiceDetailFragment.ServiceDetailListener {
 
-    private ActivityMainBinding mBinding;
+    private static final String PARAM_DOMAIN = "param_domain";
+    private static final String PARAM_REG_TYPE = "param_reg_type";
+    private static final String PARAM_SERVICE_NAME = "param_service_name";
+
+    private SlidingPaneLayout slidingPanelLayout;
+    private TextView noServiceTextView;
+    private TextView serviceNameTextView;
+    private TextView lastUpdatedTextView;
+
+    private String domain;
+    private String regType;
+    private String serviceName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_main);
-        mBinding.setDomain("local.");
+        setContentView(R.layout.activity_main);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        slidingPanelLayout = (SlidingPaneLayout) findViewById(R.id.sliding_panel_layout);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        setSupportActionBar(toolbar);
+        if (slidingPanelLayout != null) {
+            slidingPanelLayout.openPane();
+            noServiceTextView = (TextView) findViewById(R.id.no_service);
+            serviceNameTextView = (TextView) findViewById(R.id.service_name);
+            lastUpdatedTextView = (TextView) findViewById(R.id.last_updated);
+        }
 
         if (savedInstanceState == null) {
+            domain = "local.";
             getSupportFragmentManager().beginTransaction().
                     replace(R.id.first_panel, RegTypeBrowserFragment.newInstance(Config.TCP_REG_TYPE_SUFFIX)).commit();
         }
         else{
-            mBinding.setDomain(savedInstanceState.getString("domain"));
-            mBinding.setRegType(savedInstanceState.getString("reg_type"));
-            mBinding.setServiceName(savedInstanceState.getString("service_name"));
+            domain = savedInstanceState.getString(PARAM_DOMAIN);
+            regType = savedInstanceState.getString(PARAM_REG_TYPE);
+            serviceName = savedInstanceState.getString(PARAM_SERVICE_NAME);
         }
 
-        if (mBinding.slidingPanelLayout != null){
-            mBinding.slidingPanelLayout.openPane();
+        updateNavigation();
+    }
+
+    private void updateNavigation(){
+        setTitle(domain + ((regType != null) ? "   >   " + regType + ((serviceName != null) ? "   >   " + serviceName : "") : ""));
+        if (slidingPanelLayout != null){
+            noServiceTextView.setVisibility(serviceName == null ? View.VISIBLE : View.GONE);
+            serviceNameTextView.setVisibility(serviceName == null ? View.GONE : View.VISIBLE);
+            serviceNameTextView.setText(serviceName);
+            lastUpdatedTextView.setVisibility(serviceName == null ? View.GONE : View.VISIBLE);
         }
     }
 
@@ -97,15 +120,16 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
             String serviceRegType = service.getServiceName() + "." + regTypeParts[0] + ".";
             String serviceDomain = regTypeParts[1] + ".";
 
-            if (mBinding.slidingPanelLayout != null) {
+            if (slidingPanelLayout != null) {
                 getSupportFragmentManager().beginTransaction().
                         replace(R.id.second_panel, ServiceBrowserFragment.newInstance(serviceDomain, serviceRegType)).commit();
                 Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.third_panel);
                 if (fragment != null) {
                     getSupportFragmentManager().beginTransaction().remove(fragment).commit();
                 }
-                mBinding.setRegType(serviceRegType);
-                mBinding.setServiceName(null);
+                this.regType = serviceRegType;
+                this.serviceName = null;
+                updateNavigation();
             }
             else{
                 RegTypeActivity.startActivity(this, serviceRegType, serviceDomain);
@@ -114,37 +138,23 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
         else{
             ServiceDetailFragment fragment = ServiceDetailFragment.newInstance(service);
             getSupportFragmentManager().beginTransaction().replace(R.id.third_panel, fragment).commit();
-            mBinding.slidingPanelLayout.closePane();
-            mBinding.setServiceName(service.getServiceName());
+            slidingPanelLayout.closePane();
+            this.serviceName = service.getServiceName();
+            updateNavigation();
         }
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        // FIXME: 9/22/15
-        //outState.putString("domain", mBinding.getDomain());
-        //outState.putString("reg_type", mBinding.getRegType());
-        //outState.putString("service_name", mBinding.getServiceName());
-
-        //~~~~  Temporary solution ~~~~
-        try {
-            Method getDomainMethod = mBinding.getClass().getMethod("getDomain");
-            Method getRegTypeMethod = mBinding.getClass().getMethod("getRegType");
-            Method getServiceNameMethod = mBinding.getClass().getMethod("getServiceName");
-            outState.putString("domain", (String) getDomainMethod.invoke(mBinding));
-            outState.putString("reg_type", (String) getRegTypeMethod.invoke(mBinding));
-            outState.putString("service_name",(String) getServiceNameMethod.invoke(mBinding));
-        } catch (SecurityException | NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {
-            e.printStackTrace();
-        }
-        //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
+        outState.putString(PARAM_DOMAIN, domain);
+        outState.putString(PARAM_REG_TYPE, regType);
+        outState.putString(PARAM_SERVICE_NAME, serviceName);
         super.onSaveInstanceState(outState);
     }
 
     @Override
     public void onServiceUpdated(BonjourService service) {
-        mBinding.setLastUpdate(System.currentTimeMillis());
+        lastUpdatedTextView.setText(getString(R.string.last_update, System.currentTimeMillis()));
     }
 
     @Override

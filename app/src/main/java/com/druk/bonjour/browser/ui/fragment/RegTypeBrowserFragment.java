@@ -60,11 +60,11 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
                 String regType = domain.getServiceName() + "." + domain.getRegType().split(Config.REG_TYPE_SEPARATOR)[0] + ".";
                 String regTypeDescription = BonjourApplication.getRegTypeDescription(viewHolder.itemView.getContext(), regType);
                 if (regTypeDescription != null) {
-                    viewHolder.binding.text1.setText(regType + " (" + regTypeDescription + ")");
+                    viewHolder.text1.setText(regType + " (" + regTypeDescription + ")");
                 } else {
-                    viewHolder.binding.text1.setText(regType);
+                    viewHolder.text1.setText(regType);
                 }
-                viewHolder.binding.text2.setText(domain.serviceCount + " services");
+                viewHolder.text2.setText(domain.serviceCount + " services");
                 viewHolder.itemView.setOnClickListener(mListener);
                 viewHolder.itemView.setBackgroundResource(getBackground(i));
             }

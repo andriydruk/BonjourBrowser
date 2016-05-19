@@ -16,24 +16,29 @@
 package com.druk.bonjour.browser.ui;
 
 import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.databinding.ActivityServiceBinding;
+import com.druk.bonjour.browser.Utils;
 import com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment;
 import com.github.druk.rxdnssd.BonjourService;
 
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
-import android.databinding.DataBindingUtil;
 import android.os.Bundle;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
+import android.widget.TextView;
 
 public class ServiceActivity extends AppCompatActivity implements ServiceDetailFragment.ServiceDetailListener {
 
     private static final String SERVICE = "mService";
     private static final String REGISTERED = "registered";
 
-    private ActivityServiceBinding mBinding;
+    private TextView mServiceName;
+    private TextView mRegType;
+    private TextView mDomain;
+    private TextView mLastTimestamp;
 
     public static void startActivity(Context context, BonjourService service) {
         context.startActivity(new Intent(context, ServiceActivity.class).
@@ -51,13 +56,17 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        mBinding = DataBindingUtil.setContentView(this, R.layout.activity_service);
-
-        setSupportActionBar(mBinding.toolbar);
+        setContentView(R.layout.activity_service);
+        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
+
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        mServiceName = (TextView) findViewById(R.id.service_name);
+        mRegType = (TextView) findViewById(R.id.reg_type);
+        mDomain = (TextView) findViewById(R.id.domain);
+        mLastTimestamp = (TextView) findViewById(R.id.last_timestamp);
 
         ServiceDetailFragment serviceDetailFragment;
         boolean isRegistered = getIntent().getBooleanExtra(REGISTERED, false);
@@ -71,9 +80,9 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
             serviceDetailFragment = (ServiceDetailFragment) getSupportFragmentManager().findFragmentById(R.id.content);
         }
 
-        if (isRegistered) {
-            mBinding.fab.setVisibility(View.VISIBLE);
-            mBinding.fab.setOnClickListener(serviceDetailFragment);
+        if (isRegistered && fab != null) {
+            fab.setVisibility(View.VISIBLE);
+            fab.setOnClickListener(serviceDetailFragment);
         }
     }
 
@@ -85,8 +94,10 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
 
     @Override
     public void onServiceUpdated(BonjourService service) {
-        mBinding.setService(service);
-        mBinding.setTimestamp(System.currentTimeMillis());
+        mServiceName.setText(service.getServiceName());
+        mDomain.setText(getString(R.string.domain, service.getDomain()));
+        mRegType.setText(getString(R.string.reg_type, service.getRegType()));
+        mLastTimestamp.setText(getString(R.string.last_update, Utils.formatTime(System.currentTimeMillis())));
     }
 
     @Override

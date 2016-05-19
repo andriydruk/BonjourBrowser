@@ -82,8 +82,8 @@ public class RegistrationsActivity extends AppCompatActivity {
             adapter = new ServiceAdapter(getContext()) {
                 @Override
                 public void onBindViewHolder(ViewHolder holder, int position) {
-                    holder.binding.text1.setText(getItem(position).getServiceName());
-                    holder.binding.text2.setText(getItem(position).getRegType());
+                    holder.text1.setText(getItem(position).getServiceName());
+                    holder.text2.setText(getItem(position).getRegType());
                     holder.itemView.setOnClickListener(v ->
                             startActivityForResult(ServiceActivity.startActivity(getContext(), getItem(position), true), STOP_REQUEST_CODE));
                 }

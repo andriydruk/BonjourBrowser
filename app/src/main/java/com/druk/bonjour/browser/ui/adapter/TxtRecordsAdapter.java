@@ -16,12 +16,10 @@
 package com.druk.bonjour.browser.ui.adapter;
 
 import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.databinding.TwoTextItemBinding;
 
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import android.databinding.DataBindingUtil;
 import android.support.design.widget.Snackbar;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.widget.RecyclerView;
@@ -29,6 +27,7 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.Map;
 import java.util.TreeMap;
@@ -54,8 +53,8 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, final int position) {
-        holder.mBinding.text1.setText(getKey(position));
-        holder.mBinding.text2.setText(getValue(position));
+        holder.text1.setText(getKey(position));
+        holder.text2.setText(getValue(position));
         holder.itemView.setOnClickListener(v -> onItemClick(v, position));
     }
 
@@ -90,11 +89,13 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        TwoTextItemBinding mBinding;
+        public TextView text1;
+        public TextView text2;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            mBinding = DataBindingUtil.bind(itemView);
+            text1 = (TextView) itemView.findViewById(R.id.text1);
+            text2 = (TextView) itemView.findViewById(R.id.text2);
         }
     }
 }

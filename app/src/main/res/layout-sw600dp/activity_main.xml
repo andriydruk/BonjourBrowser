@@ -14,126 +14,112 @@
   v See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+        android:id="@+id/main_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
         xmlns:card_view="http://schemas.android.com/tools">
-        <data>
-                <import type="android.view.View"/>
-                <import type="com.druk.bonjour.browser.Utils"/>
-                <variable name="domain" type="java.lang.String"/>
-                <variable name="regType" type="java.lang.String"/>
-                <variable name="serviceName" type="java.lang.String"/>
-                <variable name="lastUpdate" type="java.lang.Long"/>
-        </data>
-        <android.support.design.widget.CoordinatorLayout
-                android:id="@+id/main_content"
+
+        <android.support.design.widget.AppBarLayout
+                android:id="@+id/appbar"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent">
+                android:layout_height="wrap_content"
+                android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
 
-                <android.support.design.widget.AppBarLayout
-                        android:id="@+id/appbar"
+                <android.support.v7.widget.Toolbar
+                        android:id="@+id/toolbar"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:theme="@style/ThemeOverlay.AppCompat.Dark.ActionBar">
+                        android:layout_height="?attr/actionBarSize"
+                        android:background="?attr/colorPrimary"
+                        app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
-                        <android.support.v7.widget.Toolbar
-                                android:id="@+id/toolbar"
-                                android:layout_width="match_parent"
-                                android:layout_height="?attr/actionBarSize"
-                                android:background="?attr/colorPrimary"
-                                app:popupTheme="@style/ThemeOverlay.AppCompat.Light"
-                                app:title='@{domain + ((regType != null) ? "   >   " + regType + ((serviceName != null) ? "   >   " + serviceName : "") : "")}'/>
+        </android.support.design.widget.AppBarLayout>
 
-                </android.support.design.widget.AppBarLayout>
+        <android.support.v4.widget.SlidingPaneLayout
+                android:id="@+id/sliding_panel_layout"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginTop="?attr/actionBarSize">
 
-                <android.support.v4.widget.SlidingPaneLayout
-                        android:id="@+id/sliding_panel_layout"
-                        android:layout_width="match_parent"
+                <FrameLayout
+                        android:id="@+id/first_panel"
+                        android:layout_width="@dimen/panel_width"
                         android:layout_height="match_parent"
-                        android:layout_marginTop="?attr/actionBarSize">
+                        android:layout_gravity="start|left"
+                        android:background="@android:color/white"
+                        android:elevation="5dp"/>
+
+                <RelativeLayout
+                        android:layout_width="@dimen/content_width"
+                        android:layout_weight="1"
+                        android:layout_height="match_parent"
+                        android:layout_gravity="end|right"
+                        android:background="@android:color/white"
+                        android:elevation="10dp">
 
                         <FrameLayout
-                                android:id="@+id/first_panel"
+                                android:id="@+id/second_panel"
                                 android:layout_width="@dimen/panel_width"
-                                android:layout_height="match_parent"
-                                android:layout_gravity="start|left"
                                 android:background="@android:color/white"
-                                android:elevation="5dp"/>
+                                android:layout_height="match_parent"/>
 
-                        <RelativeLayout
-                                android:layout_width="@dimen/content_width"
-                                android:layout_weight="1"
+                        <android.support.v7.widget.CardView
+                                android:id="@+id/third_panel"
+                                android:layout_gravity="center"
+                                android:layout_width="match_parent"
+                                android:layout_toRightOf="@id/second_panel"
+                                android:layout_toEndOf="@id/second_panel"
                                 android:layout_height="match_parent"
-                                android:layout_gravity="end|right"
-                                android:background="@android:color/white"
-                                android:elevation="10dp">
-
-                                <FrameLayout
-                                        android:id="@+id/second_panel"
-                                        android:layout_width="@dimen/panel_width"
-                                        android:background="@android:color/white"
-                                        android:layout_height="match_parent"/>
-
-                                <android.support.v7.widget.CardView
-                                        android:id="@+id/third_panel"
-                                        android:layout_gravity="center"
-                                        android:layout_width="match_parent"
-                                        android:layout_toRightOf="@id/second_panel"
-                                        android:layout_toEndOf="@id/second_panel"
-                                        android:layout_height="match_parent"
-                                        card_view:cardCornerRadius="4dp"
-                                        android:gravity="center"
-                                        android:elevation="5dp"
-                                        android:layout_marginLeft="@dimen/activity_vertical_margin"
-                                        android:layout_marginRight="@dimen/activity_vertical_margin"
-                                        android:layout_marginTop="88dp"
-                                        android:layout_marginBottom="88dp">
-
-                                        <TextView
-                                                android:id="@+id/no_service"
-                                                android:layout_width="match_parent"
-                                                android:layout_height="wrap_content"
-                                                android:text="@string/no_service"
-                                                android:gravity="center"
-                                                android:textColor="@android:color/darker_gray"
-                                                android:layout_margin="@dimen/activity_vertical_margin"
-                                                android:visibility="@{serviceName == null ? View.VISIBLE : View.GONE}"
-                                                android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
-
-                                </android.support.v7.widget.CardView>
+                                card_view:cardCornerRadius="4dp"
+                                android:gravity="center"
+                                android:elevation="5dp"
+                                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                                android:layout_marginRight="@dimen/activity_vertical_margin"
+                                android:layout_marginTop="88dp"
+                                android:layout_marginBottom="44dp">
 
                                 <TextView
+                                        android:id="@+id/no_service"
                                         android:layout_width="match_parent"
-                                        android:layout_height="88dp"
+                                        android:layout_height="wrap_content"
+                                        android:text="@string/no_service"
                                         android:gravity="center"
-                                        android:textColor="@color/secondary_text"
-                                        android:layout_marginLeft="@dimen/activity_vertical_margin"
-                                        android:layout_marginRight="@dimen/activity_vertical_margin"
-                                        android:visibility="@{serviceName == null ? View.GONE : View.VISIBLE}"
-                                        android:text="@{serviceName}"
-                                        android:layout_toRightOf="@id/second_panel"
-                                        android:layout_toEndOf="@id/second_panel"
-                                        android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
+                                        android:textColor="@android:color/darker_gray"
+                                        android:layout_margin="@dimen/activity_vertical_margin"
+                                        android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
 
-                                <TextView
-                                        android:layout_width="match_parent"
-                                        android:layout_height="80dp"
-                                        android:gravity="top|center_horizontal"
-                                        android:textColor="@color/secondary_text"
-                                        android:layout_marginLeft="@dimen/activity_vertical_margin"
-                                        android:layout_marginRight="@dimen/activity_vertical_margin"
-                                        android:layout_alignParentBottom="true"
-                                        android:visibility="@{serviceName == null ? View.GONE : View.VISIBLE}"
-                                        android:text="@{@string/last_update(Utils.formatTime(lastUpdate))}"
-                                        android:layout_toRightOf="@id/second_panel"
-                                        android:layout_toEndOf="@id/second_panel"
-                                        android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+                        </android.support.v7.widget.CardView>
 
-                        </RelativeLayout>
+                        <TextView
+                                android:id="@+id/service_name"
+                                android:layout_width="match_parent"
+                                android:layout_height="88dp"
+                                android:gravity="center"
+                                android:textColor="@color/secondary_text"
+                                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                                android:layout_marginRight="@dimen/activity_vertical_margin"
+                                android:layout_toRightOf="@id/second_panel"
+                                android:layout_toEndOf="@id/second_panel"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Headline"/>
 
-                </android.support.v4.widget.SlidingPaneLayout>
+                        <TextView
+                                android:id="@+id/last_updated"
+                                android:layout_width="match_parent"
+                                android:layout_height="40dp"
+                                android:gravity="top|center_horizontal"
+                                android:textColor="@color/secondary_text"
+                                android:layout_marginLeft="@dimen/activity_vertical_margin"
+                                android:layout_marginRight="@dimen/activity_vertical_margin"
+                                android:layout_alignParentBottom="true"
+                                android:layout_toRightOf="@id/second_panel"
+                                android:layout_toEndOf="@id/second_panel"
+                                android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
-        </android.support.design.widget.CoordinatorLayout>
-</layout>
+                </RelativeLayout>
 
+        </android.support.v4.widget.SlidingPaneLayout>
+
+</android.support.design.widget.CoordinatorLayout>
 

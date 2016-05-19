@@ -104,15 +104,15 @@ public class ServiceBrowserFragment<T> extends Fragment {
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, int i) {
                 BonjourService service = getItem(i);
-                viewHolder.binding.text1.setText(service.getServiceName());
+                viewHolder.text1.setText(service.getServiceName());
                 if (service.getInet4Address() != null) {
-                    viewHolder.binding.text2.setText(service.getInet4Address().getHostAddress());
+                    viewHolder.text2.setText(service.getInet4Address().getHostAddress());
                 }
                 else if (service.getInet6Address() != null) {
-                    viewHolder.binding.text2.setText(service.getInet6Address().getHostAddress());
+                    viewHolder.text2.setText(service.getInet6Address().getHostAddress());
                 }
                 else {
-                    viewHolder.binding.text2.setText(R.string.not_resolved_yet);
+                    viewHolder.text2.setText(R.string.not_resolved_yet);
                 }
                 viewHolder.itemView.setOnClickListener(mListener);
                 viewHolder.itemView.setBackgroundResource(getBackground(i));

@@ -37,9 +37,8 @@
             android:label="@string/title_activity_bonjour_service" >
         </activity>
         <activity
-            android:name=".ui.LicensesActivity"
-            android:label="@string/licences"
-            android:parentActivityName=".ui.MainActivity" >
+                android:name=".ui.LicensesActivity"
+                android:label="@string/licences">
         </activity>
         <activity android:name=".ui.HTMLViewerActivity" >
         </activity>

@@ -14,9 +14,7 @@
   v See the License for the specific language governing permissions and
   ~ limitations under the License.
 -->
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
-    <data/>
-    <LinearLayout
+<LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:minHeight="?attr/listPreferredItemHeight"
@@ -24,9 +22,10 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingStart="@dimen/activity_horizontal_margin"
-        android:paddingEnd="@dimen/activity_horizontal_margin">
+        android:paddingEnd="@dimen/activity_horizontal_margin"
+        xmlns:android="http://schemas.android.com/apk/res/android">
 
-        <android.support.v7.widget.AppCompatTextView
+    <android.support.v7.widget.AppCompatTextView
             android:id="@+id/text1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -34,12 +33,11 @@
             android:textColor="@color/primary_text"
             android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
 
-        <android.support.v7.widget.AppCompatTextView
+    <android.support.v7.widget.AppCompatTextView
             android:id="@+id/text2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:textColor="@color/secondary_text"
             android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
 
-    </LinearLayout>
-</layout>
+</LinearLayout>

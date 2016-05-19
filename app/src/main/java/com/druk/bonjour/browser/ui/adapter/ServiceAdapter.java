@@ -16,16 +16,15 @@
 package com.druk.bonjour.browser.ui.adapter;
 
 import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.databinding.TwoTextItemBinding;
 import com.github.druk.rxdnssd.BonjourService;
 
 import android.content.Context;
-import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,11 +102,13 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
-        public TwoTextItemBinding binding;
+        public TextView text1;
+        public TextView text2;
 
         public ViewHolder(View itemView) {
             super(itemView);
-            binding = DataBindingUtil.bind(itemView);
+            text1 = (TextView) itemView.findViewById(R.id.text1);
+            text2 = (TextView) itemView.findViewById(R.id.text2);
         }
     }
 }
