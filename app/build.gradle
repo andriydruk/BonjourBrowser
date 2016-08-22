@@ -1,14 +1,14 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion '24.0.0 rc4'
+    compileSdkVersion 24
+    buildToolsVersion '24.0.0'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 23
-        versionCode 13
-        versionName "1.4.1"
+        targetSdkVersion 24
+        versionCode 14
+        versionName "1.4.2"
 
         jackOptions {
             enabled true
@@ -34,9 +34,9 @@ android {
 
 dependencies {
     //Android Support Libraries Version
-    def supportLibrary = '23.4.0'
+    def supportLibrary = '24.2.0'
 
-    compile 'com.github.andriydruk:rxdnssd:0.8.0'
+    compile 'com.github.andriydruk:rxdnssd:0.8.2'
     compile "com.android.support:support-v4:$supportLibrary"
     compile "com.android.support:appcompat-v7:$supportLibrary"
     compile "com.android.support:design:$supportLibrary"

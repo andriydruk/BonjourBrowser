@@ -18,8 +18,6 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="com.druk.bonjour.browser">
 
-    <uses-permission android:name="android.permission.INTERNET" />
-
     <application
         android:name=".BonjourApplication"
         android:allowBackup="false"
