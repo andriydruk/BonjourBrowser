@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjour.browser.ui.fragment;
+package com.druk.servicebrowser.ui.fragment;
 
-import com.druk.bonjour.browser.BonjourApplication;
-import com.druk.bonjour.browser.Config;
-import com.druk.bonjour.browser.ui.adapter.ServiceAdapter;
+import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.Config;
+import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
 import com.github.druk.rxdnssd.BonjourService;
 
 import android.os.Bundle;
@@ -35,9 +35,10 @@ import rx.functions.Action0;
 import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
-import static com.druk.bonjour.browser.Config.EMPTY_DOMAIN;
-import static com.druk.bonjour.browser.Config.TCP_REG_TYPE_SUFFIX;
-import static com.druk.bonjour.browser.Config.UDP_REG_TYPE_SUFFIX;
+import static com.druk.servicebrowser.Config.EMPTY_DOMAIN;
+import static com.druk.servicebrowser.Config.TCP_REG_TYPE_SUFFIX;
+import static com.druk.servicebrowser.Config.UDP_REG_TYPE_SUFFIX;
+
 
 public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 
@@ -47,7 +48,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     private final HashMap<String, BonjourDomain> mServices = new HashMap<>();
 
     public static Fragment newInstance(String regType) {
-        return fillArguments(new RegTypeBrowserFragment(), Config.EMPTY_DOMAIN, regType);
+        return fillArguments(new RegTypeBrowserFragment(), EMPTY_DOMAIN, regType);
     }
 
     @Override

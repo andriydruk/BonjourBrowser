@@ -13,11 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjour.test;
+package com.druk.servicebrowser;
 
-import com.druk.bonjour.browser.Config;
-import com.druk.bonjour.browser.dnssd.BonjourService;
-import com.druk.bonjour.browser.dnssd.RxDNSSD;
+import com.github.druk.rxdnssd.RxDnssd;
+import com.github.druk.rxdnssd.RxDnssdBindable;
 
 import android.test.InstrumentationTestCase;
 import android.util.Log;
@@ -26,42 +25,44 @@ import java.util.HashMap;
 
 import rx.Subscription;
 
-import static com.druk.bonjour.browser.Config.TCP_REG_TYPE_SUFFIX;
-import static com.druk.bonjour.browser.Config.UDP_REG_TYPE_SUFFIX;
+import static com.druk.servicebrowser.Config.TCP_REG_TYPE_SUFFIX;
+import static com.druk.servicebrowser.Config.UDP_REG_TYPE_SUFFIX;
 
+//TODO: move to android support tests
 public class RxDNSSDTest extends InstrumentationTestCase {
 
     private static final String TAG = "RxDNSSDTest";
     private static final int TIME_LIMIT = 5000; //5 second
 
     private Throwable error;
+    private RxDnssd mRxDnssd;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        RxDNSSD.init(getInstrumentation().getContext());
+        mRxDnssd = new RxDnssdBindable(getInstrumentation().getContext());
     }
 
     public void testRxDNSSD() throws Throwable {
         Thread mainThread = Thread.currentThread();
         HashMap<String, Subscription> subscriptions = new HashMap<>();
-        Subscription mainSubscription = RxDNSSD.browse(Config.SERVICES_DOMAIN, "")
+        Subscription mainSubscription = mRxDnssd.browse(Config.SERVICES_DOMAIN, "")
                 .subscribe(service -> {
-                    if ((service.flags & BonjourService.DELETED) == BonjourService.DELETED) {
+                    if (service.isLost()) {
                         return;
                     }
-                    String[] regTypeParts = service.getRegTypeParts();
+                    String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
                     String protocolSuffix = regTypeParts[0];
                     String serviceDomain = regTypeParts[1];
                     if (TCP_REG_TYPE_SUFFIX.equals(protocolSuffix) || UDP_REG_TYPE_SUFFIX.equals(protocolSuffix)) {
-                        String key = service.serviceName + "." + protocolSuffix;
+                        String key = service.getServiceName() + "." + protocolSuffix;
                         if (!subscriptions.containsKey(key)) {
-                            subscriptions.put(key, RxDNSSD.queryRecords(RxDNSSD.resolve(RxDNSSD.browse(key, serviceDomain)))
+                            subscriptions.put(key, mRxDnssd.browse(key, serviceDomain).compose(mRxDnssd.resolve()).compose(mRxDnssd.queryRecords())
                                     .subscribe(service2 -> {
-                                        if ((service2.flags & BonjourService.DELETED) == BonjourService.DELETED) {
+                                        if (service2.) {
                                             Log.d(TAG, "Lost " + service2.toString());
                                         } else {
-                                            Log.d(TAG, "Found " + service2.toString() + " with port " + service2.port);
+                                            Log.d(TAG, "Found " + service2.toString() + " with port " + service2.getPort());
                                         }
                                     }, throwable -> {
                                         if (error == null) {

@@ -1,4 +1,4 @@
-package com.druk.bonjour.browser.ui;
+package com.druk.servicebrowser.ui;
 
 /*
  * Copyright (C) 2008 The Android Open Source Project
@@ -16,7 +16,7 @@ package com.druk.bonjour.browser.ui;
  * limitations under the License.
  */
 
-import com.druk.bonjour.browser.R;
+import com.druk.servicebrowser.R;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;

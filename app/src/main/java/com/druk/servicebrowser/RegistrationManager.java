@@ -1,4 +1,4 @@
-package com.druk.bonjour.browser;
+package com.druk.servicebrowser;
 
 import com.github.druk.rxdnssd.BonjourService;
 

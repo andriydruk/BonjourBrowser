@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.druk.bonjour.browser;
+package com.druk.servicebrowser;
 
 import android.content.Context;
 import android.os.Build;

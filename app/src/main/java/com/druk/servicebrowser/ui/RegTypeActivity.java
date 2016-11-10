@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjour.browser.ui;
+package com.druk.servicebrowser.ui;
 
-import com.druk.bonjour.browser.BonjourApplication;
-import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
+import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.ui.fragment.ServiceBrowserFragment;
 import com.github.druk.rxdnssd.BonjourService;
 
 import android.content.Context;
@@ -28,8 +28,8 @@ import android.support.v7.widget.Toolbar;
 
 public class RegTypeActivity extends AppCompatActivity implements ServiceBrowserFragment.ServiceListener {
 
-    private static final String KEY_REG_TYPE = "com.druk.bonjour.browser.ui.RegTypeActivity.KEY_DOMAIN";
-    private static final String KEY_DOMAIN = "com.druk.bonjour.browser.ui.RegTypeActivity.KEY_REG_TYPE";
+    private static final String KEY_REG_TYPE = "com.druk.servicebrowser.ui.RegTypeActivity.KEY_DOMAIN";
+    private static final String KEY_DOMAIN = "com.druk.servicebrowser.ui.RegTypeActivity.KEY_REG_TYPE";
 
     public static void startActivity(Context context, String regType, String domain) {
         context.startActivity(new Intent(context, RegTypeActivity.class).

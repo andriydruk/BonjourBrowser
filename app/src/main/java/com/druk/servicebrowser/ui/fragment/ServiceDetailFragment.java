@@ -1,8 +1,8 @@
-package com.druk.bonjour.browser.ui.fragment;
+package com.druk.servicebrowser.ui.fragment;
 
-import com.druk.bonjour.browser.BonjourApplication;
-import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.ui.adapter.TxtRecordsAdapter;
+import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
 import com.github.druk.rxdnssd.BonjourService;
 import com.github.druk.rxdnssd.RxDnssd;
 
@@ -28,7 +28,7 @@ import rx.schedulers.Schedulers;
 
 public class ServiceDetailFragment extends Fragment implements View.OnClickListener {
 
-    private static final String KEY_SERVICE = "com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment.key_service";
+    private static final String KEY_SERVICE = "com.druk.servicebrowser.ui.fragment.ServiceDetailFragment.key_service";
 
     private BonjourService mService;
     private Subscription mResolveSubscription;

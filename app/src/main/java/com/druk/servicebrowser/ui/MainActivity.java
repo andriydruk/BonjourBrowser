@@ -13,14 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.druk.bonjour.browser.ui;
+package com.druk.servicebrowser.ui;
 
-import com.druk.bonjour.browser.Config;
-import com.druk.bonjour.browser.R;
-import com.druk.bonjour.browser.Utils;
-import com.druk.bonjour.browser.ui.fragment.RegTypeBrowserFragment;
-import com.druk.bonjour.browser.ui.fragment.ServiceBrowserFragment;
-import com.druk.bonjour.browser.ui.fragment.ServiceDetailFragment;
+import com.druk.servicebrowser.Config;
+import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.Utils;
+import com.druk.servicebrowser.ui.fragment.RegTypeBrowserFragment;
+import com.druk.servicebrowser.ui.fragment.ServiceBrowserFragment;
+import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;
 import com.github.druk.rxdnssd.BonjourService;
 
 import android.content.Intent;

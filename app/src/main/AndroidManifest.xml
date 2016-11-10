@@ -16,7 +16,7 @@
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           xmlns:tools="http://schemas.android.com/tools"
-          package="com.druk.bonjour.browser">
+          package="com.druk.servicebrowser">
 
     <application
         android:name=".BonjourApplication"
@@ -27,12 +27,10 @@
         tools:replace="android:name">
 
         <activity
-            android:name=".ui.RegTypeActivity"
-            android:label="@string/title_activity_bonjour_domain" >
+            android:name=".ui.RegTypeActivity">
         </activity>
         <activity
-            android:name=".ui.ServiceActivity"
-            android:label="@string/title_activity_bonjour_service" >
+            android:name=".ui.ServiceActivity">
         </activity>
         <activity
                 android:name=".ui.LicensesActivity"

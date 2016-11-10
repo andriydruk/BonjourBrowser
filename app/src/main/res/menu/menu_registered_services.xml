@@ -17,7 +17,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="com.druk.bonjour.browser.ui.BonjourBrowserActivity">
-    <item android:id="@+id/action_add" android:title="Add" android:icon="@drawable/ic_add"
+    tools:context="com.druk.servicebrowser.ui.RegisterServiceActivity">
+    <item android:id="@+id/action_add" android:title="@string/add" android:icon="@drawable/ic_add"
           android:orderInCategory="1" app:showAsAction="ifRoom" />
 </menu>
