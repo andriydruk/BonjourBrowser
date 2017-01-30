@@ -55,7 +55,12 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
     public void onBindViewHolder(ViewHolder holder, final int position) {
         holder.text1.setText(getKey(position));
         holder.text2.setText(getValue(position));
-        holder.itemView.setOnClickListener(v -> onItemClick(v, position));
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                TxtRecordsAdapter.this.onItemClick(v, position);
+            }
+        });
     }
 
     public void onItemClick(View view, int position){

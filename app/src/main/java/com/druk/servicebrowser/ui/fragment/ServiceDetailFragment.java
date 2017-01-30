@@ -24,6 +24,7 @@ import java.util.Map;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class ServiceDetailFragment extends Fragment implements View.OnClickListener {
@@ -59,7 +60,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         if (getArguments() != null) {
             mService = getArguments().getParcelable(KEY_SERVICE);
         }
-        mAdapter = new TxtRecordsAdapter(getActivity(), new ArrayMap<>());
+        mAdapter = new TxtRecordsAdapter(getActivity(), new ArrayMap<String, String>());
     }
 
     @Nullable
@@ -82,13 +83,19 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
                 .compose(mRxDnssd.queryRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bonjourService -> {
-                    if (bonjourService.isLost()) {
-                        return;
+                .subscribe(new Action1<BonjourService>() {
+                    @Override
+                    public void call(BonjourService bonjourService) {
+                        if (bonjourService.isLost()) {
+                            return;
+                        }
+                        ServiceDetailFragment.this.updateUI(bonjourService, false);
                     }
-                    ServiceDetailFragment.this.updateUI(bonjourService, false);
-                }, throwable -> {
-                    Log.e("DNSSD", "Error: ", throwable);
+                }, new Action1<Throwable>() {
+                    @Override
+                    public void call(Throwable throwable) {
+                        Log.e("DNSSD", "Error: ", throwable);
+                    }
                 });
     }
 

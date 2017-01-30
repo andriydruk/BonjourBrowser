@@ -28,6 +28,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> {
@@ -85,19 +86,34 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
     public void add(BonjourService service) {
         this.services.remove(service);
         this.services.add(service);
-        Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
+        Collections.sort(services, new Comparator<BonjourService>() {
+            @Override
+            public int compare(BonjourService lhs, BonjourService rhs) {
+                return lhs.getServiceName().compareTo(rhs.getServiceName());
+            }
+        });
     }
 
     public void swap(List<BonjourService> service) {
         this.services.clear();
         this.services.addAll(service);
-        Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
+        Collections.sort(services, new Comparator<BonjourService>() {
+            @Override
+            public int compare(BonjourService lhs, BonjourService rhs) {
+                return lhs.getServiceName().compareTo(rhs.getServiceName());
+            }
+        });
         notifyDataSetChanged();
     }
 
     public void remove(BonjourService bonjourService) {
         if (this.services.remove(bonjourService)) {
-            Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
+            Collections.sort(services, new Comparator<BonjourService>() {
+                @Override
+                public int compare(BonjourService lhs, BonjourService rhs) {
+                    return lhs.getServiceName().compareTo(rhs.getServiceName());
+                }
+            });
         }
     }
 

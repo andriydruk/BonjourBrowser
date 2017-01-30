@@ -22,6 +22,7 @@ import com.github.druk.rxdnssd.BonjourService;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -113,7 +114,7 @@ public class RegisterServiceActivity extends AppCompatActivity {
             regTypeEditText.setOnEditorActionListener(this);
             portEditText.setOnEditorActionListener(this);
 
-            adapter = new TxtRecordsAdapter(getContext(), new HashMap<>()){
+            adapter = new TxtRecordsAdapter(getContext(), new HashMap<String, String>()){
 
                 @Override
                 public void onItemClick(View view, int position) {
@@ -123,13 +124,19 @@ public class RegisterServiceActivity extends AppCompatActivity {
                     // Inflate and set the layout for the dialog
                     // Pass null as the parent view because its going in the dialog layout
                     builder.setMessage("Do you really want to delete " + key + "=" + value + " ?")
-                            .setPositiveButton(android.R.string.ok, (dialog, id1) -> {
-                                mRecords.remove(key);
-                                adapter.swap(mRecords);
-                                adapter.notifyDataSetChanged();
+                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id1) {
+                                    mRecords.remove(key);
+                                    adapter.swap(mRecords);
+                                    adapter.notifyDataSetChanged();
+                                }
                             })
-                            .setNegativeButton(android.R.string.cancel, (dialog, id1) -> {
+                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int id1) {
 
+                                }
                             });
                     builder.create().show();
                 }
@@ -168,13 +175,19 @@ public class RegisterServiceActivity extends AppCompatActivity {
                 // Pass null as the parent view because its going in the dialog layout
                 builder.setMessage("Add TXT record")
                         .setView(view)
-                        .setPositiveButton(android.R.string.ok, (dialog, id1) -> {
-                            mRecords.put(keyTextView.getText().toString(), valueTextView.getText().toString());
-                            adapter.swap(mRecords);
-                            adapter.notifyDataSetChanged();
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id1) {
+                                mRecords.put(keyTextView.getText().toString(), valueTextView.getText().toString());
+                                adapter.swap(mRecords);
+                                adapter.notifyDataSetChanged();
+                            }
                         })
-                        .setNegativeButton(android.R.string.cancel, (dialog, id1) -> {
+                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int id1) {
 
+                            }
                         });
                 builder.create().show();
                 return true;

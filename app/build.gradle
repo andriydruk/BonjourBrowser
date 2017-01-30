@@ -2,21 +2,13 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 25
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '25.0.2'
 
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 25
         versionCode 15
         versionName "2.0.0"
-
-        jackOptions {
-            enabled true
-        }
-    }
-
-    compileOptions {
-        incremental false
     }
 
     buildTypes {
@@ -25,16 +17,11 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
-
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_8
-        targetCompatibility JavaVersion.VERSION_1_8
-    }
 }
 
 dependencies {
     //Android Support Libraries Version
-    def supportLibrary = '25.0.0'
+    def supportLibrary = '25.1.1'
 
     compile "com.github.andriydruk:rxdnssd:0.8.3"
     compile "com.android.support:support-v4:$supportLibrary"
@@ -45,6 +32,4 @@ dependencies {
     compile "com.android.support:support-annotations:$supportLibrary"
     compile 'io.reactivex:rxandroid:1.1.0'
     compile 'io.reactivex:rxjava:1.1.3'
-
-    testCompile "com.github.andriydruk:rxdnssd:0.8.3"
 }

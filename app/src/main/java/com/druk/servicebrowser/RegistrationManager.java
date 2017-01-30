@@ -13,6 +13,7 @@ import java.util.Map;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
+import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
 public class RegistrationManager {
@@ -23,7 +24,12 @@ public class RegistrationManager {
         PublishSubject<BonjourService> subject = PublishSubject.create();
         final Subscription[] subscriptions = new Subscription[1];
         subscriptions[0] = BonjourApplication.getRxDnssd(context).register(bonjourService)
-                .doOnNext(service -> mRegistrations.put(service, subscriptions[0]))
+                .doOnNext(new Action1<BonjourService>() {
+                    @Override
+                    public void call(BonjourService service) {
+                        mRegistrations.put(service, subscriptions[0]);
+                    }
+                })
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(subject);
         return subject;

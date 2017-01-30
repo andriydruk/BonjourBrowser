@@ -23,6 +23,7 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 import android.os.StrictMode;
+import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.util.Log;
@@ -34,6 +35,10 @@ import java.io.InputStreamReader;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
+
+import rx.Observable;
+import rx.functions.Func1;
+import rx.schedulers.Schedulers;
 
 public class BonjourApplication extends Application {
 
@@ -62,6 +67,18 @@ public class BonjourApplication extends Application {
         }
         mRxDnssd = createDnssd();
         mRegistrationManager = new RegistrationManager();
+
+        // Load reg type descriptions as quick as possible on io thread
+        Observable.just(".")
+                .map(new Func1<String, String>() {
+                    @Override
+                    public String call(String s) {
+                        return getRegTypeDescription(s);
+                    }
+                })
+                .subscribeOn(Schedulers.io())
+                .observeOn(Schedulers.computation())
+                .subscribe();
     }
 
     public static RxDnssd getRxDnssd(@NonNull Context context){
@@ -99,34 +116,38 @@ public class BonjourApplication extends Application {
 
     private String getRegTypeDescription(String regType) {
         if (mServiceNamesTree == null){
-            mServiceNamesTree = new TreeMap<>();
-            try {
-                InputStream is = getAssets().open("service-names-port-numbers.csv");
-                try {
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(is));
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        String[] rowData = line.split(",");
-                        if (rowData.length < 4 || TextUtils.isEmpty(rowData[0]) || TextUtils.isEmpty(rowData[2]) || TextUtils.isEmpty(rowData[3])) {
-                            continue;
-                        }
-                        if (rowData[0].contains(" ") || rowData[2].contains(" ")){
-                            continue;
-                        }
-                        mServiceNamesTree.put("_" + rowData[0] + "._" + rowData[2] + ".", rowData[3]);
-                    }
-                } catch (IOException ex) {
-                    // handle exception
-                } finally {
+            synchronized (this) {
+                if (mServiceNamesTree == null) {
+                    mServiceNamesTree = new TreeMap<>();
                     try {
-                        is.close();
+                        InputStream is = getAssets().open("service-names-port-numbers.csv");
+                        try {
+                            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+                            String line;
+                            while ((line = reader.readLine()) != null) {
+                                String[] rowData = line.split(",");
+                                if (rowData.length < 4 || TextUtils.isEmpty(rowData[0]) || TextUtils.isEmpty(rowData[2]) || TextUtils.isEmpty(rowData[3])) {
+                                    continue;
+                                }
+                                if (rowData[0].contains(" ") || rowData[2].contains(" ")) {
+                                    continue;
+                                }
+                                mServiceNamesTree.put("_" + rowData[0] + "._" + rowData[2] + ".", rowData[3]);
+                            }
+                        } catch (IOException ex) {
+                            // handle exception
+                        } finally {
+                            try {
+                                is.close();
+                            } catch (IOException e) {
+                                Log.e(TAG, "init error: ", e);
+                            }
+                        }
                     } catch (IOException e) {
-                        Log.e(TAG, "init error: ", e);
+                        e.printStackTrace();
+                        Log.e(TAG, "service-names-port-numbers.csv reading error: ", e);
                     }
                 }
-            } catch (IOException e) {
-                e.printStackTrace();
-                Log.e(TAG, "service-names-port-numbers.csv reading error: ", e);
             }
         }
         return mServiceNamesTree.get(regType);
