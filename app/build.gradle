@@ -21,7 +21,7 @@ android {
 
 dependencies {
     //Android Support Libraries Version
-    def supportLibrary = '25.1.1'
+    def supportLibrary = '25.3.0'
 
     compile "com.github.andriydruk:rxdnssd:0.8.3"
     compile "com.android.support:support-v4:$supportLibrary"
