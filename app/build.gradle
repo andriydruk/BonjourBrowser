@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 25
-        versionCode 15
-        versionName "2.0.0"
+        versionCode 16
+        versionName "2.0.1"
     }
 
     buildTypes {
@@ -23,7 +23,7 @@ dependencies {
     //Android Support Libraries Version
     def supportLibrary = '25.3.1'
 
-    compile "com.github.andriydruk:rxdnssd:0.8.3"
+    compile "com.github.andriydruk:rxdnssd:0.8.4"
     compile "com.android.support:support-v4:$supportLibrary"
     compile "com.android.support:appcompat-v7:$supportLibrary"
     compile "com.android.support:design:$supportLibrary"
