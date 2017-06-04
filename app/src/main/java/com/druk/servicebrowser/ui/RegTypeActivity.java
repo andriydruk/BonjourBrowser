@@ -52,7 +52,7 @@ public class RegTypeActivity extends AppCompatActivity implements ServiceBrowser
         if (getIntent() != null && getIntent().hasExtra(KEY_DOMAIN) && getIntent().hasExtra(KEY_REG_TYPE)) {
             String regType = getIntent().getStringExtra(KEY_REG_TYPE);
             String domain = getIntent().getStringExtra(KEY_DOMAIN);
-            String description = BonjourApplication.getRegTypeDescription(this, regType);
+            String description = BonjourApplication.getRegTypeManager(this).getRegTypeDescription(regType);
             if (description != null) {
                 setTitle(description);
             } else {

@@ -146,7 +146,7 @@ public class RegisterServiceActivity extends AppCompatActivity {
             recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false));
             recyclerView.setAdapter(adapter);
 
-            List<String> regTypes = BonjourApplication.getListRegTypes(getContext());
+            List<String> regTypes = BonjourApplication.getRegTypeManager(getContext()).getListRegTypes();
             regTypeEditText.setAdapter(new ArrayAdapter<>(getContext(), android.R.layout.select_dialog_item, regTypes));
 
             view.findViewById(R.id.fab).setOnClickListener(this);
