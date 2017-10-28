@@ -16,6 +16,7 @@
 package com.druk.servicebrowser.ui.fragment;
 
 import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.BuildConfig;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
 import com.github.druk.rxdnssd.BonjourService;
@@ -211,6 +212,10 @@ public class ServiceBrowserFragment<T> extends Fragment {
     }
 
     protected void showError(final Throwable e){
+        if (BuildConfig.BUILD_TYPE.equals("iot")) {
+            Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
+            return;
+        }
         getActivity().runOnUiThread(new Runnable() {
             @Override
             public void run() {

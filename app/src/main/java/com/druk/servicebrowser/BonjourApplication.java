@@ -15,6 +15,7 @@
  */
 package com.druk.servicebrowser;
 
+import com.crashlytics.android.Crashlytics;
 import com.github.druk.rxdnssd.RxDnssd;
 import com.github.druk.rxdnssd.RxDnssdBindable;
 import com.github.druk.rxdnssd.RxDnssdEmbedded;
@@ -23,8 +24,10 @@ import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 import android.os.StrictMode;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import io.fabric.sdk.android.Fabric;
 
 public class BonjourApplication extends Application {
 
@@ -36,6 +39,8 @@ public class BonjourApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
+
+        Fabric.with(this, new Crashlytics());
 
         if (BuildConfig.DEBUG) {
 
@@ -68,16 +73,30 @@ public class BonjourApplication extends Application {
         return ((BonjourApplication) context.getApplicationContext()).mRegTypeManager;
     }
 
-    private RxDnssd createDnssd(){
+    private static final String DEVICE = "device";
+    private static final String ARCH = "arch";
+    private static final String DNSSD = "dnssd";
+
+    private RxDnssd createDnssd() {
+
+        String userID = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
+
+        Crashlytics.setUserIdentifier(userID);
+        Crashlytics.setString(DEVICE, Build.BRAND + " " + Build.MODEL);
+        Crashlytics.setString(ARCH, System.getProperty("os.arch"));
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN){
             Log.i(TAG, "Using embedded version of dns sd because of API < 16");
+            Crashlytics.setString(DNSSD, "Using embedded version of dns sd because of API < 16");
             return new RxDnssdEmbedded();
         }
         if (Build.VERSION.RELEASE.contains("4.4.2") && Build.MANUFACTURER.toLowerCase().contains("samsung")){
             Log.i(TAG, "Using embedded version of dns sd because of Samsung 4.4.2");
+            Crashlytics.setString(DNSSD, "Using embedded version of dns sd because of Samsung 4.4.2");
             return new RxDnssdEmbedded();
         }
         Log.i(TAG, "Using systems dns sd daemon");
+        Crashlytics.setString(DNSSD, "Using systems dns sd daemon");
         return new RxDnssdBindable(this);
     }
 }

@@ -42,3 +42,4 @@ keys/
 # Test reports
 /*.html
 
+fabric.properties
