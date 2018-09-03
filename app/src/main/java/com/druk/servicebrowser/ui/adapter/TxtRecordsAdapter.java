@@ -55,12 +55,7 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
     public void onBindViewHolder(ViewHolder holder, final int position) {
         holder.text1.setText(getKey(position));
         holder.text2.setText(getValue(position));
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                TxtRecordsAdapter.this.onItemClick(v, position);
-            }
-        });
+        holder.itemView.setOnClickListener(v -> TxtRecordsAdapter.this.onItemClick(v, position));
     }
 
     public void onItemClick(View view, int position){
@@ -80,11 +75,11 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
         return mRecords.size();
     }
 
-    public String getKey(int position) {
+    protected String getKey(int position) {
         return mRecords.keyAt(position);
     }
 
-    public String getValue(int position) {
+    protected String getValue(int position) {
         return mRecords.valueAt(position);
     }
 
@@ -97,10 +92,10 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
         public TextView text1;
         public TextView text2;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
-            text1 = (TextView) itemView.findViewById(R.id.text1);
-            text2 = (TextView) itemView.findViewById(R.id.text2);
+            text1 = itemView.findViewById(R.id.text1);
+            text2 = itemView.findViewById(R.id.text2);
         }
     }
 }

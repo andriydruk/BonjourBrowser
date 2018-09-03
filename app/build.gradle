@@ -2,12 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'io.fabric'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion '26.0.2'
+    compileSdkVersion 28
+    buildToolsVersion '28.0.1'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 26
+        targetSdkVersion 28
         versionCode 16
         versionName "2.0.2"
     }
@@ -32,22 +32,27 @@ android {
             applicationIdSuffix ".iot"
         }
     }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
 }
 
 dependencies {
     //Android Support Libraries Version
-    def supportLibrary = '26.1.0'
+    def supportLibrary = '27.0.0'
 
-    compile "com.github.andriydruk:rxdnssd:0.9.1"
-    compile "com.android.support:support-v4:$supportLibrary"
-    compile "com.android.support:appcompat-v7:$supportLibrary"
-    compile "com.android.support:design:$supportLibrary"
-    compile "com.android.support:recyclerview-v7:$supportLibrary"
-    compile "com.android.support:cardview-v7:$supportLibrary"
-    compile "com.android.support:support-annotations:$supportLibrary"
-    compile 'io.reactivex:rxandroid:1.2.1'
+    implementation "com.github.andriydruk:rxdnssd:0.9.10"
+    implementation "com.android.support:support-v4:$supportLibrary"
+    implementation "com.android.support:appcompat-v7:$supportLibrary"
+    implementation "com.android.support:design:$supportLibrary"
+    implementation "com.android.support:recyclerview-v7:$supportLibrary"
+    implementation "com.android.support:cardview-v7:$supportLibrary"
+    implementation "com.android.support:support-annotations:$supportLibrary"
+    implementation 'io.reactivex:rxandroid:1.2.1'
 
-    compile('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
         transitive = true
     }
 }

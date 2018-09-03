@@ -50,13 +50,13 @@ public class HTMLViewerActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_html_viewer);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        mWebView = (WebView) findViewById(R.id.webview);
+        mWebView = findViewById(R.id.webview);
         mLoading = findViewById(R.id.loading);
 
         mWebView.setWebChromeClient(new ChromeClient());

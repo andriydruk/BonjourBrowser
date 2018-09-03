@@ -1,8 +1,8 @@
 package com.druk.servicebrowser;
 
-import com.github.druk.rxdnssd.BonjourService;
-
 import android.content.Context;
+
+import com.github.druk.rxdnssd.BonjourService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,7 +13,6 @@ import java.util.Map;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.subjects.PublishSubject;
 
 public class RegistrationManager {
@@ -24,12 +23,7 @@ public class RegistrationManager {
         PublishSubject<BonjourService> subject = PublishSubject.create();
         final Subscription[] subscriptions = new Subscription[1];
         subscriptions[0] = BonjourApplication.getRxDnssd(context).register(bonjourService)
-                .doOnNext(new Action1<BonjourService>() {
-                    @Override
-                    public void call(BonjourService service) {
-                        mRegistrations.put(service, subscriptions[0]);
-                    }
-                })
+                .doOnNext(service -> mRegistrations.put(service, subscriptions[0]))
                 .subscribeOn(AndroidSchedulers.mainThread())
                 .subscribe(subject);
         return subject;

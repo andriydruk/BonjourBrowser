@@ -1,6 +1,5 @@
 package com.druk.servicebrowser;
 
-
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
@@ -15,7 +14,6 @@ import java.util.List;
 import java.util.TreeMap;
 
 import rx.Observable;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 public class RegTypeManager {
@@ -29,12 +27,7 @@ public class RegTypeManager {
         this.mContext = context;
         // Load reg type descriptions as quick as possible on io thread
         Observable.just(".")
-                .map(new Func1<String, String>() {
-                    @Override
-                    public String call(String s) {
-                        return getRegTypeDescription(s);
-                    }
-                })
+                .map(s -> getRegTypeDescription(s))
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .subscribe();

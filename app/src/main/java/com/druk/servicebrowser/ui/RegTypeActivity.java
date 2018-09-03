@@ -42,7 +42,7 @@ public class RegTypeActivity extends AppCompatActivity implements ServiceBrowser
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_reg_type);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);

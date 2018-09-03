@@ -15,11 +15,6 @@
  */
 package com.druk.servicebrowser.ui;
 
-import com.druk.servicebrowser.BonjourApplication;
-import com.druk.servicebrowser.R;
-import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
-import com.github.druk.rxdnssd.BonjourService;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -29,17 +24,20 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
+import com.github.druk.rxdnssd.BonjourService;
+
 import java.util.List;
 
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 
 public class RegistrationsActivity extends AppCompatActivity {
 
@@ -51,7 +49,7 @@ public class RegistrationsActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.blank_activity);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setSupportActionBar(findViewById(R.id.toolbar));
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -85,12 +83,7 @@ public class RegistrationsActivity extends AppCompatActivity {
                 public void onBindViewHolder(ViewHolder holder, final int position) {
                     holder.text1.setText(getItem(position).getServiceName());
                     holder.text2.setText(getItem(position).getRegType());
-                    holder.itemView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            startActivityForResult(ServiceActivity.startActivity(getContext(), getItem(position), true), STOP_REQUEST_CODE);
-                        }
-                    });
+                    holder.itemView.setOnClickListener(v -> startActivityForResult(ServiceActivity.startActivity(getContext(), getItem(position), true), STOP_REQUEST_CODE));
                 }
             };
         }
@@ -103,17 +96,7 @@ public class RegistrationsActivity extends AppCompatActivity {
                     mSubscription = BonjourApplication.getRegistrationManager(getContext())
                             .register(getContext(), bonjourService)
                             .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(new Action1<BonjourService>() {
-                                @Override
-                                public void call(BonjourService service) {
-                                    RegistrationsFragment.this.updateServices();
-                                }
-                            }, new Action1<Throwable>() {
-                                @Override
-                                public void call(Throwable throwable) {
-                                    Toast.makeText(RegistrationsFragment.this.getContext(), "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                            .subscribe(service -> RegistrationsFragment.this.updateServices(), throwable -> Toast.makeText(RegistrationsFragment.this.getContext(), "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show());
                 }
                 return;
             }
@@ -136,12 +119,7 @@ public class RegistrationsActivity extends AppCompatActivity {
             mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false));
             mRecyclerView.setAdapter(adapter);
             mNoServiceView = view.findViewById(R.id.no_service);
-            view.findViewById(R.id.fab).setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    RegistrationsFragment.this.startActivityForResult(RegisterServiceActivity.createIntent(getContext()), REGISTER_REQUEST_CODE);
-                }
-            });
+            view.findViewById(R.id.fab).setOnClickListener(v -> RegistrationsFragment.this.startActivityForResult(RegisterServiceActivity.createIntent(getContext()), REGISTER_REQUEST_CODE));
             updateServices();
             return view;
         }

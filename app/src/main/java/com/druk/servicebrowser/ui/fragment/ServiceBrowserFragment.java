@@ -15,13 +15,6 @@
  */
 package com.druk.servicebrowser.ui.fragment;
 
-import com.druk.servicebrowser.BonjourApplication;
-import com.druk.servicebrowser.BuildConfig;
-import com.druk.servicebrowser.R;
-import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
-import com.github.druk.rxdnssd.BonjourService;
-import com.github.druk.rxdnssd.RxDnssd;
-
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
@@ -39,9 +32,15 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
+import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.BuildConfig;
+import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
+import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rxdnssd.RxDnssd;
+
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class ServiceBrowserFragment<T> extends Fragment {
@@ -126,9 +125,9 @@ public class ServiceBrowserFragment<T> extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         FrameLayout rootView = (FrameLayout) inflater.inflate(R.layout.fragment_service_browser, container, false);
-        mRecyclerView = (RecyclerView) rootView.findViewById(R.id.recycler_view);
-        mProgressView = (ProgressBar) rootView.findViewById(R.id.progress);
-        mErrorView = (LinearLayout) rootView.findViewById(R.id.error_container);
+        mRecyclerView = rootView.findViewById(R.id.recycler_view);
+        mProgressView = rootView.findViewById(R.id.progress);
+        mErrorView = rootView.findViewById(R.id.error_container);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mRecyclerView.getContext()));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);
@@ -162,24 +161,18 @@ public class ServiceBrowserFragment<T> extends Fragment {
                 .compose(mRxDnssd.queryRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<BonjourService>() {
-                    @Override
-                    public void call(BonjourService bonjourService) {
-                        int itemsCount = mAdapter.getItemCount();
-                        if (!bonjourService.isLost()) {
-                            mAdapter.add(bonjourService);
-                        } else {
-                            mAdapter.remove(bonjourService);
-                        }
-                        ServiceBrowserFragment.this.showList(itemsCount);
-                        mAdapter.notifyDataSetChanged();
+                .subscribe(bonjourService -> {
+                    int itemsCount = mAdapter.getItemCount();
+                    if (!bonjourService.isLost()) {
+                        mAdapter.add(bonjourService);
+                    } else {
+                        mAdapter.remove(bonjourService);
                     }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e("DNSSD", "Error: ", throwable);
-                        ServiceBrowserFragment.this.showError(throwable);
-                    }
+                    ServiceBrowserFragment.this.showList(itemsCount);
+                    mAdapter.notifyDataSetChanged();
+                }, throwable -> {
+                    Log.e("DNSSD", "Error: ", throwable);
+                    ServiceBrowserFragment.this.showError(throwable);
                 });
     }
 
@@ -216,31 +209,23 @@ public class ServiceBrowserFragment<T> extends Fragment {
             Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
             return;
         }
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                mRecyclerView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mRecyclerView.setVisibility(View.GONE);
-                    }
-                }).start();
-                mProgressView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mProgressView.setVisibility(View.GONE);
-                    }
-                }).start();
-                mErrorView.setAlpha(0.0f);
-                mErrorView.setVisibility(View.VISIBLE);
-                mErrorView.animate().alpha(1.0f).setInterpolator(new AccelerateDecelerateInterpolator()).start();
-                mErrorView.findViewById(R.id.send_report).setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
-                    }
-                });
-            }
+        getActivity().runOnUiThread(() -> {
+            mRecyclerView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mRecyclerView.setVisibility(View.GONE);
+                }
+            }).start();
+            mProgressView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    mProgressView.setVisibility(View.GONE);
+                }
+            }).start();
+            mErrorView.setAlpha(0.0f);
+            mErrorView.setVisibility(View.VISIBLE);
+            mErrorView.animate().alpha(1.0f).setInterpolator(new AccelerateDecelerateInterpolator()).start();
+            mErrorView.findViewById(R.id.send_report).setOnClickListener(v -> Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e));
         });
     }
 

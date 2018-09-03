@@ -15,26 +15,22 @@
  */
 package com.druk.servicebrowser.ui.fragment;
 
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.util.Log;
+
 import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.Config;
 import com.druk.servicebrowser.RegTypeManager;
 import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
 import com.github.druk.rxdnssd.BonjourService;
 
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.util.Log;
-
 import java.util.HashMap;
 
-import rx.BackpressureOverflow;
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.exceptions.MissingBackpressureException;
-import rx.functions.Action0;
 import rx.functions.Action1;
-import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
 import static com.druk.servicebrowser.Config.EMPTY_DOMAIN;
@@ -110,17 +106,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
                 synchronized (this) {
                     if (!mBrowsers.containsKey(key)) {
                         mBrowsers.put(key, mRxDnssd.browse(key, serviceDomain)
-                                .onBackpressureBuffer(1000, new Action0() {
-                                    @Override
-                                    public void call() {
-                                        Log.e(TAG, "Back pressure buffer overflow");
-                                    }
-                                }, new BackpressureOverflow.Strategy() {
-                                    @Override
-                                    public boolean mayAttemptDrop() throws MissingBackpressureException {
-                                        return true;
-                                    }
-                                })
+                                .onBackpressureBuffer(1000, () -> Log.e(TAG, "Back pressure buffer overflow"), () -> true)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(RegTypeBrowserFragment.this.servicesAction, RegTypeBrowserFragment.this.errorAction));
@@ -134,55 +120,33 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         }
     };
 
-    protected final Action1<Throwable> errorAction = new Action1<Throwable>() {
-        @Override
-        public void call(Throwable throwable) {
-            Log.e("DNSSD", "Error: ", throwable);
-            RegTypeBrowserFragment.this.showError(throwable);
-        }
+    protected final Action1<Throwable> errorAction = throwable -> {
+        Log.e("DNSSD", "Error: ", throwable);
+        RegTypeBrowserFragment.this.showError(throwable);
     };
 
-    private final Action1<BonjourService> servicesAction = new Action1<BonjourService>() {
-        @Override
-        public void call(BonjourService service) {
-            String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
-            String serviceRegType = regTypeParts[0];
-            String protocolSuffix = regTypeParts[1];
-            String key = createKey(EMPTY_DOMAIN, protocolSuffix + "." + service.getDomain(), serviceRegType);
-            BonjourDomain domain = mServices.get(key);
-            if (domain != null) {
-                if (service.isLost()) {
-                    domain.serviceCount--;
-                } else {
-                    domain.serviceCount++;
-                }
-                final int itemsCount = mAdapter.getItemCount();
-                mAdapter.clear();
-                Observable.from(mServices.values())
-                        .filter(new Func1<BonjourDomain, Boolean>() {
-                            @Override
-                            public Boolean call(BonjourDomain bonjourDomain) {
-                                return bonjourDomain.serviceCount > 0;
-                            }
-                        })
-                        .subscribe(new Action1<BonjourDomain>() {
-                            @Override
-                            public void call(BonjourDomain service1) {
-                                mAdapter.add(service1);
-                            }
-                        }, new Action1<Throwable>() {
-                            @Override
-                            public void call(Throwable throwable) {/* empty */}
-                        }, new Action0() {
-                            @Override
-                            public void call() {
-                                RegTypeBrowserFragment.this.showList(itemsCount);
-                                mAdapter.notifyDataSetChanged();
-                            }
-                        });
+    private final Action1<BonjourService> servicesAction = service -> {
+        String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
+        String serviceRegType = regTypeParts[0];
+        String protocolSuffix = regTypeParts[1];
+        String key = createKey(EMPTY_DOMAIN, protocolSuffix + "." + service.getDomain(), serviceRegType);
+        BonjourDomain domain = mServices.get(key);
+        if (domain != null) {
+            if (service.isLost()) {
+                domain.serviceCount--;
             } else {
-                Log.w(TAG, "Service from unknown service type " + key);
+                domain.serviceCount++;
             }
+            final int itemsCount = mAdapter.getItemCount();
+            mAdapter.clear();
+            Observable.from(mServices.values())
+                    .filter(bonjourDomain -> bonjourDomain.serviceCount > 0)
+                    .subscribe(service1 -> mAdapter.add(service1), throwable -> {/* empty */}, () -> {
+                        RegTypeBrowserFragment.this.showList(itemsCount);
+                        mAdapter.notifyDataSetChanged();
+                    });
+        } else {
+            Log.w(TAG, "Service from unknown service type " + key);
         }
     };
 
@@ -191,9 +155,9 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
     }
 
     public static class BonjourDomain extends BonjourService {
-        public int serviceCount = 0;
+        int serviceCount = 0;
 
-        public BonjourDomain(BonjourService bonjourService){
+        BonjourDomain(BonjourService bonjourService){
             super(new BonjourService.Builder(bonjourService));
         }
     }

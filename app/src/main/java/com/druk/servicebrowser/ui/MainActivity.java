@@ -15,6 +15,16 @@
  */
 package com.druk.servicebrowser.ui;
 
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.widget.SlidingPaneLayout;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.TextView;
+
 import com.druk.servicebrowser.Config;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.Utils;
@@ -22,17 +32,6 @@ import com.druk.servicebrowser.ui.fragment.RegTypeBrowserFragment;
 import com.druk.servicebrowser.ui.fragment.ServiceBrowserFragment;
 import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;
 import com.github.druk.rxdnssd.BonjourService;
-
-import android.content.Intent;
-import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SlidingPaneLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.TextView;
 
 public class MainActivity extends AppCompatActivity implements ServiceBrowserFragment.ServiceListener, ServiceDetailFragment.ServiceDetailListener {
 
@@ -53,14 +52,14 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
-        slidingPanelLayout = (SlidingPaneLayout) findViewById(R.id.sliding_panel_layout);
+        setSupportActionBar(findViewById(R.id.toolbar));
+        slidingPanelLayout = findViewById(R.id.sliding_panel_layout);
 
         if (slidingPanelLayout != null) {
             slidingPanelLayout.openPane();
-            noServiceTextView = (TextView) findViewById(R.id.no_service);
-            serviceNameTextView = (TextView) findViewById(R.id.service_name);
-            lastUpdatedTextView = (TextView) findViewById(R.id.last_updated);
+            noServiceTextView = findViewById(R.id.no_service);
+            serviceNameTextView = findViewById(R.id.service_name);
+            lastUpdatedTextView = findViewById(R.id.last_updated);
         }
 
         if (savedInstanceState == null) {

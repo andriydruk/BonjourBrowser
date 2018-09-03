@@ -15,14 +15,8 @@
  */
 package com.druk.servicebrowser.ui;
 
-import com.druk.servicebrowser.BonjourApplication;
-import com.druk.servicebrowser.R;
-import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
-import com.github.druk.rxdnssd.BonjourService;
-
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -33,7 +27,6 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatAutoCompleteTextView;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -47,6 +40,11 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
+
+import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
+import com.github.druk.rxdnssd.BonjourService;
 
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +65,7 @@ public class RegisterServiceActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.blank_activity);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setSupportActionBar(findViewById(R.id.toolbar));
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
@@ -106,15 +104,15 @@ public class RegisterServiceActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_register_service, container, false);
-            serviceNameEditText = (EditText) view.findViewById(R.id.service_name);
-            regTypeEditText = (AppCompatAutoCompleteTextView) view.findViewById(R.id.reg_type);
-            portEditText = (EditText) view.findViewById(R.id.port);
+            serviceNameEditText = view.findViewById(R.id.service_name);
+            regTypeEditText = view.findViewById(R.id.reg_type);
+            portEditText = view.findViewById(R.id.port);
 
             serviceNameEditText.setOnEditorActionListener(this);
             regTypeEditText.setOnEditorActionListener(this);
             portEditText.setOnEditorActionListener(this);
 
-            adapter = new TxtRecordsAdapter(getContext(), new HashMap<String, String>()){
+            adapter = new TxtRecordsAdapter(getContext(), new HashMap<>()){
 
                 @Override
                 public void onItemClick(View view, int position) {
@@ -124,25 +122,19 @@ public class RegisterServiceActivity extends AppCompatActivity {
                     // Inflate and set the layout for the dialog
                     // Pass null as the parent view because its going in the dialog layout
                     builder.setMessage("Do you really want to delete " + key + "=" + value + " ?")
-                            .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int id1) {
-                                    mRecords.remove(key);
-                                    adapter.swap(mRecords);
-                                    adapter.notifyDataSetChanged();
-                                }
+                            .setPositiveButton(android.R.string.ok, (dialog, id1) -> {
+                                mRecords.remove(key);
+                                adapter.swap(mRecords);
+                                adapter.notifyDataSetChanged();
                             })
-                            .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int id1) {
+                            .setNegativeButton(android.R.string.cancel, (dialog, id1) -> {
 
-                                }
                             });
                     builder.create().show();
                 }
             };
 
-            RecyclerView recyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+            RecyclerView recyclerView = view.findViewById(R.id.recycler_view);
             recyclerView.setLayoutManager(new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false));
             recyclerView.setAdapter(adapter);
 
@@ -169,25 +161,19 @@ public class RegisterServiceActivity extends AppCompatActivity {
             if (id == R.id.action_add) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_add_txt_records, null);
-                final TextView keyTextView = (TextView) view.findViewById(R.id.key);
-                final TextView valueTextView = (TextView) view.findViewById(R.id.value);
+                final TextView keyTextView = view.findViewById(R.id.key);
+                final TextView valueTextView = view.findViewById(R.id.value);
                 // Inflate and set the layout for the dialog
                 // Pass null as the parent view because its going in the dialog layout
                 builder.setMessage("Add TXT record")
                         .setView(view)
-                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id1) {
-                                mRecords.put(keyTextView.getText().toString(), valueTextView.getText().toString());
-                                adapter.swap(mRecords);
-                                adapter.notifyDataSetChanged();
-                            }
+                        .setPositiveButton(android.R.string.ok, (dialog, id1) -> {
+                            mRecords.put(keyTextView.getText().toString(), valueTextView.getText().toString());
+                            adapter.swap(mRecords);
+                            adapter.notifyDataSetChanged();
                         })
-                        .setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int id1) {
+                        .setNegativeButton(android.R.string.cancel, (dialog, id1) -> {
 
-                            }
                         });
                 builder.create().show();
                 return true;

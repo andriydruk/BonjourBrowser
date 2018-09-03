@@ -15,9 +15,6 @@
  */
 package com.druk.servicebrowser.ui.adapter;
 
-import com.druk.servicebrowser.R;
-import com.github.druk.rxdnssd.BonjourService;
-
 import android.content.Context;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
@@ -26,9 +23,11 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.druk.servicebrowser.R;
+import com.github.druk.rxdnssd.BonjourService;
+
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 
 public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter.ViewHolder> {
@@ -39,7 +38,7 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
 
     private long mSelectedItemId = -1;
 
-    public ServiceAdapter(Context context) {
+    protected ServiceAdapter(Context context) {
         TypedValue mTypedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
         mBackground = mTypedValue.resourceId;
@@ -79,41 +78,26 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
         mSelectedItemId = selectedPosition;
     }
 
-    public int getBackground(int position){
+    protected int getBackground(int position){
         return (getItemId(position) == mSelectedItemId) ? mSelectedBackground : mBackground;
     }
 
     public void add(BonjourService service) {
         this.services.remove(service);
         this.services.add(service);
-        Collections.sort(services, new Comparator<BonjourService>() {
-            @Override
-            public int compare(BonjourService lhs, BonjourService rhs) {
-                return lhs.getServiceName().compareTo(rhs.getServiceName());
-            }
-        });
+        Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
     }
 
     public void swap(List<BonjourService> service) {
         this.services.clear();
         this.services.addAll(service);
-        Collections.sort(services, new Comparator<BonjourService>() {
-            @Override
-            public int compare(BonjourService lhs, BonjourService rhs) {
-                return lhs.getServiceName().compareTo(rhs.getServiceName());
-            }
-        });
+        Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
         notifyDataSetChanged();
     }
 
     public void remove(BonjourService bonjourService) {
         if (this.services.remove(bonjourService)) {
-            Collections.sort(services, new Comparator<BonjourService>() {
-                @Override
-                public int compare(BonjourService lhs, BonjourService rhs) {
-                    return lhs.getServiceName().compareTo(rhs.getServiceName());
-                }
-            });
+            Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
         }
     }
 
@@ -121,10 +105,10 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
         public TextView text1;
         public TextView text2;
 
-        public ViewHolder(View itemView) {
+        ViewHolder(View itemView) {
             super(itemView);
-            text1 = (TextView) itemView.findViewById(R.id.text1);
-            text2 = (TextView) itemView.findViewById(R.id.text2);
+            text1 = itemView.findViewById(R.id.text1);
+            text2 = itemView.findViewById(R.id.text2);
         }
     }
 }

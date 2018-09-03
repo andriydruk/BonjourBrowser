@@ -88,12 +88,12 @@ public class BonjourApplication extends Application {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN){
             Log.i(TAG, "Using embedded version of dns sd because of API < 16");
             Crashlytics.setString(DNSSD, "Using embedded version of dns sd because of API < 16");
-            return new RxDnssdEmbedded();
+            return new RxDnssdEmbedded(this);
         }
         if (Build.VERSION.RELEASE.contains("4.4.2") && Build.MANUFACTURER.toLowerCase().contains("samsung")){
             Log.i(TAG, "Using embedded version of dns sd because of Samsung 4.4.2");
             Crashlytics.setString(DNSSD, "Using embedded version of dns sd because of Samsung 4.4.2");
-            return new RxDnssdEmbedded();
+            return new RxDnssdEmbedded(this);
         }
         Log.i(TAG, "Using systems dns sd daemon");
         Crashlytics.setString(DNSSD, "Using systems dns sd daemon");

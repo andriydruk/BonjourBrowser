@@ -1,11 +1,5 @@
 package com.druk.servicebrowser.ui.fragment;
 
-import com.druk.servicebrowser.BonjourApplication;
-import com.druk.servicebrowser.R;
-import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
-import com.github.druk.rxdnssd.BonjourService;
-import com.github.druk.rxdnssd.RxDnssd;
-
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -19,12 +13,17 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
+import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rxdnssd.RxDnssd;
+
 import java.util.Map;
 
 import rx.Observable;
 import rx.Subscription;
 import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class ServiceDetailFragment extends Fragment implements View.OnClickListener {
@@ -60,7 +59,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         if (getArguments() != null) {
             mService = getArguments().getParcelable(KEY_SERVICE);
         }
-        mAdapter = new TxtRecordsAdapter(getActivity(), new ArrayMap<String, String>());
+        mAdapter = new TxtRecordsAdapter(getActivity(), new ArrayMap<>());
     }
 
     @Nullable
@@ -83,20 +82,12 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
                 .compose(mRxDnssd.queryRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(new Action1<BonjourService>() {
-                    @Override
-                    public void call(BonjourService bonjourService) {
-                        if (bonjourService.isLost()) {
-                            return;
-                        }
-                        ServiceDetailFragment.this.updateUI(bonjourService, false);
+                .subscribe(bonjourService -> {
+                    if (bonjourService.isLost()) {
+                        return;
                     }
-                }, new Action1<Throwable>() {
-                    @Override
-                    public void call(Throwable throwable) {
-                        Log.e("DNSSD", "Error: ", throwable);
-                    }
-                });
+                    ServiceDetailFragment.this.updateUI(bonjourService, false);
+                }, throwable -> Log.e("DNSSD", "Error: ", throwable));
     }
 
     @Override

@@ -15,21 +15,19 @@
  */
 package com.druk.servicebrowser.ui;
 
-
-import com.druk.servicebrowser.R;
-import com.druk.servicebrowser.Utils;
-import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;
-import com.github.druk.rxdnssd.BonjourService;
-
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
+
+import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.Utils;
+import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;
+import com.github.druk.rxdnssd.BonjourService;
 
 public class ServiceActivity extends AppCompatActivity implements ServiceDetailFragment.ServiceDetailListener {
 
@@ -58,16 +56,16 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_service);
-        setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
+        setSupportActionBar(findViewById(R.id.toolbar));
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        mServiceName = (TextView) findViewById(R.id.service_name);
-        mRegType = (TextView) findViewById(R.id.reg_type);
-        mDomain = (TextView) findViewById(R.id.domain);
-        mLastTimestamp = (TextView) findViewById(R.id.last_timestamp);
+        FloatingActionButton fab = findViewById(R.id.fab);
+        mServiceName = findViewById(R.id.service_name);
+        mRegType = findViewById(R.id.reg_type);
+        mDomain = findViewById(R.id.domain);
+        mLastTimestamp = findViewById(R.id.last_timestamp);
 
         ServiceDetailFragment serviceDetailFragment;
         boolean isRegistered = getIntent().getBooleanExtra(REGISTERED, false);
