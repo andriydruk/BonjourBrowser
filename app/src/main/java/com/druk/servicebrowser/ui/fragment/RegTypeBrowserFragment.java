@@ -23,15 +23,15 @@ import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.Config;
 import com.druk.servicebrowser.RegTypeManager;
 import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
-import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rx2dnssd.BonjourService;
 
 import java.util.HashMap;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Action1;
-import rx.schedulers.Schedulers;
+import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 
 import static com.druk.servicebrowser.Config.EMPTY_DOMAIN;
 import static com.druk.servicebrowser.Config.TCP_REG_TYPE_SUFFIX;
@@ -42,7 +42,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 
     private static final String TAG = "RegTypeBrowser";
 
-    private final HashMap<String, Subscription> mBrowsers = new HashMap<>();
+    private final HashMap<String, Disposable> mBrowsers = new HashMap<>();
     private final HashMap<String, BonjourDomain> mServices = new HashMap<>();
     private RegTypeManager mRegTypeManager;
 
@@ -74,7 +74,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 
     @Override
     protected void startDiscovery() {
-        mSubscription = mRxDnssd.browse(Config.SERVICES_DOMAIN, "local.")
+        mDisposable = mRxDnssd.browse(Config.SERVICES_DOMAIN, "local.")
                 .subscribeOn(Schedulers.io())
                 .subscribe(reqTypeAction, errorAction);
     }
@@ -84,16 +84,16 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         super.stopDiscovery();
         mServices.clear();
         synchronized (this) {
-            for (Subscription subscription : mBrowsers.values()) {
-                subscription.unsubscribe();
+            for (Disposable subscription : mBrowsers.values()) {
+                subscription.dispose();
             }
             mBrowsers.clear();
         }
     }
 
-    private final Action1<BonjourService> reqTypeAction = new Action1<BonjourService>() {
+    private final Consumer<BonjourService> reqTypeAction = new Consumer<BonjourService>() {
         @Override
-        public void call(BonjourService service) {
+        public void accept(BonjourService service) {
             if (service.isLost()) {
                 //Ignore this call
                 return;
@@ -106,7 +106,6 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
                 synchronized (this) {
                     if (!mBrowsers.containsKey(key)) {
                         mBrowsers.put(key, mRxDnssd.browse(key, serviceDomain)
-                                .onBackpressureBuffer(1000, () -> Log.e(TAG, "Back pressure buffer overflow"), () -> true)
                                 .subscribeOn(Schedulers.io())
                                 .observeOn(AndroidSchedulers.mainThread())
                                 .subscribe(RegTypeBrowserFragment.this.servicesAction, RegTypeBrowserFragment.this.errorAction));
@@ -120,12 +119,12 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         }
     };
 
-    protected final Action1<Throwable> errorAction = throwable -> {
+    protected final Consumer<Throwable> errorAction = throwable -> {
         Log.e("DNSSD", "Error: ", throwable);
         RegTypeBrowserFragment.this.showError(throwable);
     };
 
-    private final Action1<BonjourService> servicesAction = service -> {
+    private final Consumer<BonjourService> servicesAction = service -> {
         String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
         String serviceRegType = regTypeParts[0];
         String protocolSuffix = regTypeParts[1];
@@ -139,7 +138,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
             }
             final int itemsCount = mAdapter.getItemCount();
             mAdapter.clear();
-            Observable.from(mServices.values())
+            Flowable.fromIterable(mServices.values())
                     .filter(bonjourDomain -> bonjourDomain.serviceCount > 0)
                     .subscribe(service1 -> mAdapter.add(service1), throwable -> {/* empty */}, () -> {
                         RegTypeBrowserFragment.this.showList(itemsCount);

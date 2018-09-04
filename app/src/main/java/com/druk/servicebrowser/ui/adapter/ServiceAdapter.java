@@ -24,7 +24,7 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 
 import com.druk.servicebrowser.R;
-import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rx2dnssd.BonjourService;
 
 import java.util.ArrayList;
 import java.util.Collections;

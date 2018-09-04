@@ -13,8 +13,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TreeMap;
 
-import rx.Observable;
-import rx.schedulers.Schedulers;
+import io.reactivex.Flowable;
+import io.reactivex.schedulers.Schedulers;
 
 public class RegTypeManager {
 
@@ -26,8 +26,8 @@ public class RegTypeManager {
     RegTypeManager(@NonNull Context context) {
         this.mContext = context;
         // Load reg type descriptions as quick as possible on io thread
-        Observable.just(".")
-                .map(s -> getRegTypeDescription(s))
+        Flowable.just("_zigbee-gateway._udp.")
+                .map(this::getRegTypeDescription)
                 .subscribeOn(Schedulers.io())
                 .observeOn(Schedulers.computation())
                 .subscribe();

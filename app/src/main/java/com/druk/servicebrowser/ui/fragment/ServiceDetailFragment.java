@@ -16,22 +16,22 @@ import android.view.ViewGroup;
 import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
-import com.github.druk.rxdnssd.BonjourService;
-import com.github.druk.rxdnssd.RxDnssd;
+import com.github.druk.rx2dnssd.BonjourService;
+import com.github.druk.rx2dnssd.Rx2Dnssd;
 
 import java.util.Map;
 
-import rx.Observable;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.Flowable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class ServiceDetailFragment extends Fragment implements View.OnClickListener {
 
     private static final String KEY_SERVICE = "com.druk.servicebrowser.ui.fragment.ServiceDetailFragment.key_service";
 
     private BonjourService mService;
-    private Subscription mResolveSubscription;
+    private Disposable mResolveDisposable;
 
     private TxtRecordsAdapter mAdapter;
     private RecyclerView mRecyclerView;
@@ -76,8 +76,8 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     @Override
     public void onStart() {
         super.onStart();
-        RxDnssd mRxDnssd = BonjourApplication.getRxDnssd(getContext());
-        mResolveSubscription = Observable.just(mService)
+        Rx2Dnssd mRxDnssd = BonjourApplication.getRxDnssd(getContext());
+        mResolveDisposable = Flowable.just(mService)
                 .compose(mRxDnssd.resolve())
                 .compose(mRxDnssd.queryRecords())
                 .subscribeOn(Schedulers.io())
@@ -93,8 +93,8 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     @Override
     public void onStop() {
         super.onStop();
-        if (mResolveSubscription != null) {
-            mResolveSubscription.unsubscribe();
+        if (mResolveDisposable != null) {
+            mResolveDisposable.dispose();
         }
     }
 

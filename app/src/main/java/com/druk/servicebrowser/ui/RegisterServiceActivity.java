@@ -44,7 +44,7 @@ import android.widget.TextView;
 import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
-import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rx2dnssd.BonjourService;
 
 import java.util.HashMap;
 import java.util.List;

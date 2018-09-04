@@ -36,12 +36,12 @@ import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.BuildConfig;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
-import com.github.druk.rxdnssd.BonjourService;
-import com.github.druk.rxdnssd.RxDnssd;
+import com.github.druk.rx2dnssd.BonjourService;
+import com.github.druk.rx2dnssd.Rx2Dnssd;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 public class ServiceBrowserFragment<T> extends Fragment {
 
@@ -49,14 +49,14 @@ public class ServiceBrowserFragment<T> extends Fragment {
     private static final String KEY_DOMAIN = "domain";
     private static final String KEY_SELECTED_POSITION = "selected_position";
 
-    protected Subscription mSubscription;
+    protected Disposable mDisposable;
     protected ServiceAdapter mAdapter;
     protected String mReqType;
     protected String mDomain;
     protected RecyclerView mRecyclerView;
     protected ProgressBar mProgressView;
     protected LinearLayout mErrorView;
-    protected RxDnssd mRxDnssd;
+    protected Rx2Dnssd mRxDnssd;
 
     protected View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -156,7 +156,7 @@ public class ServiceBrowserFragment<T> extends Fragment {
     }
 
     protected void startDiscovery() {
-        mSubscription = mRxDnssd.browse(mReqType, mDomain)
+        mDisposable = mRxDnssd.browse(mReqType, mDomain)
                 .compose(mRxDnssd.resolve())
                 .compose(mRxDnssd.queryRecords())
                 .subscribeOn(Schedulers.io())
@@ -230,8 +230,8 @@ public class ServiceBrowserFragment<T> extends Fragment {
     }
 
     protected void stopDiscovery() {
-        if (mSubscription != null) {
-            mSubscription.unsubscribe();
+        if (mDisposable != null) {
+            mDisposable.dispose();
         }
     }
 

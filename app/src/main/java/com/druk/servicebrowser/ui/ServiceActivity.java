@@ -27,7 +27,7 @@ import android.widget.TextView;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.Utils;
 import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;
-import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rx2dnssd.BonjourService;
 
 public class ServiceActivity extends AppCompatActivity implements ServiceDetailFragment.ServiceDetailListener {
 

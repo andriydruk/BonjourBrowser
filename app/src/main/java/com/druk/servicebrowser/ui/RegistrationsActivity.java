@@ -32,12 +32,12 @@ import android.widget.Toast;
 import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
-import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rx2dnssd.BonjourService;
 
 import java.util.List;
 
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 
 public class RegistrationsActivity extends AppCompatActivity {
 
@@ -71,7 +71,7 @@ public class RegistrationsActivity extends AppCompatActivity {
         private static final int STOP_REQUEST_CODE = 101;
 
         private ServiceAdapter adapter;
-        private Subscription mSubscription;
+        private Disposable mDisposable;
         private RecyclerView mRecyclerView;
         private View mNoServiceView;
 
@@ -93,7 +93,7 @@ public class RegistrationsActivity extends AppCompatActivity {
             if (requestCode == REGISTER_REQUEST_CODE) {
                 if (resultCode == Activity.RESULT_OK) {
                     BonjourService bonjourService = RegisterServiceActivity.parseResult(data);
-                    mSubscription = BonjourApplication.getRegistrationManager(getContext())
+                    mDisposable = BonjourApplication.getRegistrationManager(getContext())
                             .register(getContext(), bonjourService)
                             .observeOn(AndroidSchedulers.mainThread())
                             .subscribe(service -> RegistrationsFragment.this.updateServices(), throwable -> Toast.makeText(RegistrationsFragment.this.getContext(), "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show());
@@ -115,7 +115,7 @@ public class RegistrationsActivity extends AppCompatActivity {
         @Override
         public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
             View view = inflater.inflate(R.layout.fragment_registrations, container, false);
-            mRecyclerView = (RecyclerView) view.findViewById(R.id.recycler_view);
+            mRecyclerView = view.findViewById(R.id.recycler_view);
             mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false));
             mRecyclerView.setAdapter(adapter);
             mNoServiceView = view.findViewById(R.id.no_service);
@@ -127,8 +127,8 @@ public class RegistrationsActivity extends AppCompatActivity {
         @Override
         public void onStop() {
             super.onStop();
-            if (mSubscription != null && !mSubscription.isUnsubscribed()) {
-                mSubscription.unsubscribe();
+            if (mDisposable != null && !mDisposable.isDisposed()) {
+                mDisposable.dispose();
             }
         }
 

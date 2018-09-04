@@ -31,7 +31,7 @@ import com.druk.servicebrowser.Utils;
 import com.druk.servicebrowser.ui.fragment.RegTypeBrowserFragment;
 import com.druk.servicebrowser.ui.fragment.ServiceBrowserFragment;
 import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;
-import com.github.druk.rxdnssd.BonjourService;
+import com.github.druk.rx2dnssd.BonjourService;
 
 public class MainActivity extends AppCompatActivity implements ServiceBrowserFragment.ServiceListener, ServiceDetailFragment.ServiceDetailListener {
 
