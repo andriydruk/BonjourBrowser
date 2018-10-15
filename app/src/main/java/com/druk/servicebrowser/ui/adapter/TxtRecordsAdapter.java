@@ -15,13 +15,12 @@
  */
 package com.druk.servicebrowser.ui.adapter;
 
-import com.druk.servicebrowser.R;
-
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.support.design.widget.Snackbar;
 import android.support.v4.util.ArrayMap;
+import android.support.v4.util.SimpleArrayMap;
 import android.support.v7.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -29,19 +28,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
-import java.util.Map;
-import java.util.TreeMap;
+import com.druk.servicebrowser.R;
+
 
 public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.ViewHolder> {
 
     private final int mBackground;
-    private final ArrayMap<String, String> mRecords = new ArrayMap<>();
+    private final SimpleArrayMap<String, String> ipRecords = new SimpleArrayMap<>();
+    private final SimpleArrayMap<String, String> txtRecords = new SimpleArrayMap<>();
 
-    public TxtRecordsAdapter(Context context, Map<String, String> records) {
+    public TxtRecordsAdapter(Context context) {
         TypedValue mTypedValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
         mBackground = mTypedValue.resourceId;
-        mRecords.putAll(records);
     }
 
     @Override
@@ -72,20 +71,35 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
 
     @Override
     public int getItemCount() {
-        return mRecords.size();
+        return ipRecords.size() + txtRecords.size();
     }
 
     protected String getKey(int position) {
-        return mRecords.keyAt(position);
+        if (position < ipRecords.size()) {
+            return ipRecords.keyAt(position);
+        }
+        else {
+            return txtRecords.keyAt(position - ipRecords.size());
+        }
     }
 
     protected String getValue(int position) {
-        return mRecords.valueAt(position);
+        if (position < ipRecords.size()) {
+            return ipRecords.valueAt(position);
+        }
+        else {
+            return txtRecords.valueAt(position - ipRecords.size());
+        }
     }
 
-    public void swap(Map<String, String> records) {
-        this.mRecords.clear();
-        this.mRecords.putAll(new TreeMap<>(records));
+    public void swapIPRecords(ArrayMap<String, String> records) {
+        this.ipRecords.clear();
+        this.ipRecords.putAll(records);
+    }
+
+    public void swapTXTRecords(ArrayMap<String, String> records) {
+        this.txtRecords.clear();
+        this.txtRecords.putAll(records);
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

@@ -46,7 +46,6 @@ import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
 import com.github.druk.rx2dnssd.BonjourService;
 
-import java.util.HashMap;
 import java.util.List;
 
 public class RegisterServiceActivity extends AppCompatActivity {
@@ -112,7 +111,7 @@ public class RegisterServiceActivity extends AppCompatActivity {
             regTypeEditText.setOnEditorActionListener(this);
             portEditText.setOnEditorActionListener(this);
 
-            adapter = new TxtRecordsAdapter(getContext(), new HashMap<>()){
+            adapter = new TxtRecordsAdapter(getContext()){
 
                 @Override
                 public void onItemClick(View view, int position) {
@@ -124,7 +123,7 @@ public class RegisterServiceActivity extends AppCompatActivity {
                     builder.setMessage("Do you really want to delete " + key + "=" + value + " ?")
                             .setPositiveButton(android.R.string.ok, (dialog, id1) -> {
                                 mRecords.remove(key);
-                                adapter.swap(mRecords);
+                                adapter.swapTXTRecords(mRecords);
                                 adapter.notifyDataSetChanged();
                             })
                             .setNegativeButton(android.R.string.cancel, (dialog, id1) -> {
@@ -169,7 +168,7 @@ public class RegisterServiceActivity extends AppCompatActivity {
                         .setView(view)
                         .setPositiveButton(android.R.string.ok, (dialog, id1) -> {
                             mRecords.put(keyTextView.getText().toString(), valueTextView.getText().toString());
-                            adapter.swap(mRecords);
+                            adapter.swapTXTRecords(mRecords);
                             adapter.notifyDataSetChanged();
                         })
                         .setNegativeButton(android.R.string.cancel, (dialog, id1) -> {

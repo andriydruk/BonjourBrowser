@@ -158,7 +158,7 @@ public class ServiceBrowserFragment<T> extends Fragment {
     protected void startDiscovery() {
         mDisposable = mRxDnssd.browse(mReqType, mDomain)
                 .compose(mRxDnssd.resolve())
-                .compose(mRxDnssd.queryRecords())
+                .compose(mRxDnssd.queryIPRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {

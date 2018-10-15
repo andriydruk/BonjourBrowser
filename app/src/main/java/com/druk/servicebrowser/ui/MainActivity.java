@@ -88,7 +88,7 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(Utils.isDevSettingEnabled(this) ? R.menu.menu_bonjour_browser_for_developers : R.menu.menu_bonjour_browser, menu);
+        getMenuInflater().inflate(R.menu.menu_bonjour_browser_for_developers, menu);
         return true;
     }
 

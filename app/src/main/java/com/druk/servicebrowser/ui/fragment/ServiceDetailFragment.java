@@ -3,7 +3,6 @@ package com.druk.servicebrowser.ui.fragment;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.Fragment;
 import android.support.v4.util.ArrayMap;
 import android.support.v7.widget.LinearLayoutManager;
@@ -19,9 +18,9 @@ import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
 import com.github.druk.rx2dnssd.BonjourService;
 import com.github.druk.rx2dnssd.Rx2Dnssd;
 
-import java.util.Map;
+import java.net.Inet4Address;
+import java.net.InetAddress;
 
-import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
@@ -31,10 +30,10 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     private static final String KEY_SERVICE = "com.druk.servicebrowser.ui.fragment.ServiceDetailFragment.key_service";
 
     private BonjourService mService;
-    private Disposable mResolveDisposable;
+    private Disposable mResolveIPDisposable;
+    private Disposable mResolveTXTDisposable;
 
     private TxtRecordsAdapter mAdapter;
-    private RecyclerView mRecyclerView;
 
     public static ServiceDetailFragment newInstance(BonjourService service){
         ServiceDetailFragment fragment = new ServiceDetailFragment();
@@ -59,17 +58,19 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         if (getArguments() != null) {
             mService = getArguments().getParcelable(KEY_SERVICE);
         }
-        mAdapter = new TxtRecordsAdapter(getActivity(), new ArrayMap<>());
+        mAdapter = new TxtRecordsAdapter(getActivity());
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
-        mRecyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_service_detail, container, false);
+        RecyclerView mRecyclerView = (RecyclerView) inflater.inflate(R.layout.fragment_service_detail, container, false);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mRecyclerView.getContext()));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);
-        updateUI(mService, false);
+        updateIPRecords(mService);
+        updateTXTRecords(mService);
+        ((ServiceDetailListener)getActivity()).onServiceUpdated(mService);
         return mRecyclerView;
     }
 
@@ -77,46 +78,61 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     public void onStart() {
         super.onStart();
         Rx2Dnssd mRxDnssd = BonjourApplication.getRxDnssd(getContext());
-        mResolveDisposable = Flowable.just(mService)
-                .compose(mRxDnssd.resolve())
-                .compose(mRxDnssd.queryRecords())
+        mResolveIPDisposable = mRxDnssd.queryIPRecords(mService)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(bonjourService -> {
                     if (bonjourService.isLost()) {
                         return;
                     }
-                    ServiceDetailFragment.this.updateUI(bonjourService, false);
+                    ServiceDetailFragment.this.updateIPRecords(bonjourService);
+                }, throwable -> Log.e("DNSSD", "Error: ", throwable));
+        mResolveTXTDisposable = mRxDnssd.queryTXTRecords(mService)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(bonjourService -> {
+                    if (bonjourService.isLost()) {
+                        return;
+                    }
+                    ServiceDetailFragment.this.updateTXTRecords(bonjourService);
                 }, throwable -> Log.e("DNSSD", "Error: ", throwable));
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (mResolveDisposable != null) {
-            mResolveDisposable.dispose();
+        if (mResolveIPDisposable != null) {
+            mResolveIPDisposable.dispose();
+        }
+        if (mResolveTXTDisposable != null) {
+            mResolveTXTDisposable.dispose();
         }
     }
 
-    private void updateUI(BonjourService service, boolean withSnakeBar) {
-        Map<String, String> metaInfo = new ArrayMap<>();
-        if (service.getInet4Address() != null){
-            metaInfo.put("Address IPv4", service.getInet4Address().getHostAddress() + ":" + service.getPort());
-        }
-        if (service.getInet6Address() != null){
-            metaInfo.put("Address IPv6", service.getInet6Address().getHostAddress() + ":" + service.getPort());
-        }
-        metaInfo.putAll(service.getTxtRecords());
-        mAdapter.swap(metaInfo);
-        mAdapter.notifyDataSetChanged();
-
-        if (isAdded()){
-            ((ServiceDetailListener)getActivity()).onServiceUpdated(service);
-            if (withSnakeBar) {
-                Snackbar snackbar = Snackbar.make(mRecyclerView, getString(R.string.service_was_resolved), Snackbar.LENGTH_LONG);
-                snackbar.getView().setBackgroundResource(R.color.accent);
-                snackbar.show();
+    private void updateIPRecords(BonjourService service) {
+        ArrayMap<String, String> metaInfo = new ArrayMap<>();
+        for (InetAddress inetAddress : service.getInetAddresses()) {
+            if (inetAddress instanceof Inet4Address) {
+                metaInfo.put("Address IPv4", service.getInet4Address().getHostAddress() + ":" + service.getPort());
             }
+            else {
+                metaInfo.put("Address IPv6", service.getInet6Address().getHostAddress() + ":" + service.getPort());
+            }
+        }
+        mAdapter.swapIPRecords(metaInfo);
+        mAdapter.notifyDataSetChanged();
+        if (isAdded()) {
+            ((ServiceDetailListener)getActivity()).onServiceUpdated(mService);
+        }
+    }
+
+    private void updateTXTRecords(BonjourService service) {
+        ArrayMap<String, String> metaInfo = new ArrayMap<>();
+        metaInfo.putAll(service.getTxtRecords());
+        mAdapter.swapTXTRecords(metaInfo);
+        mAdapter.notifyDataSetChanged();
+        if (isAdded()) {
+            ((ServiceDetailListener)getActivity()).onServiceUpdated(mService);
         }
     }
 
