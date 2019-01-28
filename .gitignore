@@ -43,3 +43,4 @@ keys/
 /*.html
 
 fabric.properties
+app/release
