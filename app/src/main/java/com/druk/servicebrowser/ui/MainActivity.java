@@ -17,9 +17,9 @@ package com.druk.servicebrowser.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SlidingPaneLayout;
-import android.support.v7.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.slidingpanelayout.widget.SlidingPaneLayout;
+import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -27,7 +27,6 @@ import android.widget.TextView;
 
 import com.druk.servicebrowser.Config;
 import com.druk.servicebrowser.R;
-import com.druk.servicebrowser.Utils;
 import com.druk.servicebrowser.ui.fragment.RegTypeBrowserFragment;
 import com.druk.servicebrowser.ui.fragment.ServiceBrowserFragment;
 import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;

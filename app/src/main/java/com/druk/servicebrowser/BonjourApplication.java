@@ -25,7 +25,7 @@ import android.content.Context;
 import android.os.Build;
 import android.os.StrictMode;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 import android.util.Log;
 import io.fabric.sdk.android.Fabric;
 

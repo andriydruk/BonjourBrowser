@@ -27,11 +27,11 @@
             android:layout_marginBottom="50dp"
             android:orientation="vertical">
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-            <android.support.v7.widget.AppCompatEditText
+            <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/service_name"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -39,13 +39,13 @@
                     android:lines="1"
                     android:hint="@string/service_name" />
 
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-            <android.support.v7.widget.AppCompatAutoCompleteTextView
+            <androidx.appcompat.widget.AppCompatAutoCompleteTextView
                     android:id="@+id/reg_type"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -54,13 +54,13 @@
                     android:completionThreshold="1"
                     android:hint="@string/reg_type_eg" />
 
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <android.support.design.widget.TextInputLayout
+        <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
 
-            <android.support.v7.widget.AppCompatEditText
+            <androidx.appcompat.widget.AppCompatEditText
                     android:id="@+id/port"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -69,9 +69,9 @@
                     android:lines="1"
                     android:hint="@string/port_eg" />
 
-        </android.support.design.widget.TextInputLayout>
+        </com.google.android.material.textfield.TextInputLayout>
 
-        <android.support.v7.widget.AppCompatTextView
+        <androidx.appcompat.widget.AppCompatTextView
                 android:id="@+id/no_service"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -81,16 +81,16 @@
                 android:textColor="@color/secondary_text"
                 android:text="@string/txt_records"/>
 
-        <android.support.v7.widget.RecyclerView
+        <androidx.recyclerview.widget.RecyclerView
                 android:id="@id/recycler_view"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent">
 
-        </android.support.v7.widget.RecyclerView>
+        </androidx.recyclerview.widget.RecyclerView>
 
     </LinearLayout>
 
-    <android.support.design.widget.FloatingActionButton
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab"
             android:layout_height="wrap_content"
             android:layout_width="wrap_content"

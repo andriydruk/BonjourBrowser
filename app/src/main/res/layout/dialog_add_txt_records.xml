@@ -5,11 +5,11 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content">
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <android.support.v7.widget.AppCompatEditText
+        <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/key"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -19,15 +19,15 @@
 
             <requestFocus/>
 
-        </android.support.v7.widget.AppCompatEditText>
+        </androidx.appcompat.widget.AppCompatEditText>
 
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
-    <android.support.design.widget.TextInputLayout
+    <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-        <android.support.v7.widget.AppCompatEditText
+        <androidx.appcompat.widget.AppCompatEditText
                 android:id="@+id/value"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -35,5 +35,5 @@
                 android:lines="1"
                 android:hint="@string/value" />
 
-    </android.support.design.widget.TextInputLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>
