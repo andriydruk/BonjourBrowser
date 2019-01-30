@@ -8,8 +8,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 19
-        versionName "2.0.4"
+        versionCode 2_000_005
+        versionName "2.0.5"
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -45,7 +45,7 @@ dependencies {
     //Android Support Libraries Version
     def androidx = '1.0.0'
 
-    implementation "com.github.andriydruk:rx2dnssd:0.9.12"
+    implementation "com.github.andriydruk:rx2dnssd:0.9.13"
     implementation "androidx.legacy:legacy-support-v4:$androidx"
     implementation "androidx.appcompat:appcompat:1.0.2"
     implementation "com.google.android.material:material:$androidx"
