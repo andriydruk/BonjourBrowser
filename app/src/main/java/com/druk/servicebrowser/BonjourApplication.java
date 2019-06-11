@@ -15,18 +15,18 @@
  */
 package com.druk.servicebrowser;
 
-import com.crashlytics.android.Crashlytics;
-import com.github.druk.rx2dnssd.Rx2Dnssd;
-import com.github.druk.rx2dnssd.Rx2DnssdBindable;
-import com.github.druk.rx2dnssd.Rx2DnssdEmbedded;
-
 import android.app.Application;
 import android.content.Context;
 import android.os.Build;
 import android.os.StrictMode;
-import android.provider.Settings;
-import androidx.annotation.NonNull;
 import android.util.Log;
+
+import androidx.annotation.NonNull;
+
+import com.crashlytics.android.Crashlytics;
+import com.github.druk.rx2dnssd.Rx2Dnssd;
+import com.github.druk.rx2dnssd.Rx2DnssdEmbedded;
+
 import io.fabric.sdk.android.Fabric;
 
 public class BonjourApplication extends Application {
@@ -78,10 +78,6 @@ public class BonjourApplication extends Application {
     private static final String DNSSD = "dnssd";
 
     private Rx2Dnssd createDnssd() {
-
-        String userID = Settings.Secure.getString(getApplicationContext().getContentResolver(), Settings.Secure.ANDROID_ID);
-
-        Crashlytics.setUserIdentifier(userID);
         Crashlytics.setString(DEVICE, Build.BRAND + " " + Build.MODEL);
         Crashlytics.setString(ARCH, System.getProperty("os.arch"));
 
