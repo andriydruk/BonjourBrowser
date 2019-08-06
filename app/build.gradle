@@ -53,7 +53,7 @@ dependencies {
     implementation "androidx.cardview:cardview:$androidx"
     implementation "androidx.annotation:annotation:$androidx"
 
-    implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
+    implementation('com.crashlytics.sdk.android:crashlytics:2.10.1@aar') {
         transitive = true
     }
 }
