@@ -47,7 +47,7 @@ dependencies {
 
     implementation "com.github.andriydruk:rx2dnssd:0.9.13"
     implementation "androidx.legacy:legacy-support-v4:$androidx"
-    implementation "androidx.appcompat:appcompat:1.0.2"
+    implementation "androidx.appcompat:appcompat:1.1.0"
     implementation "com.google.android.material:material:$androidx"
     implementation "androidx.recyclerview:recyclerview:$androidx"
     implementation "androidx.cardview:cardview:$androidx"
