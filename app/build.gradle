@@ -1,15 +1,14 @@
 apply plugin: 'com.android.application'
-apply plugin: 'io.fabric'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 30
     buildToolsVersion '28.0.3'
 
     defaultConfig {
         minSdkVersion 14
-        targetSdkVersion 28
-        versionCode 2_000_006
-        versionName "2.0.6"
+        targetSdkVersion 30
+        versionCode 2_000_007
+        versionName "2.0.7"
 
         vectorDrawables.useSupportLibrary = true
     }
@@ -42,18 +41,16 @@ android {
 }
 
 dependencies {
-    //Android Support Libraries Version
-    def androidx = '1.0.0'
+    //AndroidX Libraries Version
+    def androidx = '1.1.0'
 
     implementation "com.github.andriydruk:rx2dnssd:0.9.13"
-    implementation "androidx.legacy:legacy-support-v4:$androidx"
-    implementation "androidx.appcompat:appcompat:1.0.2"
-    implementation "com.google.android.material:material:$androidx"
-    implementation "androidx.recyclerview:recyclerview:$androidx"
-    implementation "androidx.cardview:cardview:$androidx"
-    implementation "androidx.annotation:annotation:$androidx"
 
-    implementation('com.crashlytics.sdk.android:crashlytics:2.7.1@aar') {
-        transitive = true
-    }
+    implementation "androidx.annotation:annotation:$androidx"
+    implementation "androidx.appcompat:appcompat:$androidx"
+    implementation "androidx.recyclerview:recyclerview:$androidx"
+    implementation "androidx.slidingpanelayout:slidingpanelayout:$androidx"
+
+    implementation "androidx.cardview:cardview:1.0.0"
+    implementation "com.google.android.material:material:1.1.0"
 }

@@ -17,17 +17,13 @@ package com.druk.servicebrowser;
 
 import android.app.Application;
 import android.content.Context;
-import android.os.Build;
 import android.os.StrictMode;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
-import com.crashlytics.android.Crashlytics;
 import com.github.druk.rx2dnssd.Rx2Dnssd;
-import com.github.druk.rx2dnssd.Rx2DnssdEmbedded;
-
-import io.fabric.sdk.android.Fabric;
+import com.github.druk.rx2dnssd.Rx2DnssdBindable;
 
 public class BonjourApplication extends Application {
 
@@ -39,8 +35,6 @@ public class BonjourApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-
-        Fabric.with(this, new Crashlytics());
 
         if (BuildConfig.DEBUG) {
 
@@ -73,16 +67,8 @@ public class BonjourApplication extends Application {
         return ((BonjourApplication) context.getApplicationContext()).mRegTypeManager;
     }
 
-    private static final String DEVICE = "device";
-    private static final String ARCH = "arch";
-    private static final String DNSSD = "dnssd";
-
     private Rx2Dnssd createDnssd() {
-        Crashlytics.setString(DEVICE, Build.BRAND + " " + Build.MODEL);
-        Crashlytics.setString(ARCH, System.getProperty("os.arch"));
-
-        Log.i(TAG, "Using embedded version of dns sd");
-        Crashlytics.setString(DNSSD, "Using embedded version of dns sd");
-        return new Rx2DnssdEmbedded(this);
+        Log.i(TAG, "Using bindable version of dns sd");
+        return new Rx2DnssdBindable(this);
     }
 }
