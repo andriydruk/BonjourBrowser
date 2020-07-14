@@ -18,16 +18,24 @@ package com.druk.servicebrowser.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.content.ContextCompat;
+
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.Utils;
 import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;
 import com.github.druk.rx2dnssd.BonjourService;
+
+import java.net.URL;
 
 public class ServiceActivity extends AppCompatActivity implements ServiceDetailFragment.ServiceDetailListener {
 
@@ -104,4 +112,33 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
         setResult(Activity.RESULT_OK, new Intent().putExtra(SERVICE, service));
         finish();
     }
+
+    @Override
+    public void onHttpServerFound(URL url) {
+        FloatingActionButton fab = findViewById(R.id.fab);
+        if (fab.getVisibility() != View.VISIBLE) {
+            fab.setVisibility(View.VISIBLE);
+            fab.setScaleX(0);
+            fab.setScaleY(0);
+            fab.animate()
+                    .alpha(1.0f)
+                    .scaleX(1)
+                    .scaleY(1)
+                    .setInterpolator(new OvershootInterpolator())
+                    .start();
+        }
+
+        fab.setOnClickListener(view -> {
+            CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
+            builder.setToolbarColor(ContextCompat.getColor(this, R.color.primary));
+            CustomTabsIntent customTabsIntent = builder.build();
+            try {
+                customTabsIntent.launchUrl(this, Uri.parse(url.toString()));
+            }
+            catch (Throwable e) {
+                Toast.makeText(this, "Can't find browser", Toast.LENGTH_SHORT).show();
+            }
+        });
+    }
+
 }

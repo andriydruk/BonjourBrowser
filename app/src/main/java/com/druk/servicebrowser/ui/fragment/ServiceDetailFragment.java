@@ -2,36 +2,33 @@ package com.druk.servicebrowser.ui.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.collection.ArrayMap;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import androidx.annotation.Nullable;
+import androidx.collection.ArrayMap;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
+import com.druk.servicebrowser.ui.viewmodel.ServiceDetailViewModel;
 import com.github.druk.rx2dnssd.BonjourService;
-import com.github.druk.rx2dnssd.Rx2Dnssd;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
+import java.net.URL;
 
 public class ServiceDetailFragment extends Fragment implements View.OnClickListener {
 
     private static final String KEY_SERVICE = "com.druk.servicebrowser.ui.fragment.ServiceDetailFragment.key_service";
 
     private BonjourService mService;
-    private Disposable mResolveIPDisposable;
-    private Disposable mResolveTXTDisposable;
+    private ServiceDetailViewModel viewModel;
 
     private TxtRecordsAdapter mAdapter;
 
@@ -59,6 +56,11 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
             mService = getArguments().getParcelable(KEY_SERVICE);
         }
         mAdapter = new TxtRecordsAdapter(getActivity());
+
+        viewModel = new ViewModelProvider.AndroidViewModelFactory(BonjourApplication.getApplication(requireContext()))
+                .create(ServiceDetailViewModel.class);
+        viewModel.resolveIPRecords(mService, this::updateIPRecords);
+        viewModel.resolveTXTRecords(mService, this::updateTXTRecords);
     }
 
     @Nullable
@@ -72,41 +74,6 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         updateTXTRecords(mService);
         ((ServiceDetailListener)getActivity()).onServiceUpdated(mService);
         return mRecyclerView;
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Rx2Dnssd mRxDnssd = BonjourApplication.getRxDnssd(getContext());
-        mResolveIPDisposable = mRxDnssd.queryIPRecords(mService)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bonjourService -> {
-                    if (bonjourService.isLost()) {
-                        return;
-                    }
-                    ServiceDetailFragment.this.updateIPRecords(bonjourService);
-                }, throwable -> Log.e("DNSSD", "Error: ", throwable));
-        mResolveTXTDisposable = mRxDnssd.queryTXTRecords(mService)
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bonjourService -> {
-                    if (bonjourService.isLost()) {
-                        return;
-                    }
-                    ServiceDetailFragment.this.updateTXTRecords(bonjourService);
-                }, throwable -> Log.e("DNSSD", "Error: ", throwable));
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        if (mResolveIPDisposable != null) {
-            mResolveIPDisposable.dispose();
-        }
-        if (mResolveTXTDisposable != null) {
-            mResolveTXTDisposable.dispose();
-        }
     }
 
     private void updateIPRecords(BonjourService service) {
@@ -124,6 +91,8 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         if (isAdded()) {
             ((ServiceDetailListener)getActivity()).onServiceUpdated(mService);
         }
+
+        viewModel.checkHttpConnection(mService, this::onHttpServerFound);
     }
 
     private void updateTXTRecords(BonjourService service) {
@@ -136,6 +105,10 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         }
     }
 
+    private void onHttpServerFound(URL url) {
+        ((ServiceDetailListener)getActivity()).onHttpServerFound(url);
+    }
+
     @Override
     public void onClick(View v) {
         ((ServiceDetailListener)getActivity()).onServiceStopped(mService);
@@ -143,6 +116,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
 
     public interface ServiceDetailListener{
         void onServiceUpdated(BonjourService service);
+        void onHttpServerFound(URL url);
         void onServiceStopped(BonjourService service);
     }
 }

@@ -32,6 +32,8 @@ import com.druk.servicebrowser.ui.fragment.ServiceBrowserFragment;
 import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;
 import com.github.druk.rx2dnssd.BonjourService;
 
+import java.net.URL;
+
 public class MainActivity extends AppCompatActivity implements ServiceBrowserFragment.ServiceListener, ServiceDetailFragment.ServiceDetailListener {
 
     private static final String PARAM_DOMAIN = "param_domain";
@@ -158,5 +160,10 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
     @Override
     public void onServiceStopped(BonjourService service) {
         //Ignore this
+    }
+
+    @Override
+    public void onHttpServerFound(URL url) {
+        // TODO: show FAB
     }
 }
