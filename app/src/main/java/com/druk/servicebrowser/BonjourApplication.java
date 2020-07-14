@@ -55,6 +55,10 @@ public class BonjourApplication extends Application {
         mRegTypeManager = new RegTypeManager(this);
     }
 
+    public static BonjourApplication getApplication(@NonNull Context context){
+        return ((BonjourApplication)context.getApplicationContext());
+    }
+
     public static Rx2Dnssd getRxDnssd(@NonNull Context context){
         return ((BonjourApplication)context.getApplicationContext()).mRxDnssd;
     }

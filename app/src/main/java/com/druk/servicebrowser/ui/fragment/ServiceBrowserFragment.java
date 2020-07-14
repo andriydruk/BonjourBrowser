@@ -19,10 +19,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -32,18 +28,22 @@ import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
+import androidx.annotation.Nullable;
+import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.BuildConfig;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
+import com.druk.servicebrowser.ui.viewmodel.ServiceBrowserViewModel;
 import com.github.druk.rx2dnssd.BonjourService;
-import com.github.druk.rx2dnssd.Rx2Dnssd;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.schedulers.Schedulers;
 
-public class ServiceBrowserFragment<T> extends Fragment {
+public class ServiceBrowserFragment extends Fragment {
 
     private static final String KEY_REG_TYPE = "reg_type";
     private static final String KEY_DOMAIN = "domain";
@@ -56,7 +56,6 @@ public class ServiceBrowserFragment<T> extends Fragment {
     protected RecyclerView mRecyclerView;
     protected ProgressBar mProgressView;
     protected LinearLayout mErrorView;
-    protected Rx2Dnssd mRxDnssd;
 
     protected View.OnClickListener mListener = new View.OnClickListener() {
         @Override
@@ -90,17 +89,17 @@ public class ServiceBrowserFragment<T> extends Fragment {
         if (!(context instanceof ServiceListener)) {
             throw new IllegalArgumentException("Fragment context should implement ServiceListener interface");
         }
-
-        mRxDnssd = BonjourApplication.getRxDnssd(context);
     }
 
     @Override
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         if (getArguments() != null) {
             mReqType = getArguments().getString(KEY_REG_TYPE);
             mDomain = getArguments().getString(KEY_DOMAIN);
         }
+
         mAdapter = new ServiceAdapter(getActivity()) {
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, int i) {
@@ -119,6 +118,26 @@ public class ServiceBrowserFragment<T> extends Fragment {
                 viewHolder.itemView.setBackgroundResource(getBackground(i));
             }
         };
+
+        createViewModel();
+    }
+
+    protected void createViewModel() {
+        ServiceBrowserViewModel viewModel = new ViewModelProvider.AndroidViewModelFactory(BonjourApplication.getApplication(requireContext()))
+                .create(ServiceBrowserViewModel.class);
+        viewModel.startDiscovery(mReqType, mDomain, service -> {
+            int itemsCount = mAdapter.getItemCount();
+            if (!service.isLost()) {
+                mAdapter.add(service);
+            } else {
+                mAdapter.remove(service);
+            }
+            ServiceBrowserFragment.this.showList(itemsCount);
+            mAdapter.notifyDataSetChanged();
+        }, throwable -> {
+            Log.e("DNSSD", "Error: ", throwable);
+            ServiceBrowserFragment.this.showError(throwable);
+        });
     }
 
     @Nullable
@@ -138,42 +157,9 @@ public class ServiceBrowserFragment<T> extends Fragment {
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        startDiscovery();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        stopDiscovery();
-    }
-
-    @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         outState.putLong(KEY_SELECTED_POSITION, mAdapter.getSelectedItemId());
-    }
-
-    protected void startDiscovery() {
-        mDisposable = mRxDnssd.browse(mReqType, mDomain)
-                .compose(mRxDnssd.resolve())
-                .compose(mRxDnssd.queryIPRecords())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe(bonjourService -> {
-                    int itemsCount = mAdapter.getItemCount();
-                    if (!bonjourService.isLost()) {
-                        mAdapter.add(bonjourService);
-                    } else {
-                        mAdapter.remove(bonjourService);
-                    }
-                    ServiceBrowserFragment.this.showList(itemsCount);
-                    mAdapter.notifyDataSetChanged();
-                }, throwable -> {
-                    Log.e("DNSSD", "Error: ", throwable);
-                    ServiceBrowserFragment.this.showError(throwable);
-                });
     }
 
     protected boolean showList(int itemsBefore){
@@ -227,12 +213,6 @@ public class ServiceBrowserFragment<T> extends Fragment {
             mErrorView.animate().alpha(1.0f).setInterpolator(new AccelerateDecelerateInterpolator()).start();
             mErrorView.findViewById(R.id.send_report).setOnClickListener(v -> Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e));
         });
-    }
-
-    protected void stopDiscovery() {
-        if (mDisposable != null) {
-            mDisposable.dispose();
-        }
     }
 
     public interface ServiceListener {
