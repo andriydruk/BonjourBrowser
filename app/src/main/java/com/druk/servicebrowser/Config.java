@@ -27,6 +27,7 @@ public final class Config {
     public static final String SERVICES_DOMAIN = "_services._dns-sd._udp";
 
     public static final String EMPTY_DOMAIN = ".";
+    public static final String LOCAL_DOMAIN = "local.";
     public static final String TCP_REG_TYPE_SUFFIX = "_tcp";
     public static final String UDP_REG_TYPE_SUFFIX = "_udp";
 

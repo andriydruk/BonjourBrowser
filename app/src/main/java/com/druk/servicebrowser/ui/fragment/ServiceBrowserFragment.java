@@ -21,13 +21,18 @@ import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -36,12 +41,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.BuildConfig;
+import com.druk.servicebrowser.FavouritesManager;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
 import com.druk.servicebrowser.ui.viewmodel.ServiceBrowserViewModel;
 import com.github.druk.rx2dnssd.BonjourService;
-
-import io.reactivex.disposables.Disposable;
 
 public class ServiceBrowserFragment extends Fragment {
 
@@ -49,7 +53,8 @@ public class ServiceBrowserFragment extends Fragment {
     private static final String KEY_DOMAIN = "domain";
     private static final String KEY_SELECTED_POSITION = "selected_position";
 
-    protected Disposable mDisposable;
+    protected FavouritesManager favouritesManager;
+
     protected ServiceAdapter mAdapter;
     protected String mReqType;
     protected String mDomain;
@@ -83,12 +88,14 @@ public class ServiceBrowserFragment extends Fragment {
     }
 
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
 
         if (!(context instanceof ServiceListener)) {
             throw new IllegalArgumentException("Fragment context should implement ServiceListener interface");
         }
+
+        favouritesManager = BonjourApplication.getFavouritesManager(context);
     }
 
     @Override
@@ -120,6 +127,41 @@ public class ServiceBrowserFragment extends Fragment {
         };
 
         createViewModel();
+        setHasOptionsMenu(favouriteMenuSupport());
+    }
+
+    @Override
+    public void onCreateOptionsMenu(@NonNull Menu menu, @NonNull MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_domain, menu);
+        MenuItem item = menu.findItem(R.id.action_star);
+        boolean isFavourite = favouritesManager.isFavourite(mReqType);
+        item.setChecked(isFavourite);
+        item.setIcon(isFavourite ? R.drawable.ic_star : R.drawable.ic_star_border);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getItemId() == R.id.action_star) {
+            if (!item.isChecked()) {
+                favouritesManager.addToFavourites(mReqType);
+                item.setChecked(true);
+                item.setIcon(R.drawable.ic_star);
+                Toast.makeText(getContext(), mReqType + " saved to Favourites", Toast.LENGTH_LONG).show();
+            }
+            else {
+                favouritesManager.removeFromFavourites(mReqType);
+                item.setChecked(false);
+                item.setIcon(R.drawable.ic_star_border);
+                Toast.makeText(getContext(), mReqType + " removed from Favourites", Toast.LENGTH_LONG).show();
+            }
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    protected boolean favouriteMenuSupport() {
+        return true;
     }
 
     protected void createViewModel() {

@@ -89,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.menu_bonjour_browser_for_developers, menu);
+        getMenuInflater().inflate(R.menu.menu_bonjour_browser, menu);
         return true;
     }
 
@@ -132,7 +132,8 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
                 updateNavigation();
             }
             else{
-                RegTypeActivity.startActivity(this, serviceRegType, serviceDomain);
+                Intent intent = RegTypeActivity.createIntent(this, serviceRegType, serviceDomain);
+                startActivity(intent);
             }
         }
         else{

@@ -31,10 +31,10 @@ public class RegTypeActivity extends AppCompatActivity implements ServiceBrowser
     private static final String KEY_REG_TYPE = "com.druk.servicebrowser.ui.RegTypeActivity.KEY_DOMAIN";
     private static final String KEY_DOMAIN = "com.druk.servicebrowser.ui.RegTypeActivity.KEY_REG_TYPE";
 
-    public static void startActivity(Context context, String regType, String domain) {
-        context.startActivity(new Intent(context, RegTypeActivity.class).
+    public static Intent createIntent(Context context, String regType, String domain) {
+        return new Intent(context, RegTypeActivity.class).
                 putExtra(RegTypeActivity.KEY_DOMAIN, domain).
-                putExtra(RegTypeActivity.KEY_REG_TYPE, regType));
+                putExtra(RegTypeActivity.KEY_REG_TYPE, regType);
     }
 
     @Override
