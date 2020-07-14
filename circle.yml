@@ -7,7 +7,7 @@ jobs:
   build:
     working_directory: ~/code
     docker:
-      - image: circleci/android:api-30-ndk-r21d
+      - image: circleci/android:api-29-ndk
     environment:
       JVM_OPTS: -Xmx3200m
     steps:
