@@ -15,19 +15,25 @@
  */
 package com.druk.servicebrowser.ui.fragment;
 
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.Config;
+import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.RegTypeManager;
 import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
 import com.druk.servicebrowser.ui.viewmodel.RegTypeBrowserViewModel;
+import com.github.druk.rx2dnssd.BonjourService;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 
 import io.reactivex.functions.Consumer;
 
@@ -49,6 +55,9 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         super.onCreate(savedInstanceState);
         mRegTypeManager = BonjourApplication.getRegTypeManager(getContext());
         mAdapter = new ServiceAdapter(getActivity()) {
+
+            Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_star_accent);
+
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, int i) {
                 RegTypeBrowserViewModel.BonjourDomain domain = (RegTypeBrowserViewModel.BonjourDomain) getItem(i);
@@ -59,9 +68,37 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
                 } else {
                     viewHolder.text1.setText(regType);
                 }
+
+                if (favouritesManager.isFavourite(regType)) {
+                    viewHolder.text1.setCompoundDrawablesWithIntrinsicBounds(null, null, drawable, null);
+                }
+                else {
+                    viewHolder.text1.setCompoundDrawablesWithIntrinsicBounds(null, null, null, null);
+                }
+
                 viewHolder.text2.setText(domain.serviceCount + " services");
                 viewHolder.itemView.setOnClickListener(mListener);
                 viewHolder.itemView.setBackgroundResource(getBackground(i));
+            }
+
+            @Override
+            public void sortServices(ArrayList<BonjourService> services) {
+                Collections.sort(services, (lhs, rhs) -> {
+                    String lhsRegType = lhs.getServiceName() + "." + lhs.getRegType().split(Config.REG_TYPE_SEPARATOR)[0] + ".";
+                    String rhsRegType = rhs.getServiceName() + "." + rhs.getRegType().split(Config.REG_TYPE_SEPARATOR)[0] + ".";
+                    boolean isLhsFavourite = favouritesManager.isFavourite(lhsRegType);
+                    boolean isRhsFavourite = favouritesManager.isFavourite(rhsRegType);
+                    if (isLhsFavourite && isRhsFavourite) {
+                        return lhs.getServiceName().compareTo(rhs.getServiceName());
+                    }
+                    else if (isLhsFavourite) {
+                        return -1;
+                    }
+                    else if (isRhsFavourite) {
+                        return 1;
+                    }
+                    return lhs.getServiceName().compareTo(rhs.getServiceName());
+                });
             }
         };
     }
@@ -89,5 +126,18 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         };
 
         viewModel.startDiscovery(servicesAction, errorAction);
+    }
+
+    @Override
+    protected boolean favouriteMenuSupport() {
+        return false;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        // Favourites can be changed
+        mAdapter.sortServices();
+        mAdapter.notifyDataSetChanged();
     }
 }

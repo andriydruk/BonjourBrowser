@@ -85,20 +85,28 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
     public void add(BonjourService service) {
         this.services.remove(service);
         this.services.add(service);
-        Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
+        sortServices(services);
     }
 
     public void swap(List<BonjourService> service) {
         this.services.clear();
         this.services.addAll(service);
-        Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
+        sortServices(services);
         notifyDataSetChanged();
     }
 
     public void remove(BonjourService bonjourService) {
         if (this.services.remove(bonjourService)) {
-            Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
+            sortServices(services);
         }
+    }
+
+    public void sortServices() {
+        sortServices(services);
+    }
+
+    public void sortServices(ArrayList<BonjourService> services) {
+        Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
     }
 
     public static class ViewHolder extends RecyclerView.ViewHolder {

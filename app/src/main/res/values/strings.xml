@@ -48,5 +48,6 @@
     <string name="value">Value</string>
     <string name="add">Add</string>
     <string name="register">Register</string>
+    <string name="star">Mark as starred</string>
 
 </resources>

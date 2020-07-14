@@ -31,6 +31,7 @@ public class BonjourApplication extends Application {
     private Rx2Dnssd mRxDnssd;
     private RegistrationManager mRegistrationManager;
     private RegTypeManager mRegTypeManager;
+    private FavouritesManager mFavouritesManager;
 
     @Override
     public void onCreate() {
@@ -53,6 +54,7 @@ public class BonjourApplication extends Application {
         mRxDnssd = createDnssd();
         mRegistrationManager = new RegistrationManager();
         mRegTypeManager = new RegTypeManager(this);
+        mFavouritesManager = new FavouritesManager(this);
     }
 
     public static BonjourApplication getApplication(@NonNull Context context){
@@ -69,6 +71,10 @@ public class BonjourApplication extends Application {
 
     public static RegTypeManager getRegTypeManager(@NonNull Context context){
         return ((BonjourApplication) context.getApplicationContext()).mRegTypeManager;
+    }
+
+    public static FavouritesManager getFavouritesManager(@NonNull Context context){
+        return ((BonjourApplication)context.getApplicationContext()).mFavouritesManager;
     }
 
     private Rx2Dnssd createDnssd() {
