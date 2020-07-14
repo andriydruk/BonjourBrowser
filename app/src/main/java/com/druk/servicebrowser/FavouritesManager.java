@@ -64,9 +64,13 @@ public class FavouritesManager {
         List<ShortcutInfo> shortcuts = new LinkedList<>();
 
         for (String regType : favouriteRegTypes) {
+            String fullNameRegType = regTypeManager.getRegTypeDescription(regType);
+            if (fullNameRegType == null) {
+                fullNameRegType = regType;
+            }
             ShortcutInfoCompat newShortcut = new ShortcutInfoCompat.Builder(context, regType)
-                    .setShortLabel(regTypeManager.getRegTypeDescription(regType))
-                    .setLongLabel(regTypeManager.getRegTypeDescription(regType))
+                    .setShortLabel(fullNameRegType)
+                    .setLongLabel(fullNameRegType)
                     .setIcon(IconCompat.createWithResource(context, R.drawable.ic_star_accent))
                     .setIntent(RegTypeActivity.createIntent(context, regType, Config.LOCAL_DOMAIN).setAction(Intent.ACTION_VIEW))
                     .build();
