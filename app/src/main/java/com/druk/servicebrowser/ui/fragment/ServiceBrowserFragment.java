@@ -29,7 +29,6 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -59,7 +58,7 @@ public class ServiceBrowserFragment extends Fragment {
     protected String mReqType;
     protected String mDomain;
     protected RecyclerView mRecyclerView;
-    protected ProgressBar mProgressView;
+    protected LinearLayout mProgressView;
     protected LinearLayout mErrorView;
 
     protected View.OnClickListener mListener = new View.OnClickListener() {
@@ -174,7 +173,7 @@ public class ServiceBrowserFragment extends Fragment {
             } else {
                 mAdapter.remove(service);
             }
-            ServiceBrowserFragment.this.showList(itemsCount);
+            ServiceBrowserFragment.this.showList();
             mAdapter.notifyDataSetChanged();
         }, throwable -> {
             Log.e("DNSSD", "Error: ", throwable);
@@ -204,32 +203,15 @@ public class ServiceBrowserFragment extends Fragment {
         outState.putLong(KEY_SELECTED_POSITION, mAdapter.getSelectedItemId());
     }
 
-    protected boolean showList(int itemsBefore){
-        if (itemsBefore > 0 && mAdapter.getItemCount() == 0) {
-            mRecyclerView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mRecyclerView.setVisibility(View.GONE);
-                }
-            }).start();
-            mProgressView.setAlpha(0.0f);
-            mProgressView.setVisibility(View.VISIBLE);
-            mProgressView.animate().alpha(1.0f).setInterpolator(new AccelerateDecelerateInterpolator()).start();
-            return true;
-        }
-        if (itemsBefore == 0 && mAdapter.getItemCount() > 0) {
-            mProgressView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    mProgressView.setVisibility(View.GONE);
-                }
-            }).start();
-            mRecyclerView.setAlpha(0.0f);
+    protected void showList(){
+        if (mAdapter.getItemCount() > 0) {
             mRecyclerView.setVisibility(View.VISIBLE);
-            mRecyclerView.animate().alpha(1.0f).setInterpolator(new AccelerateDecelerateInterpolator()).start();
-            return false;
+            mProgressView.setVisibility(View.GONE);
         }
-        return mAdapter.getItemCount() > 0;
+        else {
+            mRecyclerView.setVisibility(View.GONE);
+            mProgressView.setVisibility(View.VISIBLE);
+        }
     }
 
     protected void showError(final Throwable e){

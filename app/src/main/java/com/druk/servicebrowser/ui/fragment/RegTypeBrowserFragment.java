@@ -121,7 +121,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
                     mAdapter.add(bonjourDomain);
                 }
             }
-            RegTypeBrowserFragment.this.showList(itemsCount);
+            RegTypeBrowserFragment.this.showList();
             mAdapter.notifyDataSetChanged();
         };
 
