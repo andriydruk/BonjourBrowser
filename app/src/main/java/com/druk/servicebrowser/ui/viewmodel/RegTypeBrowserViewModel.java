@@ -108,7 +108,7 @@ public class RegTypeBrowserViewModel extends AndroidViewModel {
             }
         };
 
-        mDisposable = mRxDnssd.browse(Config.SERVICES_DOMAIN, "local.")
+        mDisposable = mRxDnssd.browse(Config.SERVICES_DOMAIN, Config.LOCAL_DOMAIN)
                 .subscribeOn(Schedulers.io())
                 .subscribe(reqTypeAction, errorAction);
     }

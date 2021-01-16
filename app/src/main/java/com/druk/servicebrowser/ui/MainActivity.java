@@ -64,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
         }
 
         if (savedInstanceState == null) {
-            domain = "local.";
+            domain = Config.LOCAL_DOMAIN;
             getSupportFragmentManager().beginTransaction().
                     replace(R.id.first_panel, RegTypeBrowserFragment.newInstance(Config.TCP_REG_TYPE_SUFFIX)).commit();
         }
