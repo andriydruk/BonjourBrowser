@@ -41,7 +41,7 @@ android {
 }
 
 dependencies {
-    implementation "com.github.andriydruk:rx2dnssd:0.9.15"
+    implementation "com.github.andriydruk:rx2dnssd:0.9.16"
 
     implementation "androidx.annotation:annotation:1.2.0"
     implementation "androidx.appcompat:appcompat:1.2.0"
