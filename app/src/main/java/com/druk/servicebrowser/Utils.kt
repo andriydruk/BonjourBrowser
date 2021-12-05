@@ -13,29 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.druk.servicebrowser
 
-package com.druk.servicebrowser;
+import java.text.SimpleDateFormat
+import java.util.*
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
-import java.util.TimeZone;
+object Utils {
 
-public class Utils {
+    private const val TIME_FORMAT = "HH:mm:ss"
 
-    private static final String TIME_FORMAT = "HH:mm:ss";
-
-    public static String formatTime(Long timestamp) {
-        if (timestamp == null){
-            return "";
+    fun formatTime(timestamp: Long?): String {
+        if (timestamp == null) {
+            return ""
         }
-        Calendar cal = Calendar.getInstance();
-        TimeZone tz = cal.getTimeZone();
-
-        SimpleDateFormat sdf = new SimpleDateFormat(TIME_FORMAT, Locale.getDefault());
-        sdf.setTimeZone(tz);
-
-        return sdf.format(new Date(timestamp));
+        val cal = Calendar.getInstance()
+        val tz = cal.timeZone
+        val sdf = SimpleDateFormat(TIME_FORMAT, Locale.getDefault())
+        sdf.timeZone = tz
+        return sdf.format(Date(timestamp))
     }
 }
