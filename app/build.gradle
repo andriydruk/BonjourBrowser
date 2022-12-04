@@ -1,12 +1,11 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 30
-    buildToolsVersion '28.0.3'
+    compileSdkVersion 33
 
     defaultConfig {
         minSdkVersion 16
-        targetSdkVersion 30
+        targetSdkVersion 33
         versionCode 2_001_001
         versionName "2.1.1"
 
@@ -38,10 +37,11 @@ android {
         sourceCompatibility 1.8
         targetCompatibility 1.8
     }
+    namespace 'com.druk.servicebrowser'
 }
 
 dependencies {
-    implementation "com.github.andriydruk:rx2dnssd:0.9.16"
+    implementation "com.github.andriydruk:rx2dnssd:0.9.17"
 
     implementation "androidx.annotation:annotation:1.2.0"
     implementation "androidx.appcompat:appcompat:1.2.0"

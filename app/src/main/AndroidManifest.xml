@@ -14,8 +14,7 @@
   ~ limitations under the License.
 -->
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    package="com.druk.servicebrowser">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Some Chromebooks don't support touch. Although not essential,
          it's a good idea to explicitly include this declaration. -->
@@ -41,23 +40,20 @@
         <activity android:name=".ui.HTMLViewerActivity" />
         <activity
             android:name=".ui.MainActivity"
-            android:label="@string/app_name">
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
             android:name=".ui.RegistrationsActivity"
-            android:label="@string/title_activity_registrations" />
+            android:label="@string/title_activity_registrations"
+            android:exported="true"/>
         <activity
             android:name=".ui.RegisterServiceActivity"
-            android:label="@string/register_new_service" />
-
-        <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="bf5b6f4d0797a13305d045d79eb7e1eb7b3c4cc3" />
+            android:label="@string/register_new_service"
+            android:exported="true"/>
 
     </application>
 
