@@ -111,7 +111,7 @@ public class RegisterServiceActivity extends AppCompatActivity {
             regTypeEditText.setOnEditorActionListener(this);
             portEditText.setOnEditorActionListener(this);
 
-            adapter = new TxtRecordsAdapter(getContext()){
+            adapter = new TxtRecordsAdapter(){
 
                 @Override
                 public void onItemClick(View view, int position) {

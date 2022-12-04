@@ -55,10 +55,9 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         if (getArguments() != null) {
             mService = getArguments().getParcelable(KEY_SERVICE);
         }
-        mAdapter = new TxtRecordsAdapter(getActivity());
+        mAdapter = new TxtRecordsAdapter();
 
-        viewModel = new ViewModelProvider.AndroidViewModelFactory(BonjourApplication.getApplication(requireContext()))
-                .create(ServiceDetailViewModel.class);
+        viewModel = new ViewModelProvider(this).get(ServiceDetailViewModel.class);
         viewModel.resolveIPRecords(mService, this::updateIPRecords);
         viewModel.resolveTXTRecords(mService, this::updateTXTRecords);
     }

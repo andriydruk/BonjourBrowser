@@ -38,7 +38,6 @@ public class ServiceBrowserViewModel extends AndroidViewModel {
                                Consumer<Throwable> errorAction) {
         mDisposable = mRxDnssd.browse(reqType, domain)
                 .compose(mRxDnssd.resolve())
-                .compose(mRxDnssd.queryIPRecords())
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(servicesAction, errorAction);

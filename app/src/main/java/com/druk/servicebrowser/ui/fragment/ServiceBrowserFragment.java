@@ -118,7 +118,7 @@ public class ServiceBrowserFragment extends Fragment {
                     viewHolder.text2.setText(service.getInet6Address().getHostAddress());
                 }
                 else {
-                    viewHolder.text2.setText(R.string.not_resolved_yet);
+                    viewHolder.text2.setText(service.getHostname());
                 }
                 viewHolder.itemView.setOnClickListener(mListener);
                 viewHolder.itemView.setBackgroundResource(getBackground(i));
@@ -164,10 +164,8 @@ public class ServiceBrowserFragment extends Fragment {
     }
 
     protected void createViewModel() {
-        ServiceBrowserViewModel viewModel = new ViewModelProvider.AndroidViewModelFactory(BonjourApplication.getApplication(requireContext()))
-                .create(ServiceBrowserViewModel.class);
+        ServiceBrowserViewModel viewModel = new ViewModelProvider(this).get(ServiceBrowserViewModel.class);
         viewModel.startDiscovery(mReqType, mDomain, service -> {
-            int itemsCount = mAdapter.getItemCount();
             if (!service.isLost()) {
                 mAdapter.add(service);
             } else {

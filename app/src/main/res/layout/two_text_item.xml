@@ -30,14 +30,12 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
-            android:textColor="@color/primary_text"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"/>
+            style="?attr/textAppearanceBodyLarge"/>
 
     <androidx.appcompat.widget.AppCompatTextView
             android:id="@+id/text2"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/secondary_text"
-            android:textAppearance="@style/TextAppearance.AppCompat.Body1"/>
+            style="?attr/textAppearanceBodyMedium"/>
 
 </LinearLayout>

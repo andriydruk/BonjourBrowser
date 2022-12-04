@@ -130,7 +130,6 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
 
         fab.setOnClickListener(view -> {
             CustomTabsIntent.Builder builder = new CustomTabsIntent.Builder();
-            builder.setToolbarColor(ContextCompat.getColor(this, R.color.primary));
             CustomTabsIntent customTabsIntent = builder.build();
             try {
                 customTabsIntent.launchUrl(this, Uri.parse(url.toString()));

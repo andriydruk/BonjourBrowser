@@ -22,6 +22,8 @@ import com.google.android.material.snackbar.Snackbar;
 import androidx.collection.ArrayMap;
 import androidx.collection.SimpleArrayMap;
 import androidx.recyclerview.widget.RecyclerView;
+
+import android.os.Build;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -33,21 +35,16 @@ import com.druk.servicebrowser.R;
 
 public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.ViewHolder> {
 
-    private final int mBackground;
     private final SimpleArrayMap<String, String> ipRecords = new SimpleArrayMap<>();
     private final SimpleArrayMap<String, String> txtRecords = new SimpleArrayMap<>();
 
-    public TxtRecordsAdapter(Context context) {
-        TypedValue mTypedValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
-        mBackground = mTypedValue.resourceId;
+    public TxtRecordsAdapter() {
     }
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-        View view = LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.two_text_item, viewGroup, false);
-        view.setBackgroundResource(mBackground);
-        return new ViewHolder(view);
+        return new ViewHolder(LayoutInflater.from(viewGroup.getContext())
+                .inflate(R.layout.two_text_item, viewGroup, false));
     }
 
     @Override
@@ -64,9 +61,10 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
         ClipData clip = ClipData.newPlainText(getKey(position), getValue(position));
         clipboard.setPrimaryClip(clip);
 
-        Snackbar snackbar = Snackbar.make(view, context.getResources().getString(R.string.copy_toast_message, getKey(position)), Snackbar.LENGTH_LONG);
-        snackbar.getView().setBackgroundResource(R.color.accent);
-        snackbar.show();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            Snackbar snackbar = Snackbar.make(view, context.getResources().getString(R.string.copy_toast_message, getKey(position)), Snackbar.LENGTH_LONG);
+            snackbar.show();
+        }
     }
 
     @Override

@@ -57,7 +57,7 @@ public class LicensesActivity extends AppCompatActivity implements View.OnClickL
         }
 
         mLayoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        mAdapter = new OpenSourceComponentAdapter(this, LICENSE_SOFTWARE, new String[]{
+        mAdapter = new OpenSourceComponentAdapter(LICENSE_SOFTWARE, new String[]{
                 ANDROID_ASSETS_FILE_PATH + ANDROID_OPEN_SOURCE_PROJECT_LICENSE,
                 ANDROID_ASSETS_FILE_PATH + ANDROID_OPEN_SOURCE_PROJECT_LICENSE,
                 ANDROID_ASSETS_FILE_PATH + ANDROID_OPEN_SOURCE_PROJECT_LICENSE,
@@ -106,26 +106,20 @@ public class LicensesActivity extends AppCompatActivity implements View.OnClickL
 
     private static class OpenSourceComponentAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-        private final int mBackground;
         private String[] componentNames;
         private String[] licensePaths;
 
         private View.OnClickListener listener;
 
-        private OpenSourceComponentAdapter(Context context, String[] names, String[] paths) {
+        private OpenSourceComponentAdapter(String[] names, String[] paths) {
             this.componentNames = names;
             this.licensePaths = paths;
-            TypedValue mTypedValue = new TypedValue();
-            context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
-            mBackground = mTypedValue.resourceId;
         }
 
         @Override
         public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
-            RecyclerView.ViewHolder vh = new RecyclerView.ViewHolder(LayoutInflater.from(viewGroup.getContext()).inflate(R.layout.one_text_item, viewGroup, false)) {
-            };
-            vh.itemView.setBackgroundResource(mBackground);
-            return vh;
+            return new RecyclerView.ViewHolder(LayoutInflater.from(viewGroup.getContext())
+                    .inflate(R.layout.one_text_item, viewGroup, false)) {};
         }
 
         @Override

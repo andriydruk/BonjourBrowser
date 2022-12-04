@@ -25,8 +25,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:textAppearance="@style/TextAppearance.AppCompat.Title"
-            android:textColor="@color/divider"
+            style="?attr/textAppearanceTitleLarge"
+            android:textColor="?attr/colorOutline"
             android:text="@string/no_services_registered"/>
 
     <androidx.recyclerview.widget.RecyclerView

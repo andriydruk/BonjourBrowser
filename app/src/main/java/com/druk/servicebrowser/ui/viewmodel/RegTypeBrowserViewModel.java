@@ -1,33 +1,27 @@
 package com.druk.servicebrowser.ui.viewmodel;
 
+import static com.druk.servicebrowser.Config.EMPTY_DOMAIN;
+import static com.druk.servicebrowser.Config.TCP_REG_TYPE_SUFFIX;
+import static com.druk.servicebrowser.Config.UDP_REG_TYPE_SUFFIX;
+
 import android.app.Application;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 
 import com.druk.servicebrowser.BonjourApplication;
 import com.druk.servicebrowser.Config;
-import com.druk.servicebrowser.RegTypeManager;
-import com.druk.servicebrowser.ui.fragment.RegTypeBrowserFragment;
 import com.github.druk.rx2dnssd.BonjourService;
 import com.github.druk.rx2dnssd.Rx2Dnssd;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
-import io.reactivex.Flowable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
-
-import static com.druk.servicebrowser.Config.EMPTY_DOMAIN;
-import static com.druk.servicebrowser.Config.TCP_REG_TYPE_SUFFIX;
-import static com.druk.servicebrowser.Config.UDP_REG_TYPE_SUFFIX;
 
 public class RegTypeBrowserViewModel extends AndroidViewModel {
 

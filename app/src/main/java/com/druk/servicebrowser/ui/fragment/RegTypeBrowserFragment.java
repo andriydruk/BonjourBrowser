@@ -56,7 +56,7 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         mRegTypeManager = BonjourApplication.getRegTypeManager(getContext());
         mAdapter = new ServiceAdapter(getActivity()) {
 
-            Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_star_accent);
+            Drawable drawable = ContextCompat.getDrawable(requireContext(), R.drawable.ic_star);
 
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, int i) {
@@ -78,7 +78,6 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 
                 viewHolder.text2.setText(domain.serviceCount + " services");
                 viewHolder.itemView.setOnClickListener(mListener);
-                viewHolder.itemView.setBackgroundResource(getBackground(i));
             }
 
             @Override
@@ -105,8 +104,8 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
 
     @Override
     protected void createViewModel() {
-        RegTypeBrowserViewModel viewModel = new ViewModelProvider.AndroidViewModelFactory(BonjourApplication.getApplication(requireContext()))
-                .create(RegTypeBrowserViewModel.class);
+        RegTypeBrowserViewModel viewModel = new ViewModelProvider(this)
+                .get(RegTypeBrowserViewModel.class);
 
         final Consumer<Throwable> errorAction = throwable -> {
             Log.e("DNSSD", "Error: ", throwable);
@@ -114,7 +113,6 @@ public class RegTypeBrowserFragment extends ServiceBrowserFragment {
         };
 
         final Consumer<Collection<RegTypeBrowserViewModel.BonjourDomain>> servicesAction = services -> {
-            final int itemsCount = mAdapter.getItemCount();
             mAdapter.clear();
             for (RegTypeBrowserViewModel.BonjourDomain bonjourDomain: services) {
                 if (bonjourDomain.serviceCount > 0) {

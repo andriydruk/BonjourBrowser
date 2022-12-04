@@ -40,10 +40,10 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
 
     protected ServiceAdapter(Context context) {
         TypedValue mTypedValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.selectableItemBackground, mTypedValue, true);
+        context.getTheme().resolveAttribute(R.attr.colorSurface, mTypedValue, true);
         mBackground = mTypedValue.resourceId;
 
-        context.getTheme().resolveAttribute(R.attr.selectedItemBackground, mTypedValue, true);
+        context.getTheme().resolveAttribute(R.attr.colorPrimaryContainer, mTypedValue, true);
         mSelectedBackground = mTypedValue.resourceId;
     }
 
