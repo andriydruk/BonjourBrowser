@@ -24,6 +24,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.browser.customtabs.CustomTabsIntent;
 import androidx.core.content.ContextCompat;
+import androidx.core.content.IntentCompat;
 
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
@@ -57,7 +58,7 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
     }
 
     public static BonjourService parseResult(Intent intent) {
-        return intent.getParcelableExtra(SERVICE);
+        return IntentCompat.getParcelableExtra(intent, SERVICE, BonjourService.class);
     }
 
     @Override
@@ -79,7 +80,7 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
         boolean isRegistered = getIntent().getBooleanExtra(REGISTERED, false);
 
         if (savedInstanceState == null){
-            BonjourService service = getIntent().getParcelableExtra(SERVICE);
+            BonjourService service = IntentCompat.getParcelableExtra(getIntent(), SERVICE, BonjourService.class);
             serviceDetailFragment = ServiceDetailFragment.newInstance(service);
             getSupportFragmentManager().beginTransaction().replace(R.id.content, serviceDetailFragment).commit();
         }
@@ -95,7 +96,7 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 

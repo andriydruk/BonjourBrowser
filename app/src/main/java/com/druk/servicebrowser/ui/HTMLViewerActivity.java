@@ -28,6 +28,7 @@ import android.view.View;
 import android.webkit.WebChromeClient;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebResourceRequest;
 import android.webkit.WebViewClient;
 import android.widget.Toast;
 
@@ -67,8 +68,6 @@ public class HTMLViewerActivity extends AppCompatActivity {
         s.setSupportZoom(true);
         s.setBuiltInZoomControls(true);
         s.setDisplayZoomControls(false);
-        s.setSavePassword(false);
-        s.setSaveFormData(false);
         s.setBlockNetworkLoads(true);
 
         // Javascript is purposely disabled, so that nothing can be
@@ -106,7 +105,8 @@ public class HTMLViewerActivity extends AppCompatActivity {
         }
 
         @Override
-        public boolean shouldOverrideUrlLoading(WebView view, String url) {
+        public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
+            String url = request.getUrl().toString();
             Intent intent;
             // Perform generic parsing of the URI to turn it into an Intent.
             try {
@@ -138,7 +138,7 @@ public class HTMLViewerActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 }

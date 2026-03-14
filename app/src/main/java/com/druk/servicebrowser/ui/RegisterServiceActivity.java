@@ -20,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import androidx.annotation.Nullable;
+import androidx.core.content.IntentCompat;
 import androidx.fragment.app.Fragment;
 import androidx.collection.ArrayMap;
 import androidx.appcompat.app.AlertDialog;
@@ -57,7 +58,7 @@ public class RegisterServiceActivity extends AppCompatActivity {
     }
 
     public static BonjourService parseResult(Intent intent) {
-        return intent.getParcelableExtra(SERVICE);
+        return IntentCompat.getParcelableExtra(intent, SERVICE, BonjourService.class);
     }
 
     @Override
@@ -76,7 +77,7 @@ public class RegisterServiceActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 

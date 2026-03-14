@@ -19,6 +19,8 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.appcompat.app.AppCompatActivity;
@@ -61,54 +63,54 @@ public class RegistrationsActivity extends AppCompatActivity {
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 
     public static class RegistrationsFragment extends Fragment {
-
-        private static final int REGISTER_REQUEST_CODE = 100;
-        private static final int STOP_REQUEST_CODE = 101;
 
         private ServiceAdapter adapter;
         private Disposable mDisposable;
         private RecyclerView mRecyclerView;
         private View mNoServiceView;
 
+        private ActivityResultLauncher<Intent> registerLauncher;
+        private ActivityResultLauncher<Intent> stopLauncher;
+
         @Override
         public void onAttach(Context context) {
             super.onAttach(context);
+
+            registerLauncher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                            BonjourService bonjourService = RegisterServiceActivity.parseResult(result.getData());
+                            mDisposable = BonjourApplication.getRegistrationManager(getContext())
+                                    .register(getContext(), bonjourService)
+                                    .observeOn(AndroidSchedulers.mainThread())
+                                    .subscribe(service -> updateServices(), throwable -> Toast.makeText(getContext(), "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show());
+                        }
+                    });
+
+            stopLauncher = registerForActivityResult(
+                    new ActivityResultContracts.StartActivityForResult(),
+                    result -> {
+                        if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+                            BonjourService bonjourService = ServiceActivity.parseResult(result.getData());
+                            BonjourApplication.getRegistrationManager(getContext()).unregister(bonjourService);
+                            updateServices();
+                        }
+                    });
+
             adapter = new ServiceAdapter(getContext()) {
                 @Override
                 public void onBindViewHolder(ViewHolder holder, final int position) {
                     holder.text1.setText(getItem(position).getServiceName());
                     holder.text2.setText(getItem(position).getRegType());
-                    holder.itemView.setOnClickListener(v -> startActivityForResult(ServiceActivity.startActivity(getContext(), getItem(position), true), STOP_REQUEST_CODE));
+                    holder.itemView.setOnClickListener(v -> stopLauncher.launch(ServiceActivity.startActivity(getContext(), getItem(position), true)));
                 }
             };
-        }
-
-        @Override
-        public void onActivityResult(int requestCode, int resultCode, Intent data) {
-            if (requestCode == REGISTER_REQUEST_CODE) {
-                if (resultCode == Activity.RESULT_OK) {
-                    BonjourService bonjourService = RegisterServiceActivity.parseResult(data);
-                    mDisposable = BonjourApplication.getRegistrationManager(getContext())
-                            .register(getContext(), bonjourService)
-                            .observeOn(AndroidSchedulers.mainThread())
-                            .subscribe(service -> RegistrationsFragment.this.updateServices(), throwable -> Toast.makeText(RegistrationsFragment.this.getContext(), "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show());
-                }
-                return;
-            }
-            else if (requestCode == STOP_REQUEST_CODE) {
-                if (resultCode == Activity.RESULT_OK) {
-                    BonjourService bonjourService = ServiceActivity.parseResult(data);
-                    BonjourApplication.getRegistrationManager(getContext()).unregister(bonjourService);
-                    updateServices();
-                }
-                return;
-            }
-            super.onActivityResult(requestCode, resultCode, data);
         }
 
         @Nullable
@@ -119,7 +121,7 @@ public class RegistrationsActivity extends AppCompatActivity {
             mRecyclerView.setLayoutManager(new LinearLayoutManager(view.getContext(), LinearLayoutManager.VERTICAL, false));
             mRecyclerView.setAdapter(adapter);
             mNoServiceView = view.findViewById(R.id.no_service);
-            view.findViewById(R.id.fab).setOnClickListener(v -> RegistrationsFragment.this.startActivityForResult(RegisterServiceActivity.createIntent(getContext()), REGISTER_REQUEST_CODE));
+            view.findViewById(R.id.fab).setOnClickListener(v -> registerLauncher.launch(RegisterServiceActivity.createIntent(getContext())));
             updateServices();
             return view;
         }

@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.Nullable;
 import androidx.collection.ArrayMap;
+import androidx.core.os.BundleCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -53,7 +54,7 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mService = getArguments().getParcelable(KEY_SERVICE);
+            mService = BundleCompat.getParcelable(getArguments(), KEY_SERVICE, BonjourService.class);
         }
         mAdapter = new TxtRecordsAdapter();
 

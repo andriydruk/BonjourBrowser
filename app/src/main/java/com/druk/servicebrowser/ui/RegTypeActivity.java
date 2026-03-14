@@ -67,7 +67,7 @@ public class RegTypeActivity extends AppCompatActivity implements ServiceBrowser
 
     @Override
     public boolean onSupportNavigateUp() {
-        onBackPressed();
+        getOnBackPressedDispatcher().onBackPressed();
         return true;
     }
 
