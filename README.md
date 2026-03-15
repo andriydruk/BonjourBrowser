@@ -1,6 +1,4 @@
-# THE PROJECT IS ARCHIVED DUE TO THE RUSSIAN INVASION OF UKRAINE
-
-# 🇺🇦 #StandWithUkraine
+# #StandWithUkraine
 On Feb. 24, 2022 Russia declared an [unprovoked war on Ukraine](https://war.ukraine.ua/russia-war-crimes/) and launched a full-scale invasion. Russia is currently bombing peaceful Ukrainian cities, including schools and hospitals and attacking civilians who are fleeing conflict zones.
 
 Please support Ukraine by lobbying your governments, protesting peacefully, and donating money to support the people of Ukraine. Below are links to trustworthy organizations that are helping to defend Ukraine in this unprovoked war:
@@ -9,15 +7,30 @@ Please support Ukraine by lobbying your governments, protesting peacefully, and 
 * [Donate to KOLO](https://koloua.com/en/)
 * [Donate to Prytula Foundation](https://prytulafoundation.org/en)
 
-# Service Browser [![Circle CI](https://circleci.com/gh/andriydruk/BonjourBrowser.svg?style=shield&circle-token=8df2706f8f9aaa62b617722a3d90561781aa4c68)](https://circleci.com/gh/andriydruk/BonjourBrowser)
+# Service Browser
 
-Service Browser is a utility that discovers all services registered in a network and resolves meta-information about them, including IP addresses and port. 
-It also provides an ability to register your own service in any domain (available only for developers).
+Android app for discovering and browsing mDNS/Bonjour services on local networks.
 
-The source code is available under the Apache 2.0 license.
+Discovers all services registered on the network, resolves their IP addresses, ports, and TXT records. Also supports registering your own services.
 
-License
--------
+## Build
+
+```bash
+./gradlew assembleDebug          # Debug build
+./gradlew assembleRelease        # Release build
+./gradlew connectedAndroidTest   # Run instrumented tests
+```
+
+## Architecture
+
+- **Language**: Kotlin
+- **Pattern**: MVVM with ViewModels, Fragments, StateFlow/SharedFlow
+- **Networking**: Android NsdManager for mDNS/DNS-SD discovery, resolution, and registration
+- **Async**: Kotlin coroutines
+- **UI**: Material Design 3 with dynamic colors, SlidingPaneLayout for tablet support
+- **Min SDK**: 34 (Android 14) | **Target SDK**: 35 (Android 15) | **Compile SDK**: 36
+
+## License
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
