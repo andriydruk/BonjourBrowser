@@ -18,13 +18,10 @@ package com.druk.servicebrowser.ui.adapter;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
-import com.google.android.material.snackbar.Snackbar;
 import androidx.collection.ArrayMap;
 import androidx.collection.SimpleArrayMap;
 import androidx.recyclerview.widget.RecyclerView;
 
-import android.os.Build;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -61,10 +58,7 @@ public class TxtRecordsAdapter extends RecyclerView.Adapter<TxtRecordsAdapter.Vi
         ClipData clip = ClipData.newPlainText(getKey(position), getValue(position));
         clipboard.setPrimaryClip(clip);
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            Snackbar snackbar = Snackbar.make(view, context.getResources().getString(R.string.copy_toast_message, getKey(position)), Snackbar.LENGTH_LONG);
-            snackbar.show();
-        }
+        // On Android 13+, the system shows its own "Copied" confirmation
     }
 
     @Override

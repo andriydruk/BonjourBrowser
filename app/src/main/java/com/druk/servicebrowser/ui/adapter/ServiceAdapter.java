@@ -16,15 +16,16 @@
 package com.druk.servicebrowser.ui.adapter;
 
 import android.content.Context;
-import androidx.recyclerview.widget.RecyclerView;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import androidx.recyclerview.widget.RecyclerView;
+
+import com.druk.servicebrowser.BonjourServiceInfo;
 import com.druk.servicebrowser.R;
-import com.github.druk.rx2dnssd.BonjourService;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +35,7 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
 
     private final int mSelectedBackground;
     private final int mBackground;
-    private final ArrayList<BonjourService> services = new ArrayList<>();
+    private final ArrayList<BonjourServiceInfo> services = new ArrayList<>();
 
     private long mSelectedItemId = -1;
 
@@ -62,7 +63,7 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
         return services.get(position).hashCode();
     }
 
-    public BonjourService getItem(int position) {
+    public BonjourServiceInfo getItem(int position) {
         return services.get(position);
     }
 
@@ -78,24 +79,24 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
         mSelectedItemId = selectedPosition;
     }
 
-    protected int getBackground(int position){
+    protected int getBackground(int position) {
         return (getItemId(position) == mSelectedItemId) ? mSelectedBackground : mBackground;
     }
 
-    public void add(BonjourService service) {
+    public void add(BonjourServiceInfo service) {
         this.services.remove(service);
         this.services.add(service);
         sortServices(services);
     }
 
-    public void swap(List<BonjourService> service) {
+    public void swap(List<BonjourServiceInfo> service) {
         this.services.clear();
         this.services.addAll(service);
         sortServices(services);
         notifyDataSetChanged();
     }
 
-    public void remove(BonjourService bonjourService) {
+    public void remove(BonjourServiceInfo bonjourService) {
         if (this.services.remove(bonjourService)) {
             sortServices(services);
         }
@@ -105,7 +106,7 @@ public abstract class ServiceAdapter extends RecyclerView.Adapter<ServiceAdapter
         sortServices(services);
     }
 
-    public void sortServices(ArrayList<BonjourService> services) {
+    public void sortServices(ArrayList<BonjourServiceInfo> services) {
         Collections.sort(services, (lhs, rhs) -> lhs.getServiceName().compareTo(rhs.getServiceName()));
     }
 

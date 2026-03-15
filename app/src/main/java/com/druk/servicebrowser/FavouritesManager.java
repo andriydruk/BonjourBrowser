@@ -5,8 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ShortcutInfo;
 import android.content.pm.ShortcutManager;
-import android.os.Build;
-
 import androidx.core.content.pm.ShortcutInfoCompat;
 import androidx.core.graphics.drawable.IconCompat;
 
@@ -31,6 +29,10 @@ public class FavouritesManager {
         favouriteRegTypes = new HashSet<>(sharedPreferences.getAll().keySet());
     }
 
+    public Set<String> getFavouriteRegTypes() {
+        return new HashSet<>(favouriteRegTypes);
+    }
+
     public boolean isFavourite(String regType) {
         return favouriteRegTypes.contains(regType);
     }
@@ -52,10 +54,6 @@ public class FavouritesManager {
     }
 
     void updateDynamicShortcuts() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N_MR1) {
-            return;
-        }
-
         ShortcutManager shortcutManager = context.getSystemService(ShortcutManager.class);
         if (shortcutManager == null) {
             return;

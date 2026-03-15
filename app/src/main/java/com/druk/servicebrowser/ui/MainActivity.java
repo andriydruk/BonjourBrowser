@@ -17,20 +17,22 @@ package com.druk.servicebrowser.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.fragment.app.Fragment;
-import androidx.slidingpanelayout.widget.SlidingPaneLayout;
-import androidx.appcompat.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.slidingpanelayout.widget.SlidingPaneLayout;
+
+import com.druk.servicebrowser.BonjourServiceInfo;
 import com.druk.servicebrowser.Config;
 import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.Utils;
 import com.druk.servicebrowser.ui.fragment.RegTypeBrowserFragment;
 import com.druk.servicebrowser.ui.fragment.ServiceBrowserFragment;
 import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;
-import com.github.druk.rx2dnssd.BonjourService;
 
 import java.net.URL;
 
@@ -67,8 +69,7 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
             domain = Config.LOCAL_DOMAIN;
             getSupportFragmentManager().beginTransaction().
                     replace(R.id.first_panel, RegTypeBrowserFragment.newInstance(Config.TCP_REG_TYPE_SUFFIX)).commit();
-        }
-        else{
+        } else {
             domain = savedInstanceState.getString(PARAM_DOMAIN);
             regType = savedInstanceState.getString(PARAM_REG_TYPE);
             serviceName = savedInstanceState.getString(PARAM_SERVICE_NAME);
@@ -77,9 +78,9 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
         updateNavigation();
     }
 
-    private void updateNavigation(){
+    private void updateNavigation() {
         setTitle(domain + ((regType != null) ? "   >   " + regType + ((serviceName != null) ? "   >   " + serviceName : "") : ""));
-        if (slidingPanelLayout != null){
+        if (slidingPanelLayout != null) {
             noServiceTextView.setVisibility(serviceName == null ? View.VISIBLE : View.GONE);
             serviceNameTextView.setVisibility(serviceName == null ? View.GONE : View.VISIBLE);
             serviceNameTextView.setText(serviceName);
@@ -95,17 +96,12 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
         if (id == R.id.action_license) {
             startActivity(new Intent(this, LicensesActivity.class));
             return true;
-        }
-        else if (id == R.id.action_register) {
+        } else if (id == R.id.action_register) {
             RegistrationsActivity.startActivity(this);
             return true;
         }
@@ -114,7 +110,7 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
     }
 
     @Override
-    public void onServiceWasSelected(String domain, String regType, BonjourService service) {
+    public void onServiceWasSelected(String domain, String regType, BonjourServiceInfo service) {
         if (domain.equals(Config.EMPTY_DOMAIN)) {
             String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
             String serviceRegType = service.getServiceName() + "." + regTypeParts[0] + ".";
@@ -130,13 +126,11 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
                 this.regType = serviceRegType;
                 this.serviceName = null;
                 updateNavigation();
-            }
-            else{
+            } else {
                 Intent intent = RegTypeActivity.createIntent(this, serviceRegType, serviceDomain);
                 startActivity(intent);
             }
-        }
-        else{
+        } else {
             ServiceDetailFragment fragment = ServiceDetailFragment.newInstance(service);
             getSupportFragmentManager().beginTransaction().replace(R.id.third_panel, fragment).commit();
             slidingPanelLayout.closePane();
@@ -154,12 +148,12 @@ public class MainActivity extends AppCompatActivity implements ServiceBrowserFra
     }
 
     @Override
-    public void onServiceUpdated(BonjourService service) {
-        lastUpdatedTextView.setText(getString(R.string.last_update, System.currentTimeMillis()));
+    public void onServiceUpdated(BonjourServiceInfo service) {
+        lastUpdatedTextView.setText(getString(R.string.last_update, Utils.formatTime(System.currentTimeMillis())));
     }
 
     @Override
-    public void onServiceStopped(BonjourService service) {
+    public void onServiceStopped(BonjourServiceInfo service) {
         //Ignore this
     }
 

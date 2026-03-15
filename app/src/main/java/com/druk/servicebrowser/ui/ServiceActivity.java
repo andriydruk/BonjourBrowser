@@ -20,21 +20,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.browser.customtabs.CustomTabsIntent;
-import androidx.core.content.ContextCompat;
-import androidx.core.content.IntentCompat;
-
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.browser.customtabs.CustomTabsIntent;
+import androidx.core.content.IntentCompat;
+
+import com.druk.servicebrowser.BonjourServiceInfo;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.Utils;
 import com.druk.servicebrowser.ui.fragment.ServiceDetailFragment;
-import com.github.druk.rx2dnssd.BonjourService;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.net.URL;
 
@@ -48,17 +47,17 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
     private TextView mDomain;
     private TextView mLastTimestamp;
 
-    public static void startActivity(Context context, BonjourService service) {
+    public static void startActivity(Context context, BonjourServiceInfo service) {
         context.startActivity(new Intent(context, ServiceActivity.class).
                 putExtra(ServiceActivity.SERVICE, service));
     }
 
-    public static Intent startActivity(Context context, BonjourService service, boolean isRegistered) {
+    public static Intent startActivity(Context context, BonjourServiceInfo service, boolean isRegistered) {
         return new Intent(context, ServiceActivity.class).putExtra(ServiceActivity.SERVICE, service).putExtra(REGISTERED, isRegistered);
     }
 
-    public static BonjourService parseResult(Intent intent) {
-        return IntentCompat.getParcelableExtra(intent, SERVICE, BonjourService.class);
+    public static BonjourServiceInfo parseResult(Intent intent) {
+        return IntentCompat.getParcelableExtra(intent, SERVICE, BonjourServiceInfo.class);
     }
 
     @Override
@@ -79,12 +78,11 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
         ServiceDetailFragment serviceDetailFragment;
         boolean isRegistered = getIntent().getBooleanExtra(REGISTERED, false);
 
-        if (savedInstanceState == null){
-            BonjourService service = IntentCompat.getParcelableExtra(getIntent(), SERVICE, BonjourService.class);
+        if (savedInstanceState == null) {
+            BonjourServiceInfo service = IntentCompat.getParcelableExtra(getIntent(), SERVICE, BonjourServiceInfo.class);
             serviceDetailFragment = ServiceDetailFragment.newInstance(service);
             getSupportFragmentManager().beginTransaction().replace(R.id.content, serviceDetailFragment).commit();
-        }
-        else {
+        } else {
             serviceDetailFragment = (ServiceDetailFragment) getSupportFragmentManager().findFragmentById(R.id.content);
         }
 
@@ -101,7 +99,7 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
     }
 
     @Override
-    public void onServiceUpdated(BonjourService service) {
+    public void onServiceUpdated(BonjourServiceInfo service) {
         mServiceName.setText(service.getServiceName());
         mDomain.setText(getString(R.string.domain, service.getDomain()));
         mRegType.setText(getString(R.string.reg_type, service.getRegType()));
@@ -109,7 +107,7 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
     }
 
     @Override
-    public void onServiceStopped(BonjourService service) {
+    public void onServiceStopped(BonjourServiceInfo service) {
         setResult(Activity.RESULT_OK, new Intent().putExtra(SERVICE, service));
         finish();
     }
@@ -134,11 +132,9 @@ public class ServiceActivity extends AppCompatActivity implements ServiceDetailF
             CustomTabsIntent customTabsIntent = builder.build();
             try {
                 customTabsIntent.launchUrl(this, Uri.parse(url.toString()));
-            }
-            catch (Throwable e) {
+            } catch (Throwable e) {
                 Toast.makeText(this, "Can't find browser", Toast.LENGTH_SHORT).show();
             }
         });
     }
-
 }

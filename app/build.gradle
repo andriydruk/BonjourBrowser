@@ -2,7 +2,7 @@ apply plugin: 'com.android.application'
 
 android {
     defaultConfig {
-        minSdkVersion 22
+        minSdkVersion 34
         compileSdk 35
         targetSdkVersion 35
         versionCode 2_002_001
@@ -23,15 +23,6 @@ android {
             debuggable true
         }
 
-        /**
-         * It's my IOT build type for running as builtin app on Android Things.
-         * I use this type of build for testing on huge networks with my Raspberry Pi 3.
-         */
-        iot {
-            initWith debug
-            debuggable true
-            applicationIdSuffix ".iot"
-        }
     }
 
     compileOptions {
@@ -42,8 +33,6 @@ android {
 }
 
 dependencies {
-    implementation "com.github.andriydruk:rx2dnssd:0.9.17"
-
     implementation "androidx.annotation:annotation:1.8.2"
     implementation "androidx.appcompat:appcompat:1.7.0"
     implementation "androidx.core:core:1.13.1"

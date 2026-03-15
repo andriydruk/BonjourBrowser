@@ -1,122 +1,219 @@
 package com.druk.servicebrowser.ui.viewmodel;
 
-import static com.druk.servicebrowser.Config.EMPTY_DOMAIN;
-import static com.druk.servicebrowser.Config.TCP_REG_TYPE_SUFFIX;
-import static com.druk.servicebrowser.Config.UDP_REG_TYPE_SUFFIX;
-
 import android.app.Application;
+import android.net.nsd.NsdManager;
+import android.net.nsd.NsdServiceInfo;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.BonjourServiceInfo;
 import com.druk.servicebrowser.Config;
-import com.github.druk.rx2dnssd.BonjourService;
-import com.github.druk.rx2dnssd.Rx2Dnssd;
+import com.druk.servicebrowser.ServiceTypeResolver;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
-
+/**
+ * Discovers available mDNS service types on the local network.
+ * <p>
+ * NsdManager does not support the _services._dns-sd._udp meta-query, so we perform
+ * it via a persistent mDNS multicast listener ({@link ServiceTypeResolver}). Each new
+ * service type is immediately handed to NsdManager for per-service browsing.
+ */
 public class RegTypeBrowserViewModel extends AndroidViewModel {
 
-    private final HashMap<String, Disposable> mBrowsers = new HashMap<>();
-    private final HashMap<String, BonjourDomain> mServices = new HashMap<>();
+    private static final String TAG = "RegTypeBrowserVM";
 
-    protected Rx2Dnssd mRxDnssd;
-    protected Disposable mDisposable;
+    /** Delay before retrying types that failed with FAILURE_MAX_LIMIT. */
+    private static final long RETRY_DELAY_MS = 3000;
+
+    private final NsdManager nsdManager;
+    private final Handler handler = new Handler(Looper.getMainLooper());
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    private final ServiceTypeResolver resolver = new ServiceTypeResolver();
+
+    /** Active NsdManager discovery listeners keyed by service type. */
+    private final HashMap<String, NsdManager.DiscoveryListener> activeListeners = new HashMap<>();
+
+    /** Types that found at least one service. Thread-safe. */
+    private final ConcurrentHashMap<String, BonjourDomain> foundTypes = new ConcurrentHashMap<>();
+
+    /** Queue of types that hit FAILURE_MAX_LIMIT and need retry. */
+    private final Queue<String> retryQueue = new LinkedList<>();
+
+    private final MutableLiveData<Collection<BonjourDomain>> servicesLiveData = new MutableLiveData<>();
+    private final MutableLiveData<Throwable> errorLiveData = new MutableLiveData<>();
+
+    private final Runnable retryRunnable = () -> {
+        synchronized (RegTypeBrowserViewModel.this) {
+            drainQueue(retryQueue);
+        }
+    };
 
     public RegTypeBrowserViewModel(@NonNull Application application) {
         super(application);
-        mRxDnssd = BonjourApplication.getRxDnssd(application);
+        nsdManager = BonjourApplication.getNsdManager(application);
     }
 
     @Override
     protected void onCleared() {
         super.onCleared();
-        if (mDisposable != null) {
-            mDisposable.dispose();
-        }
-        mServices.clear();
+        resolver.stop();
+        handler.removeCallbacksAndMessages(null);
+        executor.shutdownNow();
         synchronized (this) {
-            for (Disposable subscription : mBrowsers.values()) {
-                subscription.dispose();
+            for (NsdManager.DiscoveryListener listener : activeListeners.values()) {
+                try {
+                    nsdManager.stopServiceDiscovery(listener);
+                } catch (IllegalArgumentException ignored) {
+                }
             }
-            mBrowsers.clear();
+            activeListeners.clear();
+        }
+        foundTypes.clear();
+    }
+
+    public ConcurrentHashMap<String, BonjourDomain> getServices() {
+        return foundTypes;
+    }
+
+    public LiveData<Collection<BonjourDomain>> getServicesLiveData() {
+        return servicesLiveData;
+    }
+
+    public LiveData<Throwable> getErrorLiveData() {
+        return errorLiveData;
+    }
+
+    public void startDiscovery() {
+        // Run the mDNS listener on a background thread — it stays open until onCleared
+        executor.execute(() -> resolver.start(serviceType -> {
+            // Called on the background thread for each newly discovered type — start browsing immediately
+            handler.post(() -> {
+                synchronized (RegTypeBrowserViewModel.this) {
+                    if (!activeListeners.containsKey(serviceType)) {
+                        startSingleDiscovery(serviceType);
+                    }
+                }
+            });
+        }));
+    }
+
+    /** Try to start all queued types; stop on first FAILURE_MAX_LIMIT. */
+    private void drainQueue(Queue<String> queue) {
+        while (!queue.isEmpty()) {
+            String type = queue.poll();
+            if (type == null || activeListeners.containsKey(type)) continue;
+            if (!startSingleDiscovery(type)) {
+                queue.add(type); // put it back
+                handler.postDelayed(retryRunnable, RETRY_DELAY_MS);
+                break;
+            }
         }
     }
 
-    public HashMap<String, BonjourDomain> getServices() {
-        return mServices;
-    }
-
-    public void startDiscovery(Consumer<Collection<BonjourDomain>> servicesAction, Consumer<Throwable> errorAction) {
-        final Consumer<BonjourService> serviceAction = service -> {
-            String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
-            String serviceRegType = regTypeParts[0];
-            String protocolSuffix = regTypeParts[1];
-            String key = RegTypeBrowserViewModel.createKey(EMPTY_DOMAIN, protocolSuffix + "." + service.getDomain(), serviceRegType);
-            RegTypeBrowserViewModel.BonjourDomain domain = mServices.get(key);
-            if (domain != null) {
-                if (service.isLost()) {
-                    domain.serviceCount--;
-                } else {
-                    domain.serviceCount++;
-                }
-                servicesAction.accept(mServices.values());
-            } else {
-                Log.w("TAG", "Service from unknown service type " + key);
-            }
-        };
-
-        Consumer<BonjourService> reqTypeAction = new Consumer<BonjourService>() {
+    /**
+     * @return true if started successfully, false if hit system limit
+     */
+    private synchronized boolean startSingleDiscovery(String serviceType) {
+        NsdManager.DiscoveryListener listener = new NsdManager.DiscoveryListener() {
             @Override
-            public void accept(BonjourService service) {
-                if (service.isLost()) {
-                    //Ignore this call
-                    return;
+            public void onDiscoveryStarted(String regType) {
+                Log.d(TAG, "Browsing: " + regType);
+            }
+
+            @Override
+            public void onServiceFound(NsdServiceInfo nsdServiceInfo) {
+                handleServiceEvent(serviceType, false);
+            }
+
+            @Override
+            public void onServiceLost(NsdServiceInfo nsdServiceInfo) {
+                handleServiceEvent(serviceType, true);
+            }
+
+            @Override
+            public void onDiscoveryStopped(String regType) {
+            }
+
+            @Override
+            public void onStartDiscoveryFailed(String regType, int errorCode) {
+                Log.w(TAG, "Browse failed for " + regType + ": " + errorCode);
+                synchronized (RegTypeBrowserViewModel.this) {
+                    activeListeners.remove(serviceType);
                 }
-                String[] regTypeParts = service.getRegType().split(Config.REG_TYPE_SEPARATOR);
-                String protocolSuffix = regTypeParts[0];
-                String serviceDomain = regTypeParts[1];
-                if (TCP_REG_TYPE_SUFFIX.equals(protocolSuffix) || UDP_REG_TYPE_SUFFIX.equals(protocolSuffix)) {
-                    String key = service.getServiceName() + "." + protocolSuffix;
-                    synchronized (this) {
-                        if (!mBrowsers.containsKey(key)) {
-                            mBrowsers.put(key, mRxDnssd.browse(key, serviceDomain)
-                                    .subscribeOn(Schedulers.io())
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(serviceAction, errorAction));
-                        }
-                        mServices.put(createKey(service.getDomain(), service.getRegType(), service.getServiceName()), new BonjourDomain(service));
+                if (errorCode == NsdManager.FAILURE_MAX_LIMIT) {
+                    synchronized (RegTypeBrowserViewModel.this) {
+                        retryQueue.add(serviceType);
                     }
-                } else {
-                    Log.e("TAG", "Unknown service protocol " + protocolSuffix);
-                    //Just ignore service with different protocol suffixes
+                    handler.removeCallbacks(retryRunnable);
+                    handler.postDelayed(retryRunnable, RETRY_DELAY_MS);
                 }
+            }
+
+            @Override
+            public void onStopDiscoveryFailed(String regType, int errorCode) {
+                Log.w(TAG, "Stop failed for " + regType + ": " + errorCode);
             }
         };
 
-        mDisposable = mRxDnssd.browse(Config.SERVICES_DOMAIN, Config.LOCAL_DOMAIN)
-                .subscribeOn(Schedulers.io())
-                .subscribe(reqTypeAction, errorAction);
+        activeListeners.put(serviceType, listener);
+
+        try {
+            nsdManager.discoverServices(serviceType, NsdManager.PROTOCOL_DNS_SD, listener);
+            return true;
+        } catch (IllegalArgumentException e) {
+            Log.w(TAG, "Failed to start browse for " + serviceType, e);
+            activeListeners.remove(serviceType);
+            return false;
+        }
     }
 
-    private static String createKey(String domain, String regType, String serviceName) {
-        return domain + regType + serviceName;
+    private void handleServiceEvent(String serviceType, boolean lost) {
+        String[] parts = serviceType.split("\\.");
+        if (parts.length < 2) return;
+
+        String serviceName = parts[0];
+        String protocolSuffix = parts[1];
+
+        BonjourDomain domain = foundTypes.get(serviceType);
+        if (domain == null) {
+            BonjourServiceInfo info = new BonjourServiceInfo.Builder()
+                    .serviceName(serviceName)
+                    .regType(protocolSuffix + "." + Config.LOCAL_DOMAIN)
+                    .domain(Config.EMPTY_DOMAIN)
+                    .build();
+            domain = new BonjourDomain(info);
+            foundTypes.put(serviceType, domain);
+        }
+
+        if (lost) {
+            domain.serviceCount = Math.max(0, domain.serviceCount - 1);
+        } else {
+            domain.serviceCount++;
+        }
+
+        servicesLiveData.postValue(new ArrayList<>(foundTypes.values()));
     }
 
-    public static class BonjourDomain extends BonjourService {
+    public static class BonjourDomain extends BonjourServiceInfo {
         public int serviceCount = 0;
 
-        public BonjourDomain(BonjourService bonjourService){
-            super(new BonjourService.Builder(bonjourService));
+        public BonjourDomain(BonjourServiceInfo info) {
+            super(new Builder(info));
         }
     }
-
 }

@@ -19,15 +19,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.annotation.Nullable;
-import androidx.core.content.IntentCompat;
-import androidx.fragment.app.Fragment;
-import androidx.collection.ArrayMap;
-import androidx.appcompat.app.AlertDialog;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.text.TextUtils;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
@@ -42,10 +33,20 @@ import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.AppCompatAutoCompleteTextView;
+import androidx.collection.ArrayMap;
+import androidx.core.content.IntentCompat;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.BonjourServiceInfo;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
-import com.github.druk.rx2dnssd.BonjourService;
 
 import java.util.List;
 
@@ -57,8 +58,8 @@ public class RegisterServiceActivity extends AppCompatActivity {
         return new Intent(context, RegisterServiceActivity.class);
     }
 
-    public static BonjourService parseResult(Intent intent) {
-        return IntentCompat.getParcelableExtra(intent, SERVICE, BonjourService.class);
+    public static BonjourServiceInfo parseResult(Intent intent) {
+        return IntentCompat.getParcelableExtra(intent, SERVICE, BonjourServiceInfo.class);
     }
 
     @Override
@@ -81,8 +82,8 @@ public class RegisterServiceActivity extends AppCompatActivity {
         return true;
     }
 
-    private void setResult(BonjourService bonjourService) {
-        setResult(Activity.RESULT_OK, new Intent().putExtra(SERVICE, bonjourService));
+    private void setResult(BonjourServiceInfo bonjourServiceInfo) {
+        setResult(Activity.RESULT_OK, new Intent().putExtra(SERVICE, bonjourServiceInfo));
         finish();
     }
 
@@ -112,15 +113,13 @@ public class RegisterServiceActivity extends AppCompatActivity {
             regTypeEditText.setOnEditorActionListener(this);
             portEditText.setOnEditorActionListener(this);
 
-            adapter = new TxtRecordsAdapter(){
+            adapter = new TxtRecordsAdapter() {
 
                 @Override
                 public void onItemClick(View view, int position) {
                     AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                     final String key = getKey(position);
                     String value = getValue(position);
-                    // Inflate and set the layout for the dialog
-                    // Pass null as the parent view because its going in the dialog layout
                     builder.setMessage("Do you really want to delete " + key + "=" + value + " ?")
                             .setPositiveButton(android.R.string.ok, (dialog, id1) -> {
                                 mRecords.remove(key);
@@ -128,7 +127,6 @@ public class RegisterServiceActivity extends AppCompatActivity {
                                 adapter.notifyDataSetChanged();
                             })
                             .setNegativeButton(android.R.string.cancel, (dialog, id1) -> {
-
                             });
                     builder.create().show();
                 }
@@ -152,19 +150,13 @@ public class RegisterServiceActivity extends AppCompatActivity {
 
         @Override
         public boolean onOptionsItemSelected(MenuItem item) {
-            // Handle action bar item clicks here. The action bar will
-            // automatically handle clicks on the Home/Up button, so long
-            // as you specify a parent activity in AndroidManifest.xml.
             int id = item.getItemId();
 
-            //noinspection SimplifiableIfStatement
             if (id == R.id.action_add) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
                 View view = getActivity().getLayoutInflater().inflate(R.layout.dialog_add_txt_records, null);
                 final TextView keyTextView = view.findViewById(R.id.key);
                 final TextView valueTextView = view.findViewById(R.id.value);
-                // Inflate and set the layout for the dialog
-                // Pass null as the parent view because its going in the dialog layout
                 builder.setMessage("Add TXT record")
                         .setView(view)
                         .setPositiveButton(android.R.string.ok, (dialog, id1) -> {
@@ -173,7 +165,6 @@ public class RegisterServiceActivity extends AppCompatActivity {
                             adapter.notifyDataSetChanged();
                         })
                         .setNegativeButton(android.R.string.cancel, (dialog, id1) -> {
-
                         });
                 builder.create().show();
                 return true;
@@ -239,8 +230,13 @@ public class RegisterServiceActivity extends AppCompatActivity {
 
             if (isValid) {
                 if (getActivity() instanceof RegisterServiceActivity) {
-                    ((RegisterServiceActivity) getActivity()).setResult(
-                            new BonjourService.Builder(0, 0, serviceName, reqType, null).port(portNumber).dnsRecords(mRecords).build());
+                    BonjourServiceInfo serviceInfo = new BonjourServiceInfo.Builder()
+                            .serviceName(serviceName)
+                            .regType(reqType)
+                            .port(portNumber)
+                            .txtRecords(mRecords)
+                            .build();
+                    ((RegisterServiceActivity) getActivity()).setResult(serviceInfo);
                 }
             }
         }

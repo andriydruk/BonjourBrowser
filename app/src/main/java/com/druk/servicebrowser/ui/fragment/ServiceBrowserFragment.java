@@ -19,7 +19,6 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -39,12 +38,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.druk.servicebrowser.BonjourApplication;
-import com.druk.servicebrowser.BuildConfig;
+import com.druk.servicebrowser.BonjourServiceInfo;
 import com.druk.servicebrowser.FavouritesManager;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
 import com.druk.servicebrowser.ui.viewmodel.ServiceBrowserViewModel;
-import com.github.druk.rx2dnssd.BonjourService;
 
 public class ServiceBrowserFragment extends Fragment {
 
@@ -68,7 +66,7 @@ public class ServiceBrowserFragment extends Fragment {
             mAdapter.setSelectedItemId(mAdapter.getItemId(position));
             mAdapter.notifyDataSetChanged();
             if (ServiceBrowserFragment.this.isAdded()) {
-                BonjourService service = mAdapter.getItem(position);
+                BonjourServiceInfo service = mAdapter.getItem(position);
                 ((ServiceListener) ServiceBrowserFragment.this.getActivity()).onServiceWasSelected(mDomain, mReqType, service);
             }
         }
@@ -109,15 +107,13 @@ public class ServiceBrowserFragment extends Fragment {
         mAdapter = new ServiceAdapter(getActivity()) {
             @Override
             public void onBindViewHolder(ViewHolder viewHolder, int i) {
-                BonjourService service = getItem(i);
+                BonjourServiceInfo service = getItem(i);
                 viewHolder.text1.setText(service.getServiceName());
                 if (service.getInet4Address() != null) {
                     viewHolder.text2.setText(service.getInet4Address().getHostAddress());
-                }
-                else if (service.getInet6Address() != null) {
+                } else if (service.getInet6Address() != null) {
                     viewHolder.text2.setText(service.getInet6Address().getHostAddress());
-                }
-                else {
+                } else {
                     viewHolder.text2.setText(service.getHostname());
                 }
                 viewHolder.itemView.setOnClickListener(mListener);
@@ -147,8 +143,7 @@ public class ServiceBrowserFragment extends Fragment {
                 item.setChecked(true);
                 item.setIcon(R.drawable.ic_star);
                 Toast.makeText(getContext(), mReqType + " saved to Favourites", Toast.LENGTH_LONG).show();
-            }
-            else {
+            } else {
                 favouritesManager.removeFromFavourites(mReqType);
                 item.setChecked(false);
                 item.setIcon(R.drawable.ic_star_border);
@@ -165,7 +160,7 @@ public class ServiceBrowserFragment extends Fragment {
 
     protected void createViewModel() {
         ServiceBrowserViewModel viewModel = new ViewModelProvider(this).get(ServiceBrowserViewModel.class);
-        viewModel.startDiscovery(mReqType, mDomain, service -> {
+        viewModel.getServiceEvent().observe(this, service -> {
             if (!service.isLost()) {
                 mAdapter.add(service);
             } else {
@@ -173,10 +168,11 @@ public class ServiceBrowserFragment extends Fragment {
             }
             ServiceBrowserFragment.this.showList();
             mAdapter.notifyDataSetChanged();
-        }, throwable -> {
-            Log.e("DNSSD", "Error: ", throwable);
+        });
+        viewModel.getErrorEvent().observe(this, throwable -> {
             ServiceBrowserFragment.this.showError(throwable);
         });
+        viewModel.startDiscovery(mReqType, mDomain);
     }
 
     @Nullable
@@ -201,22 +197,17 @@ public class ServiceBrowserFragment extends Fragment {
         outState.putLong(KEY_SELECTED_POSITION, mAdapter.getSelectedItemId());
     }
 
-    protected void showList(){
+    protected void showList() {
         if (mAdapter.getItemCount() > 0) {
             mRecyclerView.setVisibility(View.VISIBLE);
             mProgressView.setVisibility(View.GONE);
-        }
-        else {
+        } else {
             mRecyclerView.setVisibility(View.GONE);
             mProgressView.setVisibility(View.VISIBLE);
         }
     }
 
-    protected void showError(final Throwable e){
-        if (BuildConfig.BUILD_TYPE.equals("iot")) {
-            Thread.getDefaultUncaughtExceptionHandler().uncaughtException(Thread.currentThread(), e);
-            return;
-        }
+    protected void showError(final Throwable e) {
         getActivity().runOnUiThread(() -> {
             mRecyclerView.animate().alpha(0.0f).setInterpolator(new AccelerateDecelerateInterpolator()).setListener(new AnimatorListenerAdapter() {
                 @Override
@@ -238,6 +229,6 @@ public class ServiceBrowserFragment extends Fragment {
     }
 
     public interface ServiceListener {
-        void onServiceWasSelected(String domain, String regType, BonjourService service);
+        void onServiceWasSelected(String domain, String regType, BonjourServiceInfo service);
     }
 }

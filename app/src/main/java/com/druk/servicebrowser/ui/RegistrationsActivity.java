@@ -19,27 +19,26 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import androidx.activity.result.ActivityResultLauncher;
-import androidx.activity.result.contract.ActivityResultContracts;
-import androidx.annotation.Nullable;
-import androidx.fragment.app.Fragment;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.BonjourServiceInfo;
 import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.RegistrationManager;
 import com.druk.servicebrowser.ui.adapter.ServiceAdapter;
-import com.github.druk.rx2dnssd.BonjourService;
 
 import java.util.List;
-
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 
 public class RegistrationsActivity extends AppCompatActivity {
 
@@ -70,7 +69,6 @@ public class RegistrationsActivity extends AppCompatActivity {
     public static class RegistrationsFragment extends Fragment {
 
         private ServiceAdapter adapter;
-        private Disposable mDisposable;
         private RecyclerView mRecyclerView;
         private View mNoServiceView;
 
@@ -85,11 +83,24 @@ public class RegistrationsActivity extends AppCompatActivity {
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
                         if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                            BonjourService bonjourService = RegisterServiceActivity.parseResult(result.getData());
-                            mDisposable = BonjourApplication.getRegistrationManager(getContext())
-                                    .register(getContext(), bonjourService)
-                                    .observeOn(AndroidSchedulers.mainThread())
-                                    .subscribe(service -> updateServices(), throwable -> Toast.makeText(getContext(), "Error: " + throwable.getMessage(), Toast.LENGTH_SHORT).show());
+                            BonjourServiceInfo bonjourServiceInfo = RegisterServiceActivity.parseResult(result.getData());
+                            BonjourApplication.getRegistrationManager(getContext())
+                                    .register(bonjourServiceInfo, new RegistrationManager.RegistrationCallback() {
+                                        @Override
+                                        public void onServiceRegistered(BonjourServiceInfo service) {
+                                            if (getActivity() != null) {
+                                                getActivity().runOnUiThread(() -> updateServices());
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onRegistrationFailed(int errorCode) {
+                                            if (getActivity() != null) {
+                                                getActivity().runOnUiThread(() ->
+                                                        Toast.makeText(getContext(), "Error: registration failed (" + errorCode + ")", Toast.LENGTH_SHORT).show());
+                                            }
+                                        }
+                                    });
                         }
                     });
 
@@ -97,8 +108,8 @@ public class RegistrationsActivity extends AppCompatActivity {
                     new ActivityResultContracts.StartActivityForResult(),
                     result -> {
                         if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
-                            BonjourService bonjourService = ServiceActivity.parseResult(result.getData());
-                            BonjourApplication.getRegistrationManager(getContext()).unregister(bonjourService);
+                            BonjourServiceInfo bonjourServiceInfo = ServiceActivity.parseResult(result.getData());
+                            BonjourApplication.getRegistrationManager(getContext()).unregister(bonjourServiceInfo);
                             updateServices();
                         }
                     });
@@ -126,16 +137,8 @@ public class RegistrationsActivity extends AppCompatActivity {
             return view;
         }
 
-        @Override
-        public void onStop() {
-            super.onStop();
-            if (mDisposable != null && !mDisposable.isDisposed()) {
-                mDisposable.dispose();
-            }
-        }
-
         private void updateServices() {
-            List<BonjourService> registeredServices = BonjourApplication.getRegistrationManager(getContext()).getRegisteredServices();
+            List<BonjourServiceInfo> registeredServices = BonjourApplication.getRegistrationManager(getContext()).getRegisteredServices();
             adapter.swap(registeredServices);
             mNoServiceView.setVisibility(registeredServices.size() > 0 ? View.GONE : View.VISIBLE);
         }

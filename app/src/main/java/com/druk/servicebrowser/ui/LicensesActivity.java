@@ -35,7 +35,7 @@ import android.view.ViewGroup;
 
 public class LicensesActivity extends AppCompatActivity implements View.OnClickListener {
 
-    private static String[] LICENSE_SOFTWARE = new String[]{"Android Compatibility Library v4", "Android Compatibility Library v7", "Android Design Support Library", "Android SDK", "mDNSResponder", "RxAndroid"};
+    private static String[] LICENSE_SOFTWARE = new String[]{"Android Compatibility Library v4", "Android Compatibility Library v7", "Android Design Support Library", "Android SDK"};
 
     private static final String ANDROID_ASSETS_FILE_PATH = "file:///android_asset/";
     private static final String ANDROID_OPEN_SOURCE_PROJECT_LICENSE = "ANDROID-OPEN-SOURCE-PROJECT-LICENSE.txt";
@@ -61,9 +61,7 @@ public class LicensesActivity extends AppCompatActivity implements View.OnClickL
                 ANDROID_ASSETS_FILE_PATH + ANDROID_OPEN_SOURCE_PROJECT_LICENSE,
                 ANDROID_ASSETS_FILE_PATH + ANDROID_OPEN_SOURCE_PROJECT_LICENSE,
                 ANDROID_ASSETS_FILE_PATH + ANDROID_OPEN_SOURCE_PROJECT_LICENSE,
-                ANDROID_ASSETS_FILE_PATH + ANDROID_SOFTWARE_DEVELOPMENT_KIT,
-                ANDROID_ASSETS_FILE_PATH + APACHE_LICENSE,
-                ANDROID_ASSETS_FILE_PATH + APACHE_LICENSE
+                ANDROID_ASSETS_FILE_PATH + ANDROID_SOFTWARE_DEVELOPMENT_KIT
         });
 
         RecyclerView recyclerView = ((RecyclerView) findViewById(R.id.recycler_view));

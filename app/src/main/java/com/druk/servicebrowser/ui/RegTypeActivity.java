@@ -15,16 +15,17 @@
  */
 package com.druk.servicebrowser.ui;
 
-import com.druk.servicebrowser.BonjourApplication;
-import com.druk.servicebrowser.R;
-import com.druk.servicebrowser.ui.fragment.ServiceBrowserFragment;
-import com.github.druk.rx2dnssd.BonjourService;
-
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+
+import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.BonjourServiceInfo;
+import com.druk.servicebrowser.R;
+import com.druk.servicebrowser.ui.fragment.ServiceBrowserFragment;
 
 public class RegTypeActivity extends AppCompatActivity implements ServiceBrowserFragment.ServiceListener {
 
@@ -47,7 +48,6 @@ public class RegTypeActivity extends AppCompatActivity implements ServiceBrowser
         if (getSupportActionBar() != null) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         }
-
 
         if (getIntent() != null && getIntent().hasExtra(KEY_DOMAIN) && getIntent().hasExtra(KEY_REG_TYPE)) {
             String regType = getIntent().getStringExtra(KEY_REG_TYPE);
@@ -72,7 +72,7 @@ public class RegTypeActivity extends AppCompatActivity implements ServiceBrowser
     }
 
     @Override
-    public void onServiceWasSelected(String domain, String regType, BonjourService service) {
+    public void onServiceWasSelected(String domain, String regType, BonjourServiceInfo service) {
         ServiceActivity.startActivity(this, service);
     }
 }

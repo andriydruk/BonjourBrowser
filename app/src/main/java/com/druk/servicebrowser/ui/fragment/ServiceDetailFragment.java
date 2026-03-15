@@ -14,11 +14,10 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.druk.servicebrowser.BonjourApplication;
+import com.druk.servicebrowser.BonjourServiceInfo;
 import com.druk.servicebrowser.R;
 import com.druk.servicebrowser.ui.adapter.TxtRecordsAdapter;
 import com.druk.servicebrowser.ui.viewmodel.ServiceDetailViewModel;
-import com.github.druk.rx2dnssd.BonjourService;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -28,12 +27,12 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
 
     private static final String KEY_SERVICE = "com.druk.servicebrowser.ui.fragment.ServiceDetailFragment.key_service";
 
-    private BonjourService mService;
+    private BonjourServiceInfo mService;
     private ServiceDetailViewModel viewModel;
 
     private TxtRecordsAdapter mAdapter;
 
-    public static ServiceDetailFragment newInstance(BonjourService service){
+    public static ServiceDetailFragment newInstance(BonjourServiceInfo service) {
         ServiceDetailFragment fragment = new ServiceDetailFragment();
         Bundle bundle = new Bundle();
         bundle.putParcelable(KEY_SERVICE, service);
@@ -54,13 +53,17 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
     public void onCreate(final Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mService = BundleCompat.getParcelable(getArguments(), KEY_SERVICE, BonjourService.class);
+            mService = BundleCompat.getParcelable(getArguments(), KEY_SERVICE, BonjourServiceInfo.class);
         }
         mAdapter = new TxtRecordsAdapter();
 
         viewModel = new ViewModelProvider(this).get(ServiceDetailViewModel.class);
-        viewModel.resolveIPRecords(mService, this::updateIPRecords);
-        viewModel.resolveTXTRecords(mService, this::updateTXTRecords);
+        viewModel.getServiceInfoLiveData().observe(this, service -> {
+            mService = service;
+            updateRecords(service);
+        });
+        viewModel.getHttpUrlLiveData().observe(this, this::onHttpServerFound);
+        viewModel.resolve(mService);
     }
 
     @Nullable
@@ -70,53 +73,44 @@ public class ServiceDetailFragment extends Fragment implements View.OnClickListe
         mRecyclerView.setLayoutManager(new LinearLayoutManager(mRecyclerView.getContext()));
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setAdapter(mAdapter);
-        updateIPRecords(mService);
-        updateTXTRecords(mService);
-        ((ServiceDetailListener)getActivity()).onServiceUpdated(mService);
+        updateRecords(mService);
+        ((ServiceDetailListener) getActivity()).onServiceUpdated(mService);
         return mRecyclerView;
     }
 
-    private void updateIPRecords(BonjourService service) {
-        ArrayMap<String, String> metaInfo = new ArrayMap<>();
+    private void updateRecords(BonjourServiceInfo service) {
+        ArrayMap<String, String> ipInfo = new ArrayMap<>();
         for (InetAddress inetAddress : service.getInetAddresses()) {
             if (inetAddress instanceof Inet4Address) {
-                metaInfo.put("Address IPv4", service.getInet4Address().getHostAddress() + ":" + service.getPort());
-            }
-            else {
-                metaInfo.put("Address IPv6", service.getInet6Address().getHostAddress() + ":" + service.getPort());
+                ipInfo.put("Address IPv4", inetAddress.getHostAddress() + ":" + service.getPort());
+            } else {
+                ipInfo.put("Address IPv6", inetAddress.getHostAddress() + ":" + service.getPort());
             }
         }
-        mAdapter.swapIPRecords(metaInfo);
+        mAdapter.swapIPRecords(ipInfo);
+
+        ArrayMap<String, String> txtInfo = new ArrayMap<>();
+        txtInfo.putAll(service.getTxtRecords());
+        mAdapter.swapTXTRecords(txtInfo);
+
         mAdapter.notifyDataSetChanged();
         if (isAdded()) {
-            ((ServiceDetailListener)getActivity()).onServiceUpdated(mService);
-        }
-
-        viewModel.checkHttpConnection(mService, this::onHttpServerFound);
-    }
-
-    private void updateTXTRecords(BonjourService service) {
-        ArrayMap<String, String> metaInfo = new ArrayMap<>();
-        metaInfo.putAll(service.getTxtRecords());
-        mAdapter.swapTXTRecords(metaInfo);
-        mAdapter.notifyDataSetChanged();
-        if (isAdded()) {
-            ((ServiceDetailListener)getActivity()).onServiceUpdated(mService);
+            ((ServiceDetailListener) getActivity()).onServiceUpdated(mService);
         }
     }
 
     private void onHttpServerFound(URL url) {
-        ((ServiceDetailListener)getActivity()).onHttpServerFound(url);
+        ((ServiceDetailListener) getActivity()).onHttpServerFound(url);
     }
 
     @Override
     public void onClick(View v) {
-        ((ServiceDetailListener)getActivity()).onServiceStopped(mService);
+        ((ServiceDetailListener) getActivity()).onServiceStopped(mService);
     }
 
-    public interface ServiceDetailListener{
-        void onServiceUpdated(BonjourService service);
+    public interface ServiceDetailListener {
+        void onServiceUpdated(BonjourServiceInfo service);
         void onHttpServerFound(URL url);
-        void onServiceStopped(BonjourService service);
+        void onServiceStopped(BonjourServiceInfo service);
     }
 }
