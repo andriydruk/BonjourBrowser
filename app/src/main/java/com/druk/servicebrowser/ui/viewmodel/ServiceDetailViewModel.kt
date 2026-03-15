@@ -1,17 +1,17 @@
 package com.druk.servicebrowser.ui.viewmodel
 
 import android.app.Application
+import android.net.nsd.NsdManager
+import android.net.nsd.NsdServiceInfo
+import android.os.Build
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.druk.servicebrowser.BonjourApplication
 import com.druk.servicebrowser.BonjourServiceInfo
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.IOException
@@ -19,13 +19,11 @@ import java.net.HttpURLConnection
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.concurrent.Executors
-import android.net.nsd.NsdManager
-import android.net.nsd.NsdServiceInfo
 
 class ServiceDetailViewModel(application: Application) : AndroidViewModel(application) {
 
     private val nsdManager = BonjourApplication.getNsdManager(application)
-    private var serviceInfoCallback: NsdManager.ServiceInfoCallback? = null
+    private var serviceInfoCallback: Any? = null
 
     private val _serviceInfo = MutableStateFlow<BonjourServiceInfo?>(null)
     val serviceInfo: StateFlow<BonjourServiceInfo?> = _serviceInfo
@@ -35,9 +33,11 @@ class ServiceDetailViewModel(application: Application) : AndroidViewModel(applic
 
     override fun onCleared() {
         super.onCleared()
-        serviceInfoCallback?.let { callback ->
+        if (Build.VERSION.SDK_INT >= 34 && serviceInfoCallback != null) {
             try {
-                nsdManager.unregisterServiceInfoCallback(callback)
+                nsdManager.unregisterServiceInfoCallback(
+                    serviceInfoCallback as NsdManager.ServiceInfoCallback
+                )
             } catch (_: IllegalArgumentException) {
             }
         }
@@ -49,6 +49,16 @@ class ServiceDetailViewModel(application: Application) : AndroidViewModel(applic
             serviceName = service.displayName
             serviceType = service.regType
         }
+
+        if (Build.VERSION.SDK_INT >= 34) {
+            resolveLive(nsdServiceInfo)
+        } else {
+            resolveOnce(nsdServiceInfo)
+        }
+    }
+
+    private fun resolveLive(nsdServiceInfo: NsdServiceInfo) {
+        if (Build.VERSION.SDK_INT < 34) return
 
         val callback = object : NsdManager.ServiceInfoCallback {
             override fun onServiceInfoCallbackRegistrationFailed(errorCode: Int) {
@@ -72,6 +82,21 @@ class ServiceDetailViewModel(application: Application) : AndroidViewModel(applic
 
         serviceInfoCallback = callback
         nsdManager.registerServiceInfoCallback(nsdServiceInfo, Executors.newSingleThreadExecutor(), callback)
+    }
+
+    private fun resolveOnce(nsdServiceInfo: NsdServiceInfo) {
+        @Suppress("DEPRECATION")
+        nsdManager.resolveService(nsdServiceInfo, object : NsdManager.ResolveListener {
+            override fun onResolveFailed(serviceInfo: NsdServiceInfo, errorCode: Int) {
+                Log.e(TAG, "Resolve failed: $errorCode")
+            }
+
+            override fun onServiceResolved(serviceInfo: NsdServiceInfo) {
+                val info = BonjourServiceInfo.fromNsdServiceInfo(serviceInfo, false)
+                _serviceInfo.value = info
+                checkHttpConnection(info)
+            }
+        })
     }
 
     private fun checkHttpConnection(service: BonjourServiceInfo) {
