@@ -55,23 +55,18 @@ class BonjourApplication : Application() {
     }
 
     companion object {
-        @JvmStatic
         fun getApplication(context: Context): BonjourApplication =
             context.applicationContext as BonjourApplication
 
-        @JvmStatic
         fun getNsdManager(context: Context): NsdManager =
             context.getSystemService(NsdManager::class.java)
 
-        @JvmStatic
         fun getRegistrationManager(context: Context): RegistrationManager =
             getApplication(context).registrationManager
 
-        @JvmStatic
         fun getRegTypeManager(context: Context): RegTypeManager =
             getApplication(context).regTypeManager
 
-        @JvmStatic
         fun getFavouritesManager(context: Context): FavouritesManager =
             getApplication(context).favouritesManager
     }

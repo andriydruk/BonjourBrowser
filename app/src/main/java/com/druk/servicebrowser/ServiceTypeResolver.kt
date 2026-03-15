@@ -145,7 +145,6 @@ class ServiceTypeResolver {
             return null
         }
 
-        @JvmStatic
         fun buildPtrQuery(name: String): ByteArray {
             try {
                 val baos = ByteArrayOutputStream()
@@ -208,7 +207,7 @@ class ServiceTypeResolver {
             for (i in 0 until totalRecords) {
                 if (buf.remaining() < 1) return
 
-                readDnsName(buf, data)
+                readDnsName(buf)
                 if (buf.remaining() < 10) return
 
                 val type = buf.short.toInt() and 0xFFFF
@@ -220,7 +219,7 @@ class ServiceTypeResolver {
 
                 if (type == TYPE_PTR) {
                     val rdStart = buf.position()
-                    val target = readDnsName(buf, data)
+                    val target = readDnsName(buf)
                     buf.position(rdStart + rdLength)
 
                     val serviceType = extractServiceType(target)
@@ -234,7 +233,6 @@ class ServiceTypeResolver {
             }
         }
 
-        @JvmStatic
         fun extractServiceType(target: String?): String? {
             if (target == null) return null
 
@@ -255,8 +253,7 @@ class ServiceTypeResolver {
             return "$name.$proto"
         }
 
-        @Suppress("UNUSED_PARAMETER")
-        private fun readDnsName(buf: ByteBuffer, data: ByteArray): String {
+        private fun readDnsName(buf: ByteBuffer): String {
             val sb = StringBuilder()
             var first = true
             var savedPos = -1

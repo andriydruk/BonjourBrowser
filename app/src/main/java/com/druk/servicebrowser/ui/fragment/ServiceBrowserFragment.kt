@@ -156,7 +156,7 @@ open class ServiceBrowserFragment : Fragment() {
             }
         }
 
-        viewModel.startDiscovery(mReqType, mDomain)
+        viewModel.startDiscovery(mReqType)
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
@@ -220,7 +220,6 @@ open class ServiceBrowserFragment : Fragment() {
         private const val KEY_DOMAIN = "domain"
         private const val KEY_SELECTED_POSITION = "selected_position"
 
-        @JvmStatic
         fun newInstance(domain: String, regType: String): Fragment =
             fillArguments(ServiceBrowserFragment(), domain, regType)
 

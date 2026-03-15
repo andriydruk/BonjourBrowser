@@ -55,11 +55,6 @@ class RegTypeBrowserViewModel(application: Application) : AndroidViewModel(appli
     private val _error = MutableSharedFlow<Throwable>(extraBufferCapacity = 1)
     val error: SharedFlow<Throwable> = _error
 
-    // LiveData-style accessors for fragment compatibility
-    fun getServicesLiveData() = _services
-    fun getErrorLiveData() = _error
-    fun getServices() = foundTypes
-
     override fun onCleared() {
         super.onCleared()
         handler.removeCallbacksAndMessages(null)

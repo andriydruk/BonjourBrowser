@@ -56,8 +56,8 @@ class RegTypeActivity : AppCompatActivity(), ServiceBrowserFragment.ServiceListe
     }
 
     companion object {
-        private const val KEY_REG_TYPE = "com.druk.servicebrowser.ui.RegTypeActivity.KEY_DOMAIN"
-        private const val KEY_DOMAIN = "com.druk.servicebrowser.ui.RegTypeActivity.KEY_REG_TYPE"
+        private const val KEY_REG_TYPE = "com.druk.servicebrowser.ui.RegTypeActivity.KEY_REG_TYPE"
+        private const val KEY_DOMAIN = "com.druk.servicebrowser.ui.RegTypeActivity.KEY_DOMAIN"
 
         fun createIntent(context: Context, regType: String, domain: String): Intent =
             Intent(context, RegTypeActivity::class.java)

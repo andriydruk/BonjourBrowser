@@ -23,17 +23,12 @@ class ServiceBrowserViewModel(application: Application) : AndroidViewModel(appli
     private val _errorEvent = MutableSharedFlow<Throwable>(extraBufferCapacity = 1)
     val errorEvent: SharedFlow<Throwable> = _errorEvent
 
-    // LiveData-style accessors for fragment compatibility
-    fun getServiceEvent() = _serviceEvent
-    fun getErrorEvent() = _errorEvent
-
     override fun onCleared() {
         super.onCleared()
         stopDiscovery()
     }
 
-    @Suppress("UNUSED_PARAMETER")
-    fun startDiscovery(serviceType: String?, domain: String?) {
+    fun startDiscovery(serviceType: String?) {
         stopDiscovery()
 
         var type = serviceType

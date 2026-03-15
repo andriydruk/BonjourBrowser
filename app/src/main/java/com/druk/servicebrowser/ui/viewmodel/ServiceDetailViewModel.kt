@@ -33,10 +33,6 @@ class ServiceDetailViewModel(application: Application) : AndroidViewModel(applic
     private val _httpUrl = MutableStateFlow<URL?>(null)
     val httpUrl: StateFlow<URL?> = _httpUrl
 
-    // LiveData-style accessors for fragment compatibility
-    fun getServiceInfoLiveData() = _serviceInfo
-    fun getHttpUrlLiveData() = _httpUrl
-
     override fun onCleared() {
         super.onCleared()
         serviceInfoCallback?.let { callback ->

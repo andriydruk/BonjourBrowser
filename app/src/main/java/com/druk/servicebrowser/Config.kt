@@ -24,6 +24,5 @@ object Config {
     const val TCP_REG_TYPE_SUFFIX = "_tcp"
     const val UDP_REG_TYPE_SUFFIX = "_udp"
 
-    @JvmField
     val REG_TYPE_SEPARATOR: String = Pattern.quote(".")
 }

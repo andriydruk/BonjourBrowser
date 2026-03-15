@@ -42,7 +42,7 @@ data class BonjourServiceInfo(
     val port: Int = 0,
     val inetAddresses: List<InetAddress> = emptyList(),
     val txtRecords: Map<String, String> = emptyMap(),
-    @JvmField val isLost: Boolean = false,
+    val isLost: Boolean = false,
     val ifIndex: Int = 0
 ) : Parcelable {
 
@@ -76,7 +76,6 @@ data class BonjourServiceInfo(
         "BonjourServiceInfo(serviceName='$serviceName', regType='$regType', domain='$domain', port=$port, lost=$isLost)"
 
     companion object {
-        @JvmStatic
         fun fromNsdServiceInfo(nsdServiceInfo: NsdServiceInfo, lost: Boolean): BonjourServiceInfo {
             var serviceType = nsdServiceInfo.serviceType
             if (serviceType != null && serviceType.endsWith(".")) {
@@ -94,6 +93,7 @@ data class BonjourServiceInfo(
             return BonjourServiceInfo(
                 serviceName = nsdServiceInfo.serviceName,
                 regType = serviceType,
+                domain = Config.LOCAL_DOMAIN,
                 port = nsdServiceInfo.port,
                 inetAddresses = hostAddresses.toList(),
                 hostname = hostname,
