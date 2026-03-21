@@ -6,6 +6,7 @@ import android.os.Parcelable
 import kotlinx.parcelize.Parceler
 import kotlinx.parcelize.Parcelize
 import kotlinx.parcelize.TypeParceler
+import android.os.Build
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.InetAddress
@@ -82,12 +83,19 @@ data class BonjourServiceInfo(
                 serviceType = serviceType.substring(0, serviceType.length - 1)
             }
 
-            val hostAddresses = nsdServiceInfo.hostAddresses
+            val hostAddresses: List<InetAddress> = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                nsdServiceInfo.hostAddresses
+            } else {
+                @Suppress("DEPRECATION")
+                listOfNotNull(nsdServiceInfo.host)
+            }
             val hostname = if (hostAddresses.isNotEmpty()) hostAddresses[0].hostName else null
 
             val txtRecords = mutableMapOf<String, String>()
-            nsdServiceInfo.attributes?.forEach { (key, value) ->
-                txtRecords[key] = if (value != null) String(value) else ""
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                nsdServiceInfo.attributes?.forEach { (key, value) ->
+                    txtRecords[key] = if (value != null) String(value) else ""
+                }
             }
 
             return BonjourServiceInfo(
