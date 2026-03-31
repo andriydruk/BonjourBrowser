@@ -9,6 +9,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.druk.servicebrowser.BonjourApplication
 import com.druk.servicebrowser.BonjourServiceInfo
+import com.druk.servicebrowser.MdnsAddressResolver
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -95,8 +96,21 @@ class ServiceDetailViewModel(application: Application) : AndroidViewModel(applic
                 val info = BonjourServiceInfo.fromNsdServiceInfo(serviceInfo, false)
                 _serviceInfo.value = info
                 checkHttpConnection(info)
+                enrichAddresses(info)
             }
         })
+    }
+
+    private fun enrichAddresses(info: BonjourServiceInfo) {
+        val hostname = info.hostname ?: return
+        viewModelScope.launch {
+            val allAddresses = MdnsAddressResolver.resolveAddresses(hostname)
+            if (allAddresses.isNotEmpty() && allAddresses.size > info.inetAddresses.size) {
+                val updated = info.copy(inetAddresses = allAddresses)
+                _serviceInfo.value = updated
+                checkHttpConnection(updated)
+            }
+        }
     }
 
     private fun checkHttpConnection(service: BonjourServiceInfo) {
