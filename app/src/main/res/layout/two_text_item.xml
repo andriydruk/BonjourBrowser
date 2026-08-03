@@ -23,6 +23,9 @@
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingStart="@dimen/activity_horizontal_margin"
         android:paddingEnd="@dimen/activity_horizontal_margin"
+        android:focusable="true"
+        android:descendantFocusability="blocksDescendants"
+        android:background="?attr/selectableItemBackground"
         xmlns:android="http://schemas.android.com/apk/res/android">
 
     <androidx.appcompat.widget.AppCompatTextView
